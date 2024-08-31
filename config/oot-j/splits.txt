@@ -255,6 +255,8 @@ revolution/os/OSError.c:
 
 revolution/os/OSExec.c:
 	.text       start:0x8008C9C8 end:0x8008DCF4
+	.bss        start:0x801CC200 end:0x801D7F00
+	.sbss       start:0x8025D574 end:0x8025D57C
 
 revolution/os/OSFatal.c:
 	.text       start:0x8008DCF4 end:0x8008E918

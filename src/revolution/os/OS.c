@@ -327,7 +327,7 @@ static inline void CheckTargets(void) {
         case 0x81:
             OSReport("OS ERROR: boot program is not for RVL target. Please use "
                      "correct boot program.\n");
-            OSPanic("OS.c", 0, "Failed to run app");
+            OSPanic("OS.c", 1102, "Failed to run app");
             break;
         case 0x80:
         default:
@@ -338,7 +338,7 @@ static inline void CheckTargets(void) {
         case 0x81:
             OSReport("OS ERROR: apploader[D].img is not for RVL target. Please use "
                      "correct apploader[D].img.\n");
-            OSPanic("OS.c", 0, "Failed to run app");
+            OSPanic("OS.c", 1120, "Failed to run app");
             break;
         case 0x80:
         default:
@@ -403,8 +403,9 @@ static void ReportOSInfo(void) {
             }
             break;
         case OS_CONSOLE_MASK_TDEV:
-            tdev = category;
-            OSReport("TDEV-based emulation HW%d\n", test(tdev) - 3);
+            // tdev = type & 0x0FFFFFFF;
+            tdev = category & 0x0FFFFFFF;
+            OSReport("TDEV-based emulation HW%d\n", tdev - 3);
             break;
         default:
             OSReport("%08x\n", type);
@@ -449,13 +450,13 @@ void OSInit(void) {
 
         // DVD BI2 information
         bi2 = *(OSBI2**)OSPhysicalToCached(OS_PHYS_DVD_BI2);
-        if (bi2 != NULL) {
+        if (bi2 != 0) {
             // Use from DVD and update OS globals
             BI2DebugFlag = &bi2->debugFlag;
             __PADSpec = bi2->padSpec;
             *(u8*)OSPhysicalToCached(OS_PHYS_BI2_DEBUG_FLAG) = *BI2DebugFlag;
             *(u8*)OSPhysicalToCached(OS_PHYS_PAD_SPEC) = __PADSpec;
-        } else if (BootInfo->arenaHi != NULL) {
+        } else if (BootInfo->arenaHi != 0) {
             // Use from OS globals
             BI2DebugFlagHolder = *(u8*)OSPhysicalToCached(OS_PHYS_BI2_DEBUG_FLAG);
             BI2DebugFlag = &BI2DebugFlagHolder;
@@ -466,11 +467,11 @@ void OSInit(void) {
 
         // Initialize MEM1 arena lo
         mem1lo = *(void**)OSPhysicalToCached(OS_PHYS_USABLE_MEM1_START);
-        if (mem1lo == NULL) {
+        if (mem1lo == 0) {
             // Use the linker-generated arena if it is in MEM1...
             if (OSIsMEM1Region(__ArenaLo)) {
                 // ...and if the OS boot info does not specify one
-                mem1lo = BootInfo->arenaLo == NULL ? __ArenaLo : BootInfo->arenaLo;
+                mem1lo = BootInfo->arenaLo == 0 ? __ArenaLo : BootInfo->arenaLo;
 
                 /**
                  * Linker generates stack/arena in this order:
@@ -485,8 +486,8 @@ void OSInit(void) {
                  * If the arena instead starts in MEM2, this optimization is
                  * also performed.
                  */
-                if (BootInfo->arenaLo == NULL && BI2DebugFlag != NULL && *BI2DebugFlag < 2) {
-                    mem1lo = ROUND_UP_PTR(_db_stack_end, 32);
+                if (BootInfo->arenaLo == 0 && BI2DebugFlag != 0 && *BI2DebugFlag < 2) {
+                    mem1lo = ROUND_UP_PTR(_stack_addr, 32);
                 }
             } else {
                 // ???
@@ -497,22 +498,22 @@ void OSInit(void) {
 
         // Initialize MEM1 arena hi
         mem1hi = *(void**)OSPhysicalToCached(OS_PHYS_USABLE_MEM1_END);
-        if (mem1hi == NULL) {
+        if (mem1hi == 0) {
             // Use the linker-generated arena if OS boot info does not specify
             // one
-            mem1hi = BootInfo->arenaHi == NULL ? __ArenaHi : BootInfo->arenaHi;
+            mem1hi = BootInfo->arenaHi == 0 ? __ArenaHi : BootInfo->arenaHi;
         }
         OSSetMEM1ArenaHi(mem1hi);
 
         // Initialize MEM2 arena lo
         mem2lo = *(void**)OSPhysicalToCached(OS_PHYS_USABLE_MEM2_START);
-        if (mem2lo != NULL) {
+        if (mem2lo != 0) {
             // Use the linker-generated arena if it is in MEM2
             if (OSIsMEM2Region(__ArenaLo)) {
                 mem2lo = __ArenaLo;
 
                 // Use debugger stack if it would be wasted
-                if (BI2DebugFlag != NULL && *BI2DebugFlag < 2) {
+                if (BI2DebugFlag != 0 && *BI2DebugFlag < 2) {
                     mem2lo = ROUND_UP_PTR(_stack_addr, 32);
                 }
             }
@@ -525,7 +526,7 @@ void OSInit(void) {
 
         // Initialize MEM2 arena hi
         mem2hi = *(void**)OSPhysicalToCached(OS_PHYS_USABLE_MEM2_END);
-        if (mem2hi != NULL) {
+        if (mem2hi != 0) {
             OSSetMEM2ArenaHi(mem2hi);
         }
 
@@ -554,7 +555,7 @@ void OSInit(void) {
         OSRegisterVersion(__OSVersion);
 
         // Check for debugger just like earlier
-        if (BI2DebugFlag != NULL && *BI2DebugFlag >= 2) {
+        if (BI2DebugFlag != 0 && *BI2DebugFlag >= 2) {
             EnableMetroTRKInterrupts();
         }
 
