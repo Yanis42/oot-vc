@@ -607,6 +607,36 @@ revolution/wpad/WPADEncrypt.c:
 revolution/wpad/debug_msg.c:
 	.text       start:0x800C88A0 end:0x800C88F0
 
+revolution/kpad/KPAD.c:
+	.text       start:0x800C88F0 end:0x800CBE48
+
+revolution/usb/usb.c:
+	.text       start:0x800CBE48 end:0x800CCEE8
+
+revolution/wud/WUD.c:
+	.text       start:0x800CCEE8 end:0x800D1080
+
+revolution/wud/WUDHidHost.c:
+	.text       start:0x800D1080 end:0x800D10E4
+
+revolution/wud/debug_msg.c:
+	.text       start:0x800D10E4 end:0x800D1134
+
+revolution/code_800D1134.c:
+	.text       start:0x800D1134 end:0x800D1614
+
+revolution/bte/code_800D1614.c:
+	.text       start:0x800D1614 end:0x800FEFB8
+
+revolution/cnt/cnt.c:
+	.text       start:0x800FEFB8 end:0x800FF54C
+
+revolution/code_800FF54C.c:
+	.text       start:0x800FF54C end:0x80100644
+
+revolution/tpl/TPL.c:
+	.text       start:0x80100644 end:0x80100778
+
 runtime/__va_arg.c:
 	.text       start:0x80152514 end:0x801525DC
 
