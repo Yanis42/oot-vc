@@ -196,10 +196,10 @@ ASM void PSMTXRotRad(Mtx m, char axis, f32 rad) {
 	mr r31, r4
 	stw r30, 0x8(r1)
 	mr r30, r3
-	bl sinf
+	bl sin
 	frsp f31, f1
 	fmr f1, f30
-	bl cosf
+	bl cos
 	frsp f2, f1
 	mr r3, r30
 	fmr f1, f31

@@ -293,7 +293,7 @@ config.libs = [
             Object(LinkedFor("oot-j"), "revolution/os/OSCache.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSContext.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSError.c"),
-            Object(NotLinked, "revolution/os/OSExec.c", cflags=[*cflags_base, "-O4,p", "-ipa off"]),
+            Object(NotLinked, "revolution/os/OSExec.c", cflags=[*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa off"]),
             Object(NotLinked, "revolution/os/OSFatal.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSFont.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSInterrupt.c"),
@@ -320,7 +320,7 @@ config.libs = [
     RevolutionLib(
         "exi",
         [
-            Object(LinkedFor("oot-j"), "revolution/exi/EXIBios.c", cflags=[*cflags_base, "-O3,p", "-ipa file"]),
+            Object(LinkedFor("oot-j"), "revolution/exi/EXIBios.c", cflags=[*cflags_base, "-Cpp_exceptions off", "-O3,p", "-ipa file"]),
             Object(LinkedFor("oot-j"), "revolution/exi/EXIUart.c"),
             Object(LinkedFor("oot-j"), "revolution/exi/EXICommon.c"),
         ]
