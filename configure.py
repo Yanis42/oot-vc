@@ -190,7 +190,7 @@ def RevolutionLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_version": "GC/3.0a5",
-        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa file", "-enc SJIS"],
+        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
         "host": False,
         "objects": objects,
     }
@@ -294,7 +294,7 @@ config.libs = [
             Object(LinkedFor("oot-j"), "revolution/os/OSContext.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSError.c"),
             Object(NotLinked, "revolution/os/OSExec.c", cflags=[*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa off"]),
-            Object(NotLinked, "revolution/os/OSFatal.c"),
+            Object(LinkedFor("oot-j"), "revolution/os/OSFatal.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSFont.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSInterrupt.c"),
             Object(LinkedFor("oot-j"), "revolution/os/OSLink.c"),
@@ -343,7 +343,7 @@ config.libs = [
         [
             Object(NotLinked, "revolution/vi/vi.c"),
             Object(LinkedFor("oot-j"), "revolution/vi/i2c.c"),
-            Object(NotLinked, "revolution/vi/vi3in1.c"),
+            Object(LinkedFor("oot-j"), "revolution/vi/vi3in1.c"),
         ]
     ),
     RevolutionLib(

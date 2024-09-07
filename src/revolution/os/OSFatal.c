@@ -194,9 +194,7 @@ void OSFatal(GXColor textColor, GXColor bgColor, const char* msg) {
     OSEnableInterrupts();
 
     retraceCount = VIGetRetraceCount();
-    while (VIGetRetraceCount() - retraceCount < 1) {
-        ;
-    }
+    while ((s32)VIGetRetraceCount() - retraceCount < 1) {}
 
     start = OSGetTime();
     do {
@@ -280,9 +278,7 @@ static void Halt(void) {
     VIFlush();
 
     retraceCount = VIGetRetraceCount();
-    while (VIGetRetraceCount() - retraceCount < 2) {
-        ;
-    }
+    while ((s32)VIGetRetraceCount() - retraceCount < 2) {}
 
     ScreenReport(fb, FATAL_FB_W, FATAL_FB_H, RGB2YUV2(params->textColor), 48, 100, msgFont->leading, params->msg);
     DCFlushRange(fb, FATAL_FB_SIZE);
@@ -290,9 +286,7 @@ static void Halt(void) {
     VIFlush();
 
     retraceCount = VIGetRetraceCount();
-    while (VIGetRetraceCount() - retraceCount < 1) {
-        ;
-    }
+    while ((s32)VIGetRetraceCount() - retraceCount < 1) {}
 
     OSDisableInterrupts();
     OSReport("%s\n", params->msg);
