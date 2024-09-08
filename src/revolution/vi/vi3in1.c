@@ -154,7 +154,7 @@ void __VISetYUVSEL(VIBool outsel) {
     WaitMicroTime(2);
 }
 
-void __VISetTiming(VITiming timing) {
+void __VISetFilter4EURGB60(VITiming timing) {
     u8 buffer[2];
 
     buffer[1] = timing;
@@ -373,7 +373,7 @@ static inline void __VISetTrapFilterImm(VIBool filter) {
     WaitMicroTime(2);
 }
 
-void fn_8009C5D0(void) {
+void __VISetTrapFilter(void) {
     u8 buffer[2];
     buffer[0] = 0x3;
 
@@ -451,7 +451,7 @@ static inline void __VISetVolume(u8 volumeL, u8 volumeR) {
 
 void __VISetRGBModeImm(void) { __VISetVideoMode(VI_VMODE_RGB, VI_DISABLE); }
 
-static inline void VI_Unknown(VITiming timing) {
+static inline void __VISetTiming(VITiming timing) {
     u8 buffer[2];
 
     buffer[0] = timing;
@@ -467,7 +467,7 @@ void __VISetRevolutionModeSimple(void) {
     __VISetOverSampling(VI_TRUE);
     dtv = VIGetDTVStatus();
     __VISetYUVSEL((VIBool)dtv);
-    VI_Unknown(VI_TMG_GAME);
+    __VISetTiming(VI_TMG_GAME);
     __VISetVolume(0x8E, 0x8E);
     __VISetVBICtrl(VI_DISABLE, VI_DISABLE, VI_DISABLE);
     __VISetCGMSClear();

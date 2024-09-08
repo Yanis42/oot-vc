@@ -388,6 +388,9 @@ revolution/db/db.c:
 
 revolution/vi/vi.c:
 	.text       start:0x80098428 end:0x8009AA54
+	.data       start:0x80184008 end:0x80184468
+	.bss        start:0x801DDC60 end:0x801DDDD0
+	.sdata      start:0x8025C998 end:0x8025C9B8
 	.sbss       start:0x8025D670 end:0x8025D710
 
 revolution/vi/i2c.c:
