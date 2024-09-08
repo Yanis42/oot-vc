@@ -479,6 +479,9 @@ revolution/dvd/dvd_broadway.c:
 
 revolution/demo/DEMOPuts.c:
 	.text       start:0x800AAFA0 end:0x800AB758
+	.data       start:0x80186688 end:0x80186710
+	.sbss       start:0x8025D880 end:0x8025D890
+	.sdata2     start:0x8025E3F8 end:0x8025E418
 
 revolution/ai/ai.c:
 	.text       start:0x800AB758 end:0x800ABD3C
@@ -548,7 +551,9 @@ revolution/nand/nand.c:
 
 revolution/nand/NANDOpenClose.c:
 	.text       start:0x800B352C end:0x800B3D68
+	.data       start:0x8018A6D0 end:0x8018A700
 	.sdata      start:0x8025CA98 end:0x8025CAA0
+	.sbss       start:0x8025DA18 end:0x8025DA20
 
 revolution/nand/NANDCore.c:
 	.text       start:0x800B3D68 end:0x800B53AC

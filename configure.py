@@ -387,7 +387,7 @@ config.libs = [
     RevolutionLib(
         "demo",
         [
-            Object(NotLinked, "revolution/demo/DEMOPuts.c"),
+            Object(LinkedFor("oot-j"), "revolution/demo/DEMOPuts.c", cflags=[*cflags_base, "-Cpp_exceptions off", "-O4,p"]),
         ]
     ),
     RevolutionLib(

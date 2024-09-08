@@ -21,18 +21,17 @@ const char* __VIVersion = "<< RVL_SDK - VI \trelease build: Sep 26 2006 17:27:57
 static void __VIRetraceHandler(__OSInterrupt, OSContext*);
 extern bool __OSIsDiag;
 
-static volatile u32 flushFlag3in1;
+static volatile bool __VIDimming_All_Clear;
 static volatile u32 retraceCount;
 static volatile u32 flushFlag;
+static volatile u32 flushFlag3in1;
 
 static bool IsInitialized = false;
 static vu32 vsync_timing_err_cnt = 0;
 static vu32 vsync_timing_test_flag = 0;
-static volatile bool __VIDimming_All_Clear = false;
 static volatile bool __VIDimmingFlag_Enable;
 static volatile bool __VIDVDStopFlag_Enable;
-static volatile VITimeToDIM g_current_time_to_dim;
-static vu32 THD_TIME_TO_DIMMING = 0;
+static volatile VITimeToDIM g_current_time_to_dim = VI_DM_DEFAULT;
 static vu32 NEW_TIME_TO_DIMMING = 0;
 static vu32 THD_TIME_TO_DVD_STOP = 0;
 static vu32 _gIdleCount_dimming = 0;
@@ -41,6 +40,7 @@ static VIPositionCallback PositionCallback = NULL;
 static s16 displayOffsetH = 0;
 static s16 displayOffsetV = 0;
 static vu32 changeMode = 0;
+static vu32 THD_TIME_TO_DIMMING = 0;
 static vu64 changed = 0;
 static vu32 shdwChangeMode = 0;
 static vu64 shdwChanged = 0;
@@ -49,7 +49,6 @@ static timing_s* timingExtra = NULL;
 
 static vu32 __VIDimmingFlag_RF_IDLE;
 static vu32 __VIDimmingFlag_SI_IDLE;
-static vu32 __VIDimmingFlag_DEV_IDLE[10];
 
 extern VIVideo Vdac_Flag_Region;
 extern volatile u32 Vdac_Flag_Changed;
@@ -62,11 +61,12 @@ static OSThreadQueue retraceQueue;
 
 #define VI_NUMREGS ARRAY_COUNT(VI_HW_REGS)
 
-static u16 regs[VI_NUMREGS];
 
-static u16 shdwRegs[VI_NUMREGS];
-
+static u16 shdwRegs[VI_NUMREGS] = {0};
+static u16 regs[VI_NUMREGS] = {0};
 static HorVer_s HorVer;
+
+static vu32 __VIDimmingFlag_DEV_IDLE[10];
 
 static VIRetraceCallback PreCB;
 static VIRetraceCallback PostCB;
@@ -537,7 +537,6 @@ static timing_s* getTiming(VITVMode mode) {
         case VI_TVMODE_EXTRA_INT:
         case VI_TVMODE_EXTRA_DS:
         case VI_TVMODE_EXTRA_PROG:
-        case VI_TVMODE_HD720_PROG:
             return timingExtra;
     }
 

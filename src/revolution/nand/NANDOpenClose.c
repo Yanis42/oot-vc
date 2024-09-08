@@ -122,26 +122,158 @@ s32 NANDCloseAsync(NANDFileInfo* info, NANDAsyncCallback callback, NANDCommandBl
     return nandConvertErrorCode(ISFS_CloseAsync(info->fd, nandCallback, block));
 }
 
-void NANDSafeOpen() { fn_800B3958(0); }
+s32 lbl_8025DA18;
+s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len, bool private);
+
+void NANDSafeOpen(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
+    fn_800B3958(path, info, access, buffer, len, false);
+}
+
+static inline s32 nandinline(NANDFileInfo* info, void* buffer, s32 len) {
+    s32 result;
+    s32 result2;
+    s32 error;
+
+    while (true) {
+        result = ISFS_Read(info->tempFd, buffer, len);
+        error = result;
+        if (result == 0) {
+            error = 0;
+            break;
+        } 
+        else if (result >= 0) {
+            // error = result;
+            break;
+        } 
+        else {
+            result2 = ISFS_Write(info->fd, buffer, len);
+            if (result2 < 0) {
+                error = result2;
+            }
+            break;
+        }
+    }
+
+    return error;
+}
+
+s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len, bool private) {
+    s32 result;
+    u32 sp1C;
+    u16 sp8;
+    u32 attr;
+    u32 ownerPerm;
+    u32 groupPerm;
+    u32 otherPerm;
+    char name[13];
+    char dirpath[FS_MAX_PATH];
+    bool interrupts;
+    u8 temp;
+    s32 ret;
+
+    s32 temp_r30;
+    s32 temp2;
+
+    if (!nandIsInitialized()) {
+        return NAND_RESULT_FATAL_ERROR;
+    }
+
+    result = ISFS_CreateDir("/tmp/sys", 0, 3, 3, 3);
+    if (result != 0 && result != -105) {
+        return nandConvertErrorCode(result);
+    }
+
+    nandGenerateAbsPath(info->openPath, path);
+    if (!private && nandIsPrivatePath(info->openPath)) {
+        return -1;
+    }
+
+    if (access == 1) {
+        result = ISFS_Open(info->openPath, IPC_OPEN_READ);
+        if (result >= 0) {
+            info->fd = result;
+            info->access = access;
+            return 0;
+        }
+        return nandConvertErrorCode(result);
+    }
+
+    temp = access + 0xFE;
+    if (temp <= 1) {
+        MEMCLR(&name);
+
+        result = ISFS_GetAttr(info->openPath, &sp1C, &sp8, &attr, &ownerPerm, &groupPerm, &otherPerm);
+        if (result != 0) {
+            return nandConvertErrorCode(result);
+        }
+
+        info->tempFd = ISFS_Open(info->openPath, 1);
+        if (info->tempFd < 0) {
+            return nandConvertErrorCode(info->tempFd);
+        }
+
+        interrupts = OSDisableInterrupts();
+        temp_r30 = lbl_8025DA18;
+        lbl_8025DA18 = temp_r30 + 1;
+        OSRestoreInterrupts(interrupts);
+
+        sprintf(dirpath, "%s/%08x", "/tmp/sys", temp_r30);
+        result = ISFS_CreateDir(dirpath, 0, 3, 0, 0);
+        if (result != 0) {
+            return nandConvertErrorCode(result);
+        }
+
+        nandGetRelativeName(name, info->openPath);
+        sprintf(info->tempPath, "%s/%08x/%s", "/tmp/sys", temp_r30, name);
+        result = ISFS_CreateFile(info->tempPath, attr, ownerPerm, groupPerm, otherPerm);
+        if (result != 0) {
+            return nandConvertErrorCode(result);
+        }
+
+        if (access == 2) {
+            info->fd = ISFS_Open(info->tempPath, IPC_OPEN_WRITE);
+        } else if (access == 3) {
+            info->fd = ISFS_Open(info->tempPath, IPC_OPEN_RW);
+        }
+
+        if (info->fd < 0) {
+            return nandConvertErrorCode(info->fd);
+        }
+
+        temp2 = nandinline(info, buffer, len);
+        if (temp2 != 0) {
+            return nandConvertErrorCode(temp2);
+        }
+
+        result = ISFS_Seek(info->fd, 0, IPC_SEEK_BEG);
+        if (result != 0) {
+            return nandConvertErrorCode(result);
+        }
+
+        info->access = access;
+        return nandConvertErrorCode(NAND_RESULT_OK);
+    }
+
+    return NAND_RESULT_INVALID;
+}
 
 s32 NANDSafeClose(NANDFileInfo* info) {
     s32 result;
-    char* path;
-    s32 i;
+    u8 temp;
+    char path[FS_MAX_PATH];
 
-    for (i = 0; i < ARRAY_COUNT(info->openPath); i++) {
-        // info->openPath[i] = '\0';
-    }
+    MEMCLR(&path);
 
     if (!nandIsInitialized()) {
-        return -0x80;
+        return NAND_RESULT_FATAL_ERROR;
     }
 
     if (info->access == 1) {
         return nandConvertErrorCode(ISFS_Close(info->fd));
     }
 
-    if ((info->access + 0xFE) <= 1) {
+    temp = info->access + 0xFE;
+    if (temp <= 1) {
         result = ISFS_Close(info->fd);
         if (result != 0) {
             return nandConvertErrorCode(result);
@@ -161,6 +293,6 @@ s32 NANDSafeClose(NANDFileInfo* info) {
         return nandConvertErrorCode(ISFS_Delete(path));
     }
 
-    OSReport("Illegal NANDFileInfo\n");
-    return -0x80;
+    OSReport("Illegal NANDFileInfo.\n");
+    return NAND_RESULT_FATAL_ERROR;
 }
