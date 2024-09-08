@@ -1,14 +1,20 @@
 #include "revolution/gx.h"
 #include "revolution/vi.h"
 #include "revolution/nand.h"
+#include "emulator/xlHeap.h"
+#include "emulator/xlCoreRVL.h"
 
-extern GXRenderModeObj* rmode;
+static bool fn_80064870(void);
+static s32 fn_80064930(void);
+static s32 fn_80064960(void);
+static void fn_8006496C(void);
+
 s32 fn_80064960(void);
 
 u8 lbl_801C8640[0x1000];
 void* lbl_8025D140;
 
-GXRenderModeObj* DEMOGetRenderModeObj() { return rmode; }
+GXRenderModeObj* DEMOGetRenderModeObj(void) { return rmode; }
 
 s32 fn_80063680(void) {
     return 2;
@@ -23,18 +29,18 @@ bool fn_80063730(void) {
     return false;
 }
 
-s16* fn_80063C28(s32 arg0, s32 arg1) {
-    s16* sp8;
+void* OSAllocFromHeap(s32 handle, s32 size) {
+    void* pHeap;
 
-    xlHeapTake(&sp8, arg1 | 0x70000000);
-    return sp8;
+    xlHeapTake(&pHeap, size | 0x70000000);
+
+    return pHeap;
 }
 
-void fn_80063C54(s32 arg0, void* arg1) {
-    void* sp8;
+void OSFreeToHeap(s32 handle, void* p) {
+    void* pHeap = p;
 
-    sp8 = arg1;
-    xlHeapFree(&sp8);
+    xlHeapFree(&pHeap);
 }
 
 bool fn_80064600(NANDFileInfo *info, s32 arg1) {
@@ -47,7 +53,7 @@ bool fn_80064600(NANDFileInfo *info, s32 arg1) {
     return true;
 }
 
-bool fn_80064870(void) {
+static bool fn_80064870(void) {
     NANDFileInfo info;
     void* pBuffer;
     s32 nResult;
@@ -70,14 +76,14 @@ bool fn_80064870(void) {
     return nResult >= NAND_RESULT_OK;
 }
 
-s32 fn_80064930(void) {
+static s32 fn_80064930(void) {
     return !NANDDelete("banner.bin");
 }
 
-s32 fn_80064960(void) {
+static s32 fn_80064960(void) {
     return 0xF0A0;
 }
 
-void fn_8006496C(void) {
+static void fn_8006496C(void) {
     fn_80063F30("banner.bin", fn_80064960());
 }

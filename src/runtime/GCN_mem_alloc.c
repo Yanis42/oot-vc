@@ -1,8 +1,6 @@
-#include "revolution/os.h"
+#include "emulator/code_800633F8.h"
 #include "macros.h"
-
-//! TODO: document
-fn_80063C28(s32 handle, void *p);
+#include "revolution/os.h"
 
 static inline void InitInline(void) {
     void* arenaLo;
@@ -24,12 +22,12 @@ static inline void InitInline(void) {
     }
 }
 
-void Init(void *ptr) {
+void Init(s32 size) {
     InitInline();
-    fn_80063C28(__OSCurrHeap, ptr);
+    OSAllocFromHeap(__OSCurrHeap, size);
 }
 
-WEAK void __sys_free(void *ptr) {
+WEAK void __sys_free(void* ptr) {
     InitInline();
     OSFreeToHeap(__OSCurrHeap, ptr);
 }
