@@ -341,7 +341,7 @@ config.libs = [
     RevolutionLib(
         "vi",
         [
-            Object(NotLinked, "revolution/vi/vi.c"),
+            Object(LinkedFor("oot-j"), "revolution/vi/vi.c"),
             Object(LinkedFor("oot-j"), "revolution/vi/i2c.c"),
             Object(LinkedFor("oot-j"), "revolution/vi/vi3in1.c"),
         ]
