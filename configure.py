@@ -428,7 +428,7 @@ config.libs = [
     RevolutionLib(
         "nand",
         [
-            Object(NotLinked, "revolution/nand/nand.c"),
+            Object(LinkedFor("oot-j"), "revolution/nand/nand.c"),
             Object(NotLinked, "revolution/nand/NANDOpenClose.c"),
             Object(NotLinked, "revolution/nand/NANDCore.c"),
             Object(LinkedFor("oot-j"), "revolution/nand/NANDCheck.c"),

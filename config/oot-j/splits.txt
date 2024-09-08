@@ -545,10 +545,10 @@ revolution/dsp/dsp_task.c:
 
 revolution/nand/nand.c:
 	.text       start:0x800B274C end:0x800B352C
-	.sdata      start:0x8025CA98 end:0x8025CAA0
 
 revolution/nand/NANDOpenClose.c:
 	.text       start:0x800B352C end:0x800B3D68
+	.sdata      start:0x8025CA98 end:0x8025CAA0
 
 revolution/nand/NANDCore.c:
 	.text       start:0x800B3D68 end:0x800B53AC
