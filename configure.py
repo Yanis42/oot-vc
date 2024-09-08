@@ -429,7 +429,7 @@ config.libs = [
         "nand",
         [
             Object(LinkedFor("oot-j"), "revolution/nand/nand.c"),
-            Object(NotLinked, "revolution/nand/NANDOpenClose.c"),
+            Object(LinkedFor("oot-j"), "revolution/nand/NANDOpenClose.c"),
             Object(NotLinked, "revolution/nand/NANDCore.c"),
             Object(LinkedFor("oot-j"), "revolution/nand/NANDCheck.c"),
         ]

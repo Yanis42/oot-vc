@@ -129,34 +129,6 @@ void NANDSafeOpen(const char* path, NANDFileInfo* info, u8 access, void* buffer,
     fn_800B3958(path, info, access, buffer, len, false);
 }
 
-static inline s32 nandinline(NANDFileInfo* info, void* buffer, s32 len) {
-    s32 result;
-    s32 result2;
-    s32 error;
-
-    while (true) {
-        result = ISFS_Read(info->tempFd, buffer, len);
-        error = result;
-        if (result == 0) {
-            error = 0;
-            break;
-        } 
-        else if (result >= 0) {
-            // error = result;
-            break;
-        } 
-        else {
-            result2 = ISFS_Write(info->fd, buffer, len);
-            if (result2 < 0) {
-                error = result2;
-            }
-            break;
-        }
-    }
-
-    return error;
-}
-
 s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len, bool private) {
     s32 result;
     u32 sp1C;
@@ -169,10 +141,14 @@ s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s
     char dirpath[FS_MAX_PATH];
     bool interrupts;
     u8 temp;
-    s32 ret;
-
-    s32 temp_r30;
     s32 temp2;
+    s32 temp_r30;
+
+    s32 result3;
+    s32 result2;
+    s32 error;
+    s32 fd;
+    s32 fd2;
 
     if (!nandIsInitialized()) {
         return NAND_RESULT_FATAL_ERROR;
@@ -189,7 +165,7 @@ s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s
     }
 
     if (access == 1) {
-        result = ISFS_Open(info->openPath, IPC_OPEN_READ);
+        result = ISFS_Open(info->openPath, 1);
         if (result >= 0) {
             info->fd = result;
             info->access = access;
@@ -197,9 +173,8 @@ s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s
         }
         return nandConvertErrorCode(result);
     }
-
     temp = access + 0xFE;
-    if (temp <= 1) {
+    if ((temp) <= 1) {
         MEMCLR(&name);
 
         result = ISFS_GetAttr(info->openPath, &sp1C, &sp8, &attr, &ownerPerm, &groupPerm, &otherPerm);
@@ -231,30 +206,48 @@ s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s
         }
 
         if (access == 2) {
-            info->fd = ISFS_Open(info->tempPath, IPC_OPEN_WRITE);
+            info->fd = ISFS_Open(info->tempPath, 2);
         } else if (access == 3) {
-            info->fd = ISFS_Open(info->tempPath, IPC_OPEN_RW);
+            info->fd = ISFS_Open(info->tempPath, 3);
         }
-
         if (info->fd < 0) {
             return nandConvertErrorCode(info->fd);
         }
 
-        temp2 = nandinline(info, buffer, len);
+        // most remaining issues are in this inline
+        fd = info->fd;
+        fd2 = info->tempFd;
+        while (true) {
+            result3 = ISFS_Read(fd2, buffer, len);
+            error = result3;
+            if (result3 == 0) {
+                temp2 = 0;
+                break;
+            } else if (result3 < 0) {
+                temp2 = error;
+                break;
+            } else {
+                result2 = ISFS_Write(fd, buffer, result3);
+                if (result2 < 0) {
+                    temp2 = result2;
+                    break;
+                }
+            }
+        }
         if (temp2 != 0) {
             return nandConvertErrorCode(temp2);
         }
 
-        result = ISFS_Seek(info->fd, 0, IPC_SEEK_BEG);
+        result = ISFS_Seek(info->fd, 0, 0);
         if (result != 0) {
             return nandConvertErrorCode(result);
         }
 
         info->access = access;
-        return nandConvertErrorCode(NAND_RESULT_OK);
+        return nandConvertErrorCode(0);
     }
 
-    return NAND_RESULT_INVALID;
+    return -8;
 }
 
 s32 NANDSafeClose(NANDFileInfo* info) {
