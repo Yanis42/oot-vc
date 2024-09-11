@@ -1,14 +1,14 @@
 #ifndef _CODE_800633F8_H
 #define _CODE_800633F8_H
 
-#include "revolution/types.h"
 #include "revolution/demo.h"
 #include "revolution/gx.h"
 #include "revolution/nand.h"
 #include "revolution/os.h"
 #include "revolution/sc.h"
-#include "revolution/vi.h"
 #include "revolution/tpl.h"
+#include "revolution/types.h"
+#include "revolution/vi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,7 +90,7 @@ typedef struct STHeader {
  * @brief The String Table.
  * @param header String Table Header. Hosts the informations to find strings.
  * @param szStrings The strings.
- */ 
+ */
 typedef struct StringTable {
     /* 0x00 */ STHeader* header;
     /* 0x04 */ char* szStrings;

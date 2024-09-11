@@ -1,4 +1,5 @@
 #include "emulator/store.h"
+#include "emulator/code_800633F8.h"
 #include "emulator/flash.h"
 #include "emulator/pak.h"
 #include "emulator/sram.h"
@@ -7,7 +8,6 @@
 #include "mem_funcs.h"
 #include "revolution/nand.h"
 #include "revolution/os.h"
-#include "emulator/code_800633F8.h"
 
 #define STORE_OBJ (*(Store**)ppObject)
 
