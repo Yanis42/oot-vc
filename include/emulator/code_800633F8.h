@@ -104,12 +104,63 @@ typedef struct STString {
     /* 0x10 */ s32 unk10;
 } STString; // size = 0x10
 
+typedef struct ST10_Unknown1 {
+    /* 0x00 */ SCLanguage nLanguage; // u8?
+    /* 0x04 */ char* szErrors;
+    /* 0x08 */ char* szSaveComments;
+} ST10_Unknown1; // size = 0xC
+
+typedef bool (*UnknownCallback)(void);
+
+typedef struct UnknownData1_Sub {
+    /* 0x00 */ STString* pStringEntry;
+    /* 0x04 */ s16 unk04;
+    /* 0x04 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+} UnknownData1_Sub; // size = 0xC
+
+typedef struct Pos {
+    /* 0x00 */ s16 y;
+    /* 0x02 */ s16 x;
+} Pos; // size = 0x4
+
+typedef struct UnknownData2 {
+    /* 0x00 */ UnknownData1_Sub textInfo;
+    /* 0x0C */ UnknownData1_Sub textAction;
+    /* 0x18 */ UnknownCallback unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ UnknownCallback unk30;
+    /* 0x34 */ Pos unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+} UnknownData2; // size = 0x40
+
 GXRenderModeObj* DEMOGetRenderModeObj(void);
+void fn_80063400(void);
 s32 fn_80063680(void);
+s32 fn_80063688(void** arg0, s32 arg1);
 bool fn_80063730(void);
+void fn_80063764(STString* arg0);
+void fn_80063910(UnknownData2* arg0);
+void fn_80063AFC(UnknownData2* arg0);
 void* OSAllocFromHeap(s32 handle, s32 size);
 void OSFreeToHeap(s32 handle, void* p);
+void fn_80063C7C(void);
+void fn_80063D78(s32 arg0);
+s32 fn_80063F30(char* arg0, u32 arg1);
+s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, s32 arg4);
 bool fn_80064600(NANDFileInfo* info, s32 arg1);
+bool fn_80064634(char* arg0, char* arg1);
+bool fn_80064870(void);
+s32 fn_80064930(void);
+s32 fn_80064960(void);
+void fn_8006496C(void);
+s32* fn_80064980(char* pStrings, STStringID eStringID);
+char* fn_80064A10(char* pStrings, STStringID eStringID);
 
 #ifdef __cplusplus
 }

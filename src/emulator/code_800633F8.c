@@ -7,56 +7,27 @@
 #include "emulator/xlCoreRVL.h"
 #include "emulator/xlFile.h"
 #include "emulator/xlHeap.h"
+#include "macros.h"
 #include "mem_funcs.h"
 
-static bool fn_80064870(void);
-static s32 fn_80064930(void);
-static s32 fn_80064960(void);
-static void fn_8006496C(void);
-char* fn_80064A10(char*, STStringID);
-bool fn_80064600(NANDFileInfo* info, s32 arg1);
-
-s32 fn_80064960(void);
-bool fn_80063730(void);
-s32 fn_80063680(void);
+#define NO_INLINE2() \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0;         \
+    (void)0
 
 u8 lbl_801C8640[0x1000];
-NANDBanner* lbl_8025D140;
-
-typedef struct ST10_Unknown1 {
-    /* 0x00 */ SCLanguage nLanguage; // u8?
-    /* 0x04 */ char* szErrors;
-    /* 0x08 */ char* szSaveComments;
-} ST10_Unknown1; // size = 0xC
-
-typedef bool (*UnknownCallback)(void);
-
-typedef struct UnknownData1_Sub {
-    /* 0x00 */ STString* pStringEntry;
-    /* 0x04 */ s16 unk04;
-    /* 0x04 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-} UnknownData1_Sub; // size = 0xC
-
-typedef struct Pos {
-    /* 0x00 */ s16 y;
-    /* 0x02 */ s16 x;
-} Pos; // size = 0x4
-
-typedef struct UnknownData2 {
-    /* 0x00 */ UnknownData1_Sub textInfo;
-    /* 0x0C */ UnknownData1_Sub textAction;
-    /* 0x18 */ UnknownCallback unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ UnknownCallback unk30;
-    /* 0x34 */ Pos unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-} UnknownData2; // size = 0x40
 
 STString lbl_80174580[] = {
     {SID_ERROR_INS_SPACE, 0x00000000, NULL, 0x00000000, 0x00000000},
@@ -246,40 +217,15 @@ UnknownData2 lbl_80174688[] = {
 };
 
 NANDResult lbl_80174988[] = {
-    NAND_RESULT_ACCESS,
-    12,
-    NAND_RESULT_ALLOC_FAILED,
-    NAND_RESULT_OK,
-    NAND_RESULT_BUSY,
-    12,
-    NAND_RESULT_CORRUPT,
-    2,
-    NAND_RESULT_ECC_CRIT,
-    3,
-    NAND_RESULT_EXISTS,
-    12,
-    NAND_RESULT_INVALID,
-    6,
-    NAND_RESULT_MAXBLOCKS,
-    4,
-    NAND_RESULT_MAXFD,
-    5,
-    NAND_RESULT_MAXFILES,
-    5,
-    NAND_RESULT_NOEXISTS,
-    12,
-    NAND_RESULT_NOTEMPTY,
-    12,
-    NAND_RESULT_OPENFD,
-    12,
-    NAND_RESULT_AUTHENTICATION,
-    3,
-    NAND_RESULT_UNKNOWN,
-    6,
-    -128,
-    6,
-    NAND_RESULT_OK,
-    12,
+    NAND_RESULT_ACCESS,   12, NAND_RESULT_ALLOC_FAILED,   NAND_RESULT_OK,
+    NAND_RESULT_BUSY,     12, NAND_RESULT_CORRUPT,        2,
+    NAND_RESULT_ECC_CRIT, 3,  NAND_RESULT_EXISTS,         12,
+    NAND_RESULT_INVALID,  6,  NAND_RESULT_MAXBLOCKS,      4,
+    NAND_RESULT_MAXFD,    5,  NAND_RESULT_MAXFILES,       5,
+    NAND_RESULT_NOEXISTS, 12, NAND_RESULT_NOTEMPTY,       12,
+    NAND_RESULT_OPENFD,   12, NAND_RESULT_AUTHENTICATION, 3,
+    NAND_RESULT_UNKNOWN,  6,  NAND_RESULT_FATAL_ERROR,    6,
+    NAND_RESULT_OK,       12,
 };
 
 ST10_Unknown1 lbl_80174A58[] = {
@@ -287,15 +233,11 @@ ST10_Unknown1 lbl_80174A58[] = {
     {SC_LANG_NONE, NULL, NULL},
 };
 
-u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
-
-u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
-
-s32 lbl_8025D12C;
-s32 lbl_8025D130;
-
+NANDBanner* lbl_8025D140;
 char* bufferErrors;
 char* bufferSaveComments;
+s32 lbl_8025D130;
+s32 lbl_8025D12C;
 OSFontHeader* fontHeader;
 
 GXRenderModeObj* DEMOGetRenderModeObj(void) { return rmode; }
@@ -526,6 +468,7 @@ void fn_800639D4(UnknownData1_Sub* arg0, s16 nHeight, s32 arg2, GXColor color) {
         }
     }
 }
+
 void fn_80063AFC(UnknownData2* arg0) {
     UnknownData1_Sub* var_r27;
     UnknownData2* temp_r30;
@@ -582,16 +525,17 @@ void OSFreeToHeap(s32 handle, void* p) {
 
 void fn_80063C7C(void) {
     UnknownData2* pUnknownData2;
-    STString* pSTEntry; // r31
-    s32 i; // r29
+    STString* pSTEntry;
+    s32 iUnknownData2;
+    s32 iSTEntry;
     ST10_Unknown1* var_r29;
-    u32 temp_r4;
+    u32 nLanguage;
 
-    temp_r4 = SCGetLanguage();
+    nLanguage = SCGetLanguage();
     var_r29 = &lbl_80174A58[0];
 
     while (var_r29->szErrors != NULL) {
-        if (var_r29->nLanguage == temp_r4) {
+        if (var_r29->nLanguage == nLanguage) {
             break;
         }
         var_r29++;
@@ -606,13 +550,13 @@ void fn_80063C7C(void) {
     fontHeader = DEMOInitROMFont();
 
     pSTEntry = &lbl_80174580[0];
-    for (i = 0; i < ARRAY_COUNT(lbl_80174580); i++) {
+    for (iSTEntry = 0; iSTEntry < ARRAY_COUNT(lbl_80174580); iSTEntry++) {
         fn_80063764(pSTEntry);
         pSTEntry++;
     }
 
     pUnknownData2 = &lbl_80174688[0];
-    for (i = 0; i < ARRAY_COUNT(lbl_80174688); i++) {
+    for (iUnknownData2 = 0; iUnknownData2 < ARRAY_COUNT(lbl_80174688); iUnknownData2++) {
         fn_80063910(pUnknownData2);
         pUnknownData2++;
     }
@@ -687,7 +631,7 @@ void fn_80063D78(s32 arg0) {
     }
 }
 
-static inline void fn_80063F30_Inline(NANDResult result) {
+static inline void fn_80063F30_UnknownInline(NANDResult result) {
     if (result == NAND_RESULT_OK) {
         NANDResult* var_r4 = &lbl_80174988[0];
 
@@ -706,7 +650,7 @@ static inline void fn_80063F30_Inline(NANDResult result) {
     }
 }
 
-s32 fn_80063F30(char* arg0, u32 arg1) {
+static inline s32 __fn_80063F30(char* arg0, u32 arg1) {
     NANDFileInfo nandFileInfo;
     u32 length;
     s32 openResult;
@@ -721,11 +665,11 @@ s32 fn_80063F30(char* arg0, u32 arg1) {
         case NAND_RESULT_NOEXISTS:
             return 2;
         default:
-            fn_80063F30_Inline(openResult);
+            fn_80063F30_UnknownInline(openResult);
             break;
         case NAND_RESULT_OK:
-            fn_80063F30_Inline(NANDGetLength(&nandFileInfo, &length));
-            fn_80063F30_Inline(NANDSafeClose(&nandFileInfo));
+            fn_80063F30_UnknownInline(NANDGetLength(&nandFileInfo, &length));
+            fn_80063F30_UnknownInline(NANDSafeClose(&nandFileInfo));
 
             if (length == arg1) {
                 break;
@@ -735,6 +679,11 @@ s32 fn_80063F30(char* arg0, u32 arg1) {
     }
 
     return 0;
+}
+
+s32 fn_80063F30(char* arg0, u32 arg1) {
+    NO_INLINE2();
+    return __fn_80063F30(arg0, arg1);
 }
 
 s32 fn_800640BC(const char szFileName[9], u32 arg1, s32 arg2) {
@@ -845,7 +794,7 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
         sp8 = 0;
         // lbl_8025D12C |= M2C_ERROR(/* Read from unset register $r3 */) * 0x10;
 
-        fn_80063F30(szFileName, temp_r25);
+        __fn_80063F30(szFileName, temp_r25);
 
         temp_r3_7 = lbl_8025D12C | var_r3;
         lbl_8025D12C = temp_r3_7;
@@ -918,6 +867,9 @@ bool fn_80064600(NANDFileInfo* info, s32 arg1) {
 
     return true;
 }
+
+static u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
+static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
 
 bool fn_80064634(char* arg0, char* arg1) {
     wchar_t subtitle[BANNER_TITLE_MAX];
@@ -1013,20 +965,20 @@ bool fn_80064634(char* arg0, char* arg1) {
     var_r29 = 0;
     var_r28 = &lbl_8025C888[0];
 
-    while (temp_cr0_lt != 0) {
+    while (temp_cr0_lt < 0) {
         memcpy(var_r30, &tplPal->descriptors->texHeader->data[*var_r31 * 8], ARRAY_COUNT(temp_r26->iconTexture));
         var_r27_2++;
         temp_r0_3 = *var_r28 << var_r29;
-        temp_cr0_lt = var_r27_2 < 8U;
-        temp_r3 = temp_r26->iconSpeed & ~(3 << var_r29);
+        temp_cr0_lt = var_r27_2 < 8;
         var_r29 += 2;
-        var_r28++;
+        temp_r3 = temp_r26->iconSpeed & ~(3 << var_r29);
         temp_r26->iconSpeed = (temp_r3 | temp_r0_3);
-        var_r31++;
         var_r30 += 0x1200;
+        var_r28++;
+        var_r31++;
     }
 
-    if (temp_cr0_lt != 0) {
+    if (temp_cr0_lt < 0) {
         temp_r26->iconSpeed = (temp_r26->iconSpeed & ~(3 << (var_r27_2 * 2)));
     }
 
@@ -1050,8 +1002,8 @@ static bool fn_80064870(void) {
         return false;
     }
 
-    DCFlushRange(pBuffer, fn_80064960());
-    nResult = NANDWrite(&info, pBuffer, fn_80064960());
+    DCFlushRange(pBuffer, 0xF0A0); // fn_80064960()?
+    nResult = NANDWrite(&info, pBuffer, 0xF0A0); // fn_80064960()?
     NANDSafeClose(&info);
 
     return nResult >= NAND_RESULT_OK;
@@ -1061,7 +1013,9 @@ static s32 fn_80064930(void) { return !NANDDelete("banner.bin"); }
 
 static s32 fn_80064960(void) { return 0xF0A0; }
 
-static void fn_8006496C(void) { fn_80063F30("banner.bin", fn_80064960()); }
+static void fn_8006496C(void) {
+    fn_80063F30("banner.bin", 0xF0A0); // fn_80064960()?
+}
 
 s32* fn_80064980(char* pStrings, STStringID eStringID) {
     s32 temp_r0;
