@@ -45,6 +45,7 @@ typedef struct Controller {
     /* 0x280 */ u32 unk_280[PAD_MAX_CONTROLLERS];
 } Controller; // size = 0x290
 
+s32 fn_80062028(void);
 bool simulatorSetControllerMap(Controller* pController, s32 channel, u32* mapData);
 bool simulatorCopyControllerMap(Controller* pController, u32* mapDataOutput, u32* mapDataInput);
 bool fn_80062E5C(Controller* pController, s32, s32*) NO_INLINE;
