@@ -1,4 +1,4 @@
-#include "emulator/code_800633F8.h"
+#include "emulator/errordisplay.h"
 #include "macros.h"
 #include "revolution/os.h"
 

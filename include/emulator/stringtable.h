@@ -1,26 +1,13 @@
-#ifndef _CODE_800633F8_H
-#define _CODE_800633F8_H
+#ifndef _STRINGTABLE_H
+#define _STRINGTABLE_H
 
-#include "revolution/demo.h"
-#include "revolution/gx.h"
-#include "revolution/nand.h"
-#include "revolution/os.h"
-#include "revolution/sc.h"
-#include "revolution/tpl.h"
 #include "revolution/types.h"
-#include "revolution/vi.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define ENCODING_NAME_LENGTH 18
-#define BANNER_TITLE_MAX 32
-#define FADE_TIMER_MAX 15
-
-#define FLAG_COLOR_WHITE (0 << 0)
-#define FLAG_COLOR_YELLOW (1 << 0)
-#define FLAG_UNK (1 << 1)
 
 typedef enum STTableID {
     TID_NONE = 0,
@@ -78,7 +65,7 @@ typedef enum STStringIndex {
     SI_ERROR_REMOTE_BATTERY = 9, // "The battery charge is running low."
     SI_ERROR_REMOTE_COMMUNICATION = 10, // "Communications with the Wii Remote have been interrupted."
     SI_ERROR_BLANK = 11, // ""
-    SI_MAX,
+    SI_NULL = 12,
 } STStringIndex;
 
 // clang-format on
@@ -107,76 +94,6 @@ typedef struct StringTable {
     /* 0x24 */ char* szStrings;
 } StringTable; // size = 0x28
 
-typedef struct STFiles {
-    /* 0x00 */ SCLanguage eLanguage;
-    /* 0x04 */ char* szErrors;
-    /* 0x08 */ char* szSaveComments;
-} STFiles; // size = 0xC
-
-typedef struct STString {
-    /* 0x00 */ struct STStringDraw* apStringDraw[SI_MAX];
-    /* 0x30 */ STStringIndex eStringIndex;
-    /* 0x34 */ s32 iAction;
-} STString; // size = 0x38
-
-typedef s32 (*UnknownCallback)(struct STString*);
-
-typedef struct STStringBase {
-    /* 0x00 */ STStringID eSTStringID;
-    /* 0x04 */ s32 nLines;
-    /* 0x08 */ char* szString;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-} STStringBase; // size = 0x10
-
-typedef struct TextInfo {
-    /* 0x00 */ STStringBase* pBase;
-    /* 0x04 */ s16 nFlags; // bitfield
-    /* 0x06 */ s16 nFadeInTimer;
-    /* 0x08 */ s32 nShiftY; // Y position relative to nStartY
-} TextInfo; // size = 0xC
-
-typedef struct TextAction {
-    /* 0x00 */ TextInfo textInfo;
-    /* 0x0C */ UnknownCallback unk0C;
-} TextAction; // size = 0x10
-
-typedef struct STStringDraw {
-    /* 0x00 */ TextInfo textInfo;
-    /* 0x0C */ TextAction textAction[2];
-    /* 0x2C */ s32 nAction;
-    /* 0x30 */ UnknownCallback unk30;
-    /* 0x34 */ s16 nStartY;
-    /* 0x36 */ s16 unk36; // unused?
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-} STStringDraw; // size = 0x40
-
-typedef struct struct_80174988 {
-    NANDResult result;
-    STStringIndex eStringIndex;
-} struct_80174988;
-
-GXRenderModeObj* DEMOGetRenderModeObj(void);
-void fn_80063400(void);
-s32 fn_80063680(STString* pSTString);
-s32 fn_80063688(STString* arg0, s32 arg1);
-s32 fn_80063730(STString* pSTString);
-void fn_80063764(STStringBase* pStringBase);
-void fn_80063910(STStringDraw* pStringDraw);
-void fn_80063AFC(STString* pStringDraw);
-void* OSAllocFromHeap(s32 handle, s32 size);
-void OSFreeToHeap(s32 handle, void* p);
-void fn_80063C7C(void);
-bool fn_80063D78(STStringIndex eStringIndex);
-s32 fn_80063F30(char* szBannerFileName, u32 arg1);
-s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, u8 access);
-bool fn_80064600(NANDFileInfo* info, s32 arg1);
-bool fn_80064634(char* szGameName, char* szEmpty);
-bool fn_80064870(void);
-s32 fn_80064930(void);
-s32 fn_80064960(void);
-void fn_8006496C(void);
 STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID);
 char* fn_80064A10(void* pSTBuffer, STStringID eStringID);
 

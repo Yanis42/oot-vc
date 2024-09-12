@@ -1,7 +1,7 @@
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
-#include "emulator/code_800633F8.h"
+#include "emulator/errordisplay.h"
 #include "emulator/system.h"
 #include "emulator/xlObject.h"
 #include "macros.h"
