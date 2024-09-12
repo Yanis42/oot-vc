@@ -1,4 +1,5 @@
 #include "emulator/controller.h"
+#include "emulator/code_800633F8.h"
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlCoreRVL.h"
@@ -163,43 +164,44 @@ bool fn_800623F4(Controller* pController) { return true; }
 
 bool simulatorDetectController(Controller* pController, s32 arg1) { return arg1 >= 0 && arg1 < 4; }
 
-bool fn_80062C18(Controller* pController, s32 arg1, s32* arg2, s32* arg3, s32* arg4, s32* arg5, s32* arg6, s32* arg7) {
+bool fn_80062C18(Controller* pController, s32 iController, s32* arg2, s32* arg3, s32* arg4, s32* arg5, s32* arg6,
+                 s32* arg7) {
     s32 temp_r3;
 
-    if (arg1 >= 0 && arg1 < 4) {
+    if (iController >= 0 && iController < 4) {
         if (arg2 != NULL) {
-            *arg2 = pController->unk_BC[arg1];
+            *arg2 = pController->unk_BC[iController];
         }
 
         if (arg3 != NULL) {
-            *arg3 = pController->unk_CC[arg1];
+            *arg3 = pController->unk_CC[iController];
         }
 
         if (arg4 != NULL) {
-            *arg4 = pController->stickLeft[arg1][0];
+            *arg4 = pController->stickLeft[iController][0];
         }
 
         if (arg5 != NULL) {
-            *arg5 = pController->stickLeft[arg1][1];
+            *arg5 = pController->stickLeft[iController][1];
         }
 
         if (arg6 != NULL) {
-            *arg6 = pController->stickRight[arg1][0];
+            *arg6 = pController->stickRight[iController][0];
         }
 
         if (arg7 != NULL) {
-            *arg7 = pController->stickRight[arg1][1];
+            *arg7 = pController->stickRight[iController][1];
         }
 
         pController->unk_220 = 1;
-        return !!pController->unk_4C[arg1];
+        return !!pController->unk_4C[iController];
     }
 
     return false;
 }
 
-bool fn_80062CE4(Controller* pController, s32 arg1, bool bUnknown) {
-    if (arg1 >= 0 && arg1 < 4) {
+bool fn_80062CE4(Controller* pController, s32 iController, bool bUnknown) {
+    if (iController >= 0 && iController < 4) {
         return true;
     }
 
@@ -300,7 +302,7 @@ bool controllerEvent(Controller* pController, s32 nEvent, void* pArgument) {
             if (!unk4C_UnknownInline(pController)) {
                 pController->unk_24C = pController->unk_248 = OSGetTime();
                 pController->unk_21C = 8;
-                fn_80063D78(8);
+                fn_80063D78(SI_ERROR_NEED_CLASSIC);
                 pController->unk_21C = -1;
 
                 if (!controllerEvent_Inline()) {

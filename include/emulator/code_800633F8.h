@@ -17,6 +17,11 @@ extern "C" {
 #define ST10_MAGIC 'ST10'
 #define ENCODING_NAME_LENGTH 24
 #define BANNER_TITLE_MAX 28
+#define FADE_TIMER_MAX 15
+
+#define FLAG_COLOR_WHITE (0 << 0)
+#define FLAG_COLOR_YELLOW (1 << 0)
+#define FLAG_UNK (1 << 1)
 
 typedef enum STTableID {
     TID_NONE = 0,
@@ -55,6 +60,28 @@ typedef enum STStringID {
     SID_COMMENT_GAME_NAME = 0x30690AFB,
     SID_COMMENT_EMPTY = 0x30690AFD
 } STStringID;
+
+// clang-format off
+
+// Used as the index to `lbl_80174580`.
+// This happens to line up with `lbl_80174688` so we can use it for both.
+typedef enum STStringIndex {
+    SI_ERROR_INS_SPACE = 0, // "There is not enough available space in the Wii system memory. Create %ld block(s) of free space by either moving files to an SD Card or deleting files in the Data Management Screen."
+    SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU = 1, // "Press the A Button to return to the Wii Menu."
+    SI_ERROR_INS_INNODE = 2, // "There is not enough available space in the Wii system memory. Either move files to an SD Card or delete files on the Data Management Screen."
+    SI_ERROR_SYS_CORRUPT = 3, // "The Wii system memory has been damaged. Refer to the Wii operations manual for further instructions."
+    SI_ERROR_DATA_CORRUPT = 4, // "This file cannot be used because the data is corrupted."
+    SI_ERROR_MAX_BLOCKS = 5, // "There is no more available space in Wii system memory. Refer to the Wii operations manual for further information."
+    SI_ERROR_MAX_FILES = 6, // "There is no more available space in Wii system memory."
+    SI_ERROR_NO_CONTROLLER = 7, // "You will need the Classic Controller."
+    SI_ERROR_NEED_CLASSIC = 8, // "Connect Classic Controller to the P1 Wii Remote or press the A Button to return to the Wii Menu."
+    SI_ERROR_REMOTE_BATTERY = 9, // "The battery charge is running low."
+    SI_ERROR_REMOTE_COMMUNICATION = 10, // "Communications with the Wii Remote have been interrupted."
+    SI_ERROR_BLANK = 11, // ""
+    SI_MAX,
+} STStringIndex;
+
+// clang-format on
 
 /**
  * @brief Defines an entry to the ST10 string table
@@ -96,61 +123,63 @@ typedef struct StringTable {
     /* 0x04 */ char* szStrings;
 } StringTable; // size = 0x8
 
-typedef struct STString {
-    /* 0x00 */ STStringID eSTStringID;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ char* szString;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-} STString; // size = 0x10
-
-typedef struct ST10_Unknown1 {
-    /* 0x00 */ SCLanguage nLanguage; // u8?
+typedef struct STStringFiles {
+    /* 0x00 */ SCLanguage eLanguage;
     /* 0x04 */ char* szErrors;
     /* 0x08 */ char* szSaveComments;
-} ST10_Unknown1; // size = 0xC
+} STStringFiles; // size = 0xC
 
 typedef bool (*UnknownCallback)(void);
 
-typedef struct UnknownData1_Sub {
-    /* 0x00 */ STString* pStringEntry;
-    /* 0x04 */ s16 unk04;
-    /* 0x04 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-} UnknownData1_Sub; // size = 0xC
+typedef struct STStringBase {
+    /* 0x00 */ STStringID eSTStringID;
+    /* 0x04 */ s32 nLines;
+    /* 0x08 */ char* szString;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+} STStringBase; // size = 0x10
 
-typedef struct Pos {
-    /* 0x00 */ s16 y;
-    /* 0x02 */ s16 x;
-} Pos; // size = 0x4
+typedef struct TextInfo {
+    /* 0x00 */ STStringBase* pBase;
+    /* 0x04 */ s16 nFlags; // bitfield
+    /* 0x06 */ s16 nFadeInTimer;
+    /* 0x08 */ s32 nShiftY; // Y position relative to nStartY
+} TextInfo; // size = 0xC
 
-typedef struct UnknownData2 {
-    /* 0x00 */ UnknownData1_Sub textInfo;
-    /* 0x0C */ UnknownData1_Sub textAction;
-    /* 0x18 */ UnknownCallback unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
+typedef struct TextAction {
+    /* 0x00 */ TextInfo textInfo;
+    /* 0x0C */ UnknownCallback unk0C;
+} TextAction; // size = 0x10
+
+typedef struct STStringDraw {
+    /* 0x00 */ TextInfo textInfo;
+    /* 0x0C */ TextAction textAction[2];
+    /* 0x2C */ s32 nAction;
     /* 0x30 */ UnknownCallback unk30;
-    /* 0x34 */ Pos unk34;
+    /* 0x34 */ s16 nStartY;
+    /* 0x36 */ s16 unk36; // unused?
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-} UnknownData2; // size = 0x40
+} STStringDraw; // size = 0x40
+
+typedef struct UnknownData1 {
+    /* 0x00 */ STStringDraw* unk00[SI_MAX];
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s32 unk34;
+} UnknownData1; // size = 0x38
 
 GXRenderModeObj* DEMOGetRenderModeObj(void);
 void fn_80063400(void);
 s32 fn_80063680(void);
-s32 fn_80063688(void** arg0, s32 arg1);
+bool fn_80063688(UnknownData1* arg0, s32 arg1);
 bool fn_80063730(void);
-void fn_80063764(STString* arg0);
-void fn_80063910(UnknownData2* arg0);
-void fn_80063AFC(UnknownData2* arg0);
+void fn_80063764(STStringBase* arg0);
+void fn_80063910(STStringDraw* pStringDraw);
+void fn_80063AFC(UnknownData1* pStringDraw);
 void* OSAllocFromHeap(s32 handle, s32 size);
 void OSFreeToHeap(s32 handle, void* p);
 void fn_80063C7C(void);
-void fn_80063D78(s32 arg0);
+bool fn_80063D78(STStringIndex eStringIndex);
 s32 fn_80063F30(char* arg0, u32 arg1);
 s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, s32 arg4);
 bool fn_80064600(NANDFileInfo* info, s32 arg1);
