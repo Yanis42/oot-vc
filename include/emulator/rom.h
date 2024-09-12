@@ -84,7 +84,7 @@ typedef struct Rom {
     /* 0x19AFC */ s32 offsetToRom;
 } Rom; // size = 0x19B00
 
-s32 fn_80042E30(struct STString* pSTString);
+s32 fn_80042E30(STString* pSTString);
 bool romGetPC(Rom* pROM, u64* pnPC);
 bool romGetCode(Rom* pROM, s32* acCode);
 

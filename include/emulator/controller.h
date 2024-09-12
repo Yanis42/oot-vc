@@ -12,6 +12,12 @@
 extern "C" {
 #endif
 
+typedef enum ControllerStickAxis {
+    AXIS_X = 0,
+    AXIS_Y = 1,
+    AXIS_MAX = 2
+} ControllerStickAxis;
+
 typedef struct lbl_801C7DB8_Struct {
     /* 0x00 */ void* unk_00;
     /* 0x04 */ u32 unk_04;
@@ -29,8 +35,8 @@ typedef struct Controller {
     /* 0x04C */ s32 unk_4C[PAD_MAX_CONTROLLERS];
     /* 0x05C */ s32 analogTriggerLeft[PAD_MAX_CONTROLLERS];
     /* 0x06C */ s32 analogTriggerRight[PAD_MAX_CONTROLLERS];
-    /* 0x07C */ s32 stickLeft[PAD_MAX_CONTROLLERS][2];
-    /* 0x09C */ s32 stickRight[PAD_MAX_CONTROLLERS][2];
+    /* 0x07C */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x09C */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
     /* 0x0BC */ s32 unk_BC[PAD_MAX_CONTROLLERS];
     /* 0x0CC */ s32 unk_CC[PAD_MAX_CONTROLLERS];
     /* 0x0DC */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];

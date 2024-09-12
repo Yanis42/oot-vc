@@ -477,7 +477,7 @@ static inline void systemSetControllerConfiguration(SystemRomConfig* pRomConfig,
         pRomConfig->rumbleConfiguration = 0;
     }
 
-    for (iConfigList = 0; iConfigList < 4; iConfigList++) {
+    for (iConfigList = 0; iConfigList < PAD_MAX_CONTROLLERS; iConfigList++) {
         simulatorCopyControllerMap(SYSTEM_CONTROLLER(gpSystem), (u32*)pRomConfig->controllerConfiguration[iConfigList],
                                    contMap[((controllerConfig1 >> (iConfigList * 8)) & 0x7F)]);
         pRomConfig->rumbleConfiguration |= (1 << (iConfigList * 8)) & (controllerConfig1 >> 7);
@@ -492,7 +492,7 @@ static inline void systemSetControllerConfiguration(SystemRomConfig* pRomConfig,
 static inline void systemSetupGameALL_Inline(void) {
     s32 iController;
 
-    for (iController = 0; iController < 4; iController++) {
+    for (iController = 0; iController < PAD_MAX_CONTROLLERS; iController++) {
         simulatorCopyControllerMap(SYSTEM_CONTROLLER(gpSystem),
                                    (u32*)&gSystemRomConfigurationList.controllerConfiguration[iController],
                                    (u32*)&contMap[0]);
@@ -1226,7 +1226,7 @@ static bool systemSetupGameALL(System* pSystem) {
     systemSetControllerConfiguration(&gSystemRomConfigurationList, gSystemRomConfigurationList.currentControllerConfig,
                                      gSystemRomConfigurationList.currentControllerConfig, false, true);
 
-    for (iController = 0; iController < 4; iController++) {
+    for (iController = 0; iController < PAD_MAX_CONTROLLERS; iController++) {
         simulatorSetControllerMap(SYSTEM_CONTROLLER(gpSystem), iController,
                                   (u32*)&gSystemRomConfigurationList.controllerConfiguration[iController]);
 

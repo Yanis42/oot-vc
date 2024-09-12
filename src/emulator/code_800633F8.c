@@ -607,7 +607,7 @@ bool fn_80063D78(STStringIndex eStringIndex) {
         var_r30 = 0;
         var_r31 = 0;
 
-        for (iController = 0; iController < 4; iController++) {
+        for (iController = 0; iController < PAD_MAX_CONTROLLERS; iController++) {
             fn_80062C18(SYSTEM_CONTROLLER(gpSystem), iController, &spC, &sp8, NULL, NULL, NULL, NULL);
             var_r31 |= spC;
             var_r30 |= sp8;

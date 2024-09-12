@@ -89,15 +89,15 @@ bool fn_800620A8(Controller* pController) {
     pController->unk_220 = 1;
     pController->unk_21C = -1;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < PAD_MAX_CONTROLLERS; i++) {
         pController->unk_228[i] = 0;
         pController->unk_238[i] = 0;
         pController->unk_270[i] = 0;
         pController->unk_280[i] = 0;
         pController->unk_4C[i] = 0;
         pController->unk_BC[i] = pController->unk_CC[i] = 0;
-        pController->stickLeft[i][0] = pController->stickLeft[i][1] = 0;
-        pController->stickRight[i][0] = pController->stickRight[i][1] = 0;
+        pController->stickLeft[i][AXIS_X] = pController->stickLeft[i][AXIS_Y] = 0;
+        pController->stickRight[i][AXIS_X] = pController->stickRight[i][AXIS_Y] = 0;
     }
 
     for (i = 0; i < 19; i++) {
@@ -124,7 +124,7 @@ bool fn_800620A8(Controller* pController) {
 static inline bool controllerValidateIndex(s32 index) {
     bool ret;
 
-    if (index >= 0 && index < 4) {
+    if (index >= 0 && index < PAD_MAX_CONTROLLERS) {
         ret = true;
     } else {
         ret = false;
@@ -144,12 +144,12 @@ bool fn_800622B8(Controller* pController) {
 
     pController->unk_220 = 1;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < PAD_MAX_CONTROLLERS; i++) {
         pController->unk_BC[i] = pController->unk_CC[i] = 0;
-        pController->stickLeft[i][0] = pController->stickLeft[i][1] = 0;
-        pController->stickRight[i][1] = 0;
+        pController->stickLeft[i][AXIS_X] = pController->stickLeft[i][AXIS_Y] = 0;
+        pController->stickRight[i][AXIS_Y] = 0;
         pController->unk_21C = -1; // why here
-        pController->stickRight[i][0] = 0;
+        pController->stickRight[i][AXIS_X] = 0;
 
         if (!controllerValidateIndex(i)) {
             return false;
@@ -161,13 +161,13 @@ bool fn_800622B8(Controller* pController) {
 
 bool fn_800623F4(Controller* pController) { return true; }
 
-bool simulatorDetectController(Controller* pController, s32 arg1) { return arg1 >= 0 && arg1 < 4; }
+bool simulatorDetectController(Controller* pController, s32 arg1) { return arg1 >= 0 && arg1 < PAD_MAX_CONTROLLERS; }
 
 bool fn_80062C18(Controller* pController, s32 iController, s32* arg2, s32* arg3, s32* arg4, s32* arg5, s32* arg6,
                  s32* arg7) {
     s32 temp_r3;
 
-    if (iController >= 0 && iController < 4) {
+    if (iController >= 0 && iController < PAD_MAX_CONTROLLERS) {
         if (arg2 != NULL) {
             *arg2 = pController->unk_BC[iController];
         }
@@ -177,19 +177,19 @@ bool fn_80062C18(Controller* pController, s32 iController, s32* arg2, s32* arg3,
         }
 
         if (arg4 != NULL) {
-            *arg4 = pController->stickLeft[iController][0];
+            *arg4 = pController->stickLeft[iController][AXIS_X];
         }
 
         if (arg5 != NULL) {
-            *arg5 = pController->stickLeft[iController][1];
+            *arg5 = pController->stickLeft[iController][AXIS_Y];
         }
 
         if (arg6 != NULL) {
-            *arg6 = pController->stickRight[iController][0];
+            *arg6 = pController->stickRight[iController][AXIS_X];
         }
 
         if (arg7 != NULL) {
-            *arg7 = pController->stickRight[iController][1];
+            *arg7 = pController->stickRight[iController][AXIS_Y];
         }
 
         pController->unk_220 = 1;
