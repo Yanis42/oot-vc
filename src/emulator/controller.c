@@ -1,5 +1,4 @@
 #include "emulator/controller.h"
-#include "emulator/code_800633F8.h"
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlCoreRVL.h"
@@ -62,7 +61,7 @@ static inline bool unk4C_UnknownInline(Controller* pController) {
     return bRet;
 }
 
-s32 fn_80062028(void) {
+s32 fn_80062028(STString* pSTString) {
     Controller* pController;
 
     OSGetTime();

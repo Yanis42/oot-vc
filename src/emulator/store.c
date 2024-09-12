@@ -25,12 +25,12 @@ _XL_OBJECTTYPE gClassStore = {
     (EventFunc)storeEvent,
 };
 
-static inline bool unknownInline(Store* pStore, s32 unknown) {
+static inline bool unknownInline(Store* pStore, u8 access) {
     if (pStore->unk_A4 == 0) {
         return true;
     }
 
-    if (!fn_800641CC(&pStore->nandFileInfo, pStore->szFileName, pStore->unk_00, 0xAA, unknown)) {
+    if (!fn_800641CC(&pStore->nandFileInfo, pStore->szFileName, pStore->unk_00, 0xAA, access)) {
         pStore->unk_A4 = 0;
     }
 

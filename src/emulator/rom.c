@@ -1,5 +1,4 @@
 #include "emulator/rom.h"
-#include "emulator/code_800633F8.h"
 #include "emulator/cpu.h"
 #include "emulator/frame.h"
 #include "emulator/helpRVL.h"
@@ -488,7 +487,7 @@ static void* __ROMEntry(void* arg) {
     return NULL;
 }
 
-s32 fn_80042E30(void) {
+s32 fn_80042E30(STString* pSTString) {
     s32 ret;
     bool bThread;
 

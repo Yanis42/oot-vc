@@ -10,6 +10,7 @@
 #include "macros.h"
 #include "mem_funcs.h"
 
+//! TODO: fix inline oddity
 #define NO_INLINE2() \
     (void)0;         \
     (void)0;         \
@@ -27,10 +28,9 @@
     (void)0;         \
     (void)0
 
-u8 lbl_801C8640[0x1000];
+static u8 sBannerBuffer[0x1000];
 
-// US: 0x801745E0
-STStringBase lbl_80174580[] = {
+static STStringBase sStringBase[] = {
     {SID_ERROR_INS_SPACE, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_INS_INNODE, 0, NULL, 0x00000000, 0x00000000},
@@ -46,11 +46,11 @@ STStringBase lbl_80174580[] = {
     {SID_NONE, 0, NULL, 0x00000000, 0x00000000},
 };
 
-STStringDraw lbl_80174688[SI_MAX] = {
+static STStringDraw sStringDraw[SI_MAX] = {
     {
-        {&lbl_80174580[SI_ERROR_INS_SPACE], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_INS_SPACE], FLAG_COLOR_WHITE, 0, 0},
         {{
-            &lbl_80174580[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
+            &sStringBase[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
             FLAG_COLOR_WHITE,
             0,
             0,
@@ -64,10 +64,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_INS_INNODE], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_INS_INNODE], FLAG_COLOR_WHITE, 0, 0},
         {
             {
-                &lbl_80174580[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
+                &sStringBase[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -82,7 +82,7 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
         {0},
         0,
         NULL,
@@ -92,10 +92,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_DATA_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_DATA_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
         {
             {
-                &lbl_80174580[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
+                &sStringBase[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
                 FLAG_COLOR_WHITE,
                 0x0000,
                 0x00000000,
@@ -110,7 +110,7 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_MAX_BLOCKS], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_MAX_BLOCKS], FLAG_COLOR_WHITE, 0, 0},
         {0},
         0,
         NULL,
@@ -120,7 +120,7 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_MAX_FILES], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_MAX_FILES], FLAG_COLOR_WHITE, 0, 0},
         {0},
         0,
         NULL,
@@ -130,7 +130,7 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
         {0},
         0,
         NULL,
@@ -140,10 +140,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_NO_CONTROLLER], FLAG_UNK | FLAG_COLOR_YELLOW, 0, 0},
+        {&sStringBase[SI_ERROR_NO_CONTROLLER], FLAG_UNK, 0, 0},
         {
             {
-                &lbl_80174580[SID_NONE],
+                &sStringBase[SID_NONE],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -158,10 +158,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_NO_CONTROLLER], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_NO_CONTROLLER], FLAG_COLOR_WHITE, 0, 0},
         {
             {
-                &lbl_80174580[SI_ERROR_NEED_CLASSIC],
+                &sStringBase[SI_ERROR_NEED_CLASSIC],
                 FLAG_UNK | FLAG_COLOR_YELLOW,
                 0,
                 0,
@@ -176,10 +176,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_REMOTE_BATTERY], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_REMOTE_BATTERY], FLAG_COLOR_WHITE, 0, 0},
         {
             {
-                &lbl_80174580[SID_NONE],
+                &sStringBase[SID_NONE],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -194,10 +194,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_REMOTE_COMMUNICATION], FLAG_COLOR_WHITE, 0, 0},
+        {&sStringBase[SI_ERROR_REMOTE_COMMUNICATION], FLAG_COLOR_WHITE, 0, 0},
         {
             {
-                &lbl_80174580[SID_NONE],
+                &sStringBase[SID_NONE],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -212,10 +212,10 @@ STStringDraw lbl_80174688[SI_MAX] = {
         0,
     },
     {
-        {&lbl_80174580[SI_ERROR_BLANK], FLAG_UNK | FLAG_COLOR_YELLOW, 0, 0},
+        {&sStringBase[SI_ERROR_BLANK], FLAG_UNK, 0, 0},
         {
             {
-                &lbl_80174580[SID_NONE],
+                &sStringBase[SID_NONE],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -231,29 +231,37 @@ STStringDraw lbl_80174688[SI_MAX] = {
     },
 };
 
-NANDResult lbl_80174988[] = {
-    NAND_RESULT_ACCESS,   12, NAND_RESULT_ALLOC_FAILED,   NAND_RESULT_OK,
-    NAND_RESULT_BUSY,     12, NAND_RESULT_CORRUPT,        2,
-    NAND_RESULT_ECC_CRIT, 3,  NAND_RESULT_EXISTS,         12,
-    NAND_RESULT_INVALID,  6,  NAND_RESULT_MAXBLOCKS,      4,
-    NAND_RESULT_MAXFD,    5,  NAND_RESULT_MAXFILES,       5,
-    NAND_RESULT_NOEXISTS, 12, NAND_RESULT_NOTEMPTY,       12,
-    NAND_RESULT_OPENFD,   12, NAND_RESULT_AUTHENTICATION, 3,
-    NAND_RESULT_UNKNOWN,  6,  NAND_RESULT_FATAL_ERROR,    6,
-    NAND_RESULT_OK,       12,
+static struct_80174988 lbl_80174988[] = {
+    {NAND_RESULT_ACCESS, SI_MAX},
+    {NAND_RESULT_ALLOC_FAILED, SI_ERROR_INS_SPACE},
+    {NAND_RESULT_BUSY, SI_MAX},
+    {NAND_RESULT_CORRUPT, SI_ERROR_INS_INNODE},
+    {NAND_RESULT_ECC_CRIT, SI_ERROR_SYS_CORRUPT},
+    {NAND_RESULT_EXISTS, SI_MAX},
+    {NAND_RESULT_INVALID, SI_ERROR_MAX_FILES},
+    {NAND_RESULT_MAXBLOCKS, SI_ERROR_DATA_CORRUPT},
+    {NAND_RESULT_MAXFD, SI_ERROR_MAX_BLOCKS},
+    {NAND_RESULT_MAXFILES, SI_ERROR_MAX_BLOCKS},
+    {NAND_RESULT_NOEXISTS, SI_MAX},
+    {NAND_RESULT_NOTEMPTY, SI_MAX},
+    {NAND_RESULT_OPENFD, SI_MAX},
+    {NAND_RESULT_AUTHENTICATION, SI_ERROR_SYS_CORRUPT},
+    {NAND_RESULT_UNKNOWN, SI_ERROR_MAX_FILES},
+    {NAND_RESULT_FATAL_ERROR, SI_ERROR_MAX_FILES},
+    {NAND_RESULT_OK, SI_MAX},
 };
 
-STStringFiles lbl_80174A58[] = {
+static STFiles sSTFiles[] = {
     {SC_LANG_JP, "Errors_VC64ErrorStrings_jp.bin", "saveComments_saveComments_jp.bin"},
     {SC_LANG_NONE, NULL, NULL},
 };
 
-NANDBanner* lbl_8025D140;
-char* bufferErrors;
-char* bufferSaveComments;
-s32 lbl_8025D130;
-s32 lbl_8025D12C;
-OSFontHeader* fontHeader;
+static NANDBanner* sBannner;
+static void* sBufferErrorStrings;
+static void* sBufferSaveCommentStrings;
+static bool lbl_8025D130;
+static s32 lbl_8025D12C;
+static OSFontHeader* sFontHeader;
 
 GXRenderModeObj* DEMOGetRenderModeObj(void) { return rmode; }
 
@@ -299,31 +307,31 @@ void fn_80063400(void) {
     GXSetTevColor(GX_TEVREG0, WHITE);
 }
 
-s32 fn_80063680(void) { return 2; }
+s32 fn_80063680(STString* pSTString) { return 2; }
 
-bool fn_80063688(UnknownData1* pUnknownData1, s32 arg1) {
-    STStringDraw* pStringDraw = pUnknownData1->unk00[pUnknownData1->unk30];
+s32 fn_80063688(STString* pSTString, s32 arg1) {
+    STStringDraw* pStringDraw = pSTString->apStringDraw[pSTString->eStringIndex];
 
     if (arg1 & 0x08200000) {
-        if (pUnknownData1->unk34 > 0) {
-            pUnknownData1->unk34--;
+        if (pSTString->iAction > 0) {
+            pSTString->iAction--;
         }
     } else if (arg1 & 0x10400000) {
-        if (pUnknownData1->unk34 < pStringDraw->nAction - 1) {
-            pUnknownData1->unk34++;
+        if (pSTString->iAction < pStringDraw->nAction - 1) {
+            pSTString->iAction++;
         }
     } else if ((arg1 & 0x20000000 & ~1) | (arg1 & 1)) {
-        if (pStringDraw->nAction > 0 && pStringDraw->textAction[pUnknownData1->unk34].unk0C != NULL) {
-            return pStringDraw->textAction[pUnknownData1->unk34].unk0C();
+        if (pStringDraw->nAction > 0 && pStringDraw->textAction[pSTString->iAction].unk0C != NULL) {
+            return pStringDraw->textAction[pSTString->iAction].unk0C(pSTString);
         }
     } else if (pStringDraw->unk30 != NULL) {
-        return pStringDraw->unk30();
+        return pStringDraw->unk30(pSTString);
     }
 
-    return false;
+    return 0;
 }
 
-bool fn_80063730(void) {
+s32 fn_80063730(STString* pSTString) {
     VISetBlack(true);
     VIFlush();
     VIWaitForRetrace();
@@ -332,7 +340,7 @@ bool fn_80063730(void) {
     return false;
 }
 
-void fn_80063764(STStringBase* arg0) {
+void fn_80063764(STStringBase* pStringBase) {
     u32 widthOut;
     s16 nSize;
     s16 nSpace;
@@ -345,33 +353,33 @@ void fn_80063764(STStringBase* arg0) {
     s32 temp_r27;
     char* temp_r3_2;
 
-    temp_r29 = fontHeader->cellWidth;
+    temp_r29 = sFontHeader->cellWidth;
     DEMOGetROMFontSize(&nSize, &nSpace);
     nSize *= 0x10;
     nSpace *= 0x10;
-    arg0->unk10 = 0;
-    arg0->unk0C = 0;
+    pStringBase->unk10 = 0;
+    pStringBase->unk0C = 0;
 
-    if (arg0->eSTStringID != SID_NONE) {
-        arg0->szString = fn_80064A10(bufferErrors, arg0->eSTStringID);
+    if (pStringBase->eSTStringID != SID_NONE) {
+        pStringBase->szString = fn_80064A10(sBufferErrorStrings, pStringBase->eSTStringID);
 
-        if (arg0->szString != NULL) {
-            var_r27 = arg0->szString;
-            arg0->nLines = 1;
+        if (pStringBase->szString != NULL) {
+            var_r27 = pStringBase->szString;
+            pStringBase->nLines = 1;
 
             while (*var_r27 != '\0') {
                 temp_r3_2 = OSGetFontWidth(var_r27, &widthOut);
 
                 if (*var_r27 == '\n') {
-                    arg0->nLines++;
+                    pStringBase->nLines++;
                     *var_r27 = '\0';
                 }
 
                 var_r27 = temp_r3_2;
             }
 
-            var_r3 = arg0->szString;
-            temp_r27 = arg0->nLines;
+            var_r3 = pStringBase->szString;
+            temp_r27 = pStringBase->nLines;
 
             for (i = 0; i < temp_r27; i++) {
                 var_r30 = 0;
@@ -390,14 +398,15 @@ void fn_80063764(STStringBase* arg0) {
                         var_r3 = var_r31 + 1;
                         var_r30 = 0;
                         var_r31 = NULL;
-                        arg0->nLines++;
+                        pStringBase->nLines++;
                     }
                 }
 
                 var_r3++;
             }
 
-            arg0->unk10 = (s32)((arg0->nLines * ((s32)(fontHeader->leading * nSize) / (s32)temp_r29)) + 15) / 16;
+            pStringBase->unk10 =
+                (s32)((pStringBase->nLines * ((s32)(sFontHeader->leading * nSize) / (s32)temp_r29)) + 15) / 16;
         }
     }
 }
@@ -465,37 +474,36 @@ void fn_800639D4(TextInfo* arg0, s32 nHeight, s32 arg2, GXColor color) {
     }
 }
 
-void fn_80063AFC(UnknownData1* pUnknownData1) {
+void fn_80063AFC(STString* pSTString) {
+    s32 nHeight;
     STStringDraw* pStringDraw;
-    s32 var_r31;
     GXColor var_r0;
     s32 i;
-    s32 var_r31_2;
 
     GXColor YELLOW = {255, 255, 0, 255};
     GXColor WHITE = {255, 255, 255, 255};
 
-    pStringDraw = pUnknownData1->unk00[pUnknownData1->unk30];
+    pStringDraw = pSTString->apStringDraw[pSTString->eStringIndex];
 
-    var_r31 = pStringDraw->nStartY;
-    if (var_r31 == 0) {
-        var_r31 = (GC_FRAME_HEIGHT - pStringDraw->unk3C) / 2;
+    nHeight = pStringDraw->nStartY;
+    if (nHeight == 0) {
+        nHeight = (GC_FRAME_HEIGHT - pStringDraw->unk3C) / 2;
     }
 
-    fn_800639D4(&pStringDraw->textInfo, var_r31, pStringDraw->unk38, WHITE);
+    fn_800639D4(&pStringDraw->textInfo, nHeight, pStringDraw->unk38, WHITE);
 
-    var_r31_2 = var_r31 + pStringDraw->textInfo.nShiftY;
+    nHeight += pStringDraw->textInfo.nShiftY;
 
     for (i = 0; i < pStringDraw->nAction;) {
-        if (i == pUnknownData1->unk34 && !(pStringDraw->textAction[i].textInfo.nFlags & FLAG_COLOR_YELLOW)) {
+        if (i == pSTString->iAction && !(pStringDraw->textAction[i].textInfo.nFlags & FLAG_COLOR_YELLOW)) {
             var_r0 = YELLOW;
         } else {
             var_r0 = WHITE;
         }
 
-        fn_800639D4(&pStringDraw->textAction[i].textInfo, var_r31_2, 0, var_r0);
+        fn_800639D4(&pStringDraw->textAction[i].textInfo, nHeight, 0, var_r0);
         i++;
-        var_r31_2 += pStringDraw->textAction[i].textInfo.nShiftY;
+        nHeight += pStringDraw->textAction[i].textInfo.nShiftY;
     }
 }
 
@@ -515,14 +523,14 @@ void OSFreeToHeap(s32 handle, void* p) {
 
 void fn_80063C7C(void) {
     STStringDraw* pStringDraw;
-    STStringBase* pSTEntry;
+    STStringBase* pStringBase;
     s32 iStringDraw;
-    s32 iSTEntry;
-    STStringFiles* var_r29;
+    s32 iStringBase;
+    STFiles* var_r29;
     u32 eLanguage;
 
     eLanguage = SCGetLanguage();
-    var_r29 = &lbl_80174A58[0];
+    var_r29 = &sSTFiles[0];
 
     while (var_r29->szErrors != NULL) {
         if (var_r29->eLanguage == eLanguage) {
@@ -532,27 +540,27 @@ void fn_80063C7C(void) {
     }
 
     if (var_r29->szErrors == NULL) {
-        var_r29 = &lbl_80174A58[0];
+        var_r29 = &sSTFiles[0];
     }
 
-    xlFileLoad(var_r29->szErrors, (void**)&bufferErrors);
-    xlFileLoad(var_r29->szSaveComments, (void**)&bufferSaveComments);
-    fontHeader = DEMOInitROMFont();
+    xlFileLoad(var_r29->szErrors, (void**)&sBufferErrorStrings);
+    xlFileLoad(var_r29->szSaveComments, (void**)&sBufferSaveCommentStrings);
+    sFontHeader = DEMOInitROMFont();
 
-    pSTEntry = &lbl_80174580[SI_ERROR_INS_SPACE];
-    for (iSTEntry = 0; iSTEntry < ARRAY_COUNT(lbl_80174580); iSTEntry++) {
-        fn_80063764(pSTEntry);
-        pSTEntry++;
+    pStringBase = &sStringBase[SI_ERROR_INS_SPACE];
+    for (iStringBase = 0; iStringBase < ARRAY_COUNT(sStringBase); iStringBase++) {
+        fn_80063764(pStringBase);
+        pStringBase++;
     }
 
-    pStringDraw = &lbl_80174688[0];
-    for (iStringDraw = 0; iStringDraw < ARRAY_COUNT(lbl_80174688); iStringDraw++) {
+    pStringDraw = &sStringDraw[0];
+    for (iStringDraw = 0; iStringDraw < ARRAY_COUNT(sStringDraw); iStringDraw++) {
         fn_80063910(pStringDraw);
         pStringDraw++;
     }
 
-    fn_80064634(fn_80064A10(bufferSaveComments, SID_COMMENT_GAME_NAME),
-                fn_80064A10(bufferSaveComments, SID_COMMENT_EMPTY));
+    fn_80064634(fn_80064A10(sBufferSaveCommentStrings, SID_COMMENT_GAME_NAME),
+                fn_80064A10(sBufferSaveCommentStrings, SID_COMMENT_EMPTY));
 }
 
 static inline void fn_80063D78_inline(STStringDraw* pStringDraw) {
@@ -574,7 +582,7 @@ static inline void fn_80063D78_inline(STStringDraw* pStringDraw) {
 }
 
 bool fn_80063D78(STStringIndex eStringIndex) {
-    UnknownData1 sp10;
+    STString sp10;
     s32 var_r31;
     s32 var_r30;
     s32 iController;
@@ -582,17 +590,17 @@ bool fn_80063D78(STStringIndex eStringIndex) {
     s32 sp8;
     s32 temp_r3;
 
-    sp10.unk30 = -1;
+    sp10.eStringIndex = SI_NONE;
 
     if (!fn_800607B0(SYSTEM_HELP(gpSystem), 0)) {
-        return 0;
+        return false;
     }
 
-    sp10.unk30++;
-    sp10.unk00[sp10.unk30] = &lbl_80174688[eStringIndex];
-    sp10.unk34 = 0;
+    sp10.eStringIndex++;
+    sp10.apStringDraw[sp10.eStringIndex] = &sStringDraw[eStringIndex];
+    sp10.iAction = 0;
 
-    fn_80063D78_inline(&lbl_80174688[eStringIndex]);
+    fn_80063D78_inline(&sStringDraw[eStringIndex]);
     VISetBlack(false);
 
     do {
@@ -617,37 +625,34 @@ bool fn_80063D78(STStringIndex eStringIndex) {
         return temp_r3 != 1;
     }
 
-    return 0;
+    return false;
 }
 
-static inline void fn_80063F30_UnknownInline(NANDResult result) {
+static inline void fn_80063F30_Inline(NANDResult result) {
+    struct_80174988* var_r4;
+
     if (result == NAND_RESULT_OK) {
-        NANDResult* var_r4 = &lbl_80174988[0];
+        return;
+    }
 
-        while (var_r4[0] != 0) {
-            if (var_r4[0] != result) {
-                if (var_r4[1] == 12) {
-                    fn_80063D78(var_r4[1]);
-                } else {
-                    break;
-                }
-            } else {
-                var_r4 += 2;
-                continue;
+    for (var_r4 = lbl_80174988; var_r4->result != NAND_RESULT_OK; var_r4++) {
+        if (var_r4->result == result) {
+            if (var_r4->eStringIndex == SI_MAX) {
+                return;
             }
-
-            break;
+            fn_80063D78(var_r4->eStringIndex);
+            return;
         }
     }
 }
 
-static inline s32 __fn_80063F30(char* arg0, u32 arg1) {
+static inline s32 __fn_80063F30(char* szBannerFileName, u32 arg1) {
     NANDFileInfo nandFileInfo;
     u32 length;
     s32 openResult;
 
     length = 0;
-    openResult = NANDSafeOpen(arg0, &nandFileInfo, 1, lbl_801C8640, ARRAY_COUNT(lbl_801C8640));
+    openResult = NANDSafeOpen(szBannerFileName, &nandFileInfo, 1, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
 
     switch (openResult) {
         case NAND_RESULT_AUTHENTICATION:
@@ -656,58 +661,50 @@ static inline s32 __fn_80063F30(char* arg0, u32 arg1) {
         case NAND_RESULT_NOEXISTS:
             return 2;
         default:
-            fn_80063F30_UnknownInline(openResult);
-            break;
+            fn_80063F30_Inline(openResult);
         case NAND_RESULT_OK:
-            fn_80063F30_UnknownInline(NANDGetLength(&nandFileInfo, &length));
-            fn_80063F30_UnknownInline(NANDSafeClose(&nandFileInfo));
-
-            if (length == arg1) {
-                break;
-            }
-
-            return 1;
+            fn_80063F30_Inline(NANDGetLength(&nandFileInfo, &length));
+            break;
     }
 
-    return 0;
+    fn_80063F30_Inline(NANDSafeClose(&nandFileInfo));
+
+    if (length == arg1) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
-s32 fn_80063F30(char* arg0, u32 arg1) {
+s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
     NO_INLINE2();
-    return __fn_80063F30(arg0, arg1);
+    return __fn_80063F30(szBannerFileName, arg1);
 }
 
-s32 fn_800640BC(const char szFileName[9], u32 arg1, s32 arg2) {
+s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
     NANDFileInfo arg10;
     char arg8[0x20];
-
-    NANDResult var_r29;
+    NANDResult result;
     s32 var_r31;
 
-    // *(sp + (-0x100 - ((s32) sp & 0x1F))) = sp;
-    // sp->unk4 = (s32) saved_reg_lr;
-    // sp->unk-4 = (s32) saved_reg_r31;
-    // sp->unk-8 = (s32) saved_reg_r30;
-    // sp->unk-C = (s32) saved_reg_r29;
-
-    var_r29 = NANDCreate(szFileName, 0x34, 0);
-    if (var_r29 != NAND_RESULT_OK && var_r29 != NAND_RESULT_EXISTS) {
+    result = NANDCreate(szFileName, 0x34, 0);
+    if (result != NAND_RESULT_OK && result != NAND_RESULT_EXISTS) {
         return 0;
     }
 
-    var_r29 = NANDSafeOpen(szFileName, &arg10, 3, lbl_801C8640, ARRAY_COUNT(lbl_801C8640));
-    if (var_r29 != NAND_RESULT_OK) {
+    result = NANDSafeOpen(szFileName, &arg10, 3, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
+    if (result != NAND_RESULT_OK) {
         return 0;
     }
 
-    memset(arg8, arg2, ARRAY_COUNT(arg8));
+    memset(arg8, arg1, ARRAY_COUNT(arg8));
     DCFlushRange(arg8, ARRAY_COUNT(arg8));
 
     var_r31 = 0;
     while (var_r31 < (arg1 >> 5)) {
-        var_r29 = NANDWrite(&arg10, &arg8, 0x20);
+        result = NANDWrite(&arg10, &arg8, 0x20);
 
-        if (var_r29 >= NAND_RESULT_OK) {
+        if (result >= NAND_RESULT_OK) {
             var_r31 += 1;
             continue;
         }
@@ -715,66 +712,48 @@ s32 fn_800640BC(const char szFileName[9], u32 arg1, s32 arg2) {
         break;
     }
 
-    var_r29 = NANDSafeClose(&arg10);
-    if (var_r29 < NAND_RESULT_OK) {
+    result = NANDSafeClose(&arg10);
+    if (result < NAND_RESULT_OK) {
         return 0;
     }
 
     return 1;
 }
 
-static inline bool fn_800641CC_Inline(char* szFileName, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
+static inline s32 fn_800641CC_Inline(char* szFileName, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
     if (access & 2) {
         return NANDOpen(szFileName, info, access);
     } else {
         return NANDSafeOpen(szFileName, info, access, buffer, len);
     }
 
-    return true;
+    return NAND_RESULT_OK;
 }
 
-s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, s32 arg4) {
-    NANDFileInfo sp50;
-    u32 spC;
-    u32 sp8;
-    s32 temp_r3;
-    s32 temp_r3_2;
-    s32 temp_r3_3;
-    s32 temp_r3_4;
-    s32 temp_r3_5;
-    s32 temp_r3_6;
-    s32 temp_r3_7;
-    s32 temp_r3_8;
-    s32 temp_r3_9;
+s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, u8 access) {
+    s32 sp10[16];
+    s32 i;
+    u32 temp_r25;
     s32 var_r3;
     s32 var_r3_2;
-
-    s32* var_r4;
-    s32* var_r4_2;
-    s32* var_r4_3;
-    s32* var_r4_5;
-    u32 temp_r25;
+    u32 spC;
     u32 var_r4_4;
+    s32 var_r3_3;
 
-    s32 sp10[0x10];
-    s32 i;
-
-    if (lbl_8025D130 == 0) {
-        // MEMCLR(sp10);
-
+    if (!lbl_8025D130) {
         for (i = 0; i < ARRAY_COUNT(sp10); i++) {
             sp10[i] = 0;
         }
 
-        if (NANDGetHomeDir((char*)sp10) != 0) {
+        if (NANDGetHomeDir((char*)sp10) != NAND_RESULT_OK) {
             fn_80063D78(SI_ERROR_MAX_FILES);
         }
 
-        if (fn_800B48C4((char*)sp10) != 0) {
+        if (fn_800B48C4((char*)sp10) != NAND_RESULT_OK) {
             fn_80063D78(SI_ERROR_MAX_FILES);
         }
 
-        lbl_8025D130 = 1;
+        lbl_8025D130 = true;
     }
 
     temp_r25 = ((s32)(arg2 + 0x3FFF) / 16384) << 0xE;
@@ -782,70 +761,58 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
     while (true) {
         lbl_8025D12C = 0;
         fn_8006496C();
-        sp8 = 0;
-        // lbl_8025D12C |= M2C_ERROR(/* Read from unset register $r3 */) * 0x10;
+        lbl_8025D12C |= var_r3 * 0x10;
 
-        __fn_80063F30(szFileName, temp_r25);
+        var_r3 = __fn_80063F30(szFileName, temp_r25);
 
-        temp_r3_7 = lbl_8025D12C | var_r3;
-        lbl_8025D12C = temp_r3_7;
-        if (temp_r3_7 & 0x11) {
-            fn_80063D78(SI_ERROR_SYS_CORRUPT);
-            // if ((s32) M2C_ERROR(/* Read from unset register $r3 */) == 0) {
-            //     return 0;
-            // }
+        lbl_8025D12C |= var_r3;
+
+        if (lbl_8025D12C & 0x11) {
+            if (!fn_80063D78(SI_ERROR_SYS_CORRUPT)) {
+                return 0;
+            }
+
             if (lbl_8025D12C & 0x10) {
                 fn_80064930();
             }
-            if ((lbl_8025D12C & 1) && (NANDDelete(szFileName) != 0)) {}
-            continue;
-        }
 
-        if (temp_r3_7 & 0x22) {
+            if ((lbl_8025D12C & 1) && NANDDelete(szFileName) != NAND_RESULT_OK) {
+                return 0;
+            }
+        } else if (lbl_8025D12C & 0x22) {
             var_r3_2 = 0;
             var_r4_4 = 0;
 
-            if (temp_r3_7 & 0x20) {
+            if (lbl_8025D12C & 0x20) {
                 var_r4_4 = 1;
                 var_r3_2 = (s32)(((s32)(fn_80064960() + 0x3FFF) / 16384) << 0xE) / 16384;
             }
 
             if (lbl_8025D12C & 2) {
                 var_r4_4 += 1;
-                var_r3_2 += (s32)temp_r25 / 16384;
+                var_r3_2 += temp_r25;
             }
 
-            // lbl_80174688->unk78 = var_r4_4;
-            // lbl_80174688->unk38 = (s32) ((var_r3_2 << 0xE) + 0x1FFFF) / 131072;
+            sStringDraw[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU].unk38 = var_r4_4;
+            sStringDraw[SI_ERROR_INS_SPACE].unk38 = ((var_r3_2 << 0xE) + 0x1FFFF) / 131072;
 
-            fn_80063F30_Inline(NANDCheck(var_r3_2, var_r4_4, &spC));
+            fn_80063F30_UnknownInline(NANDCheck(var_r3_2, var_r4_4, &spC));
 
             if (spC & 5) {
-                fn_80063D78(SI_ERROR_INS_SPACE);
-                // if ((s32) M2C_ERROR(/* Read from unset register $r3 */) == 0) {
-                //     return 0;
-                // }
-                continue;
-            }
-
-            if (spC & 0xA) {
-                fn_80063D78(SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU);
-                // if ((s32) M2C_ERROR(/* Read from unset register $r3 */) == 0) {
-                //     return 0;
-                // }
-                continue;
-            }
-
-            if ((!(lbl_8025D12C & 0x20) || fn_80064870()) && (lbl_8025D12C & 2)) {
+                if (!fn_80063D78(SI_ERROR_INS_SPACE)) {
+                    return 0;
+                }
+            } else if (spC & 0xA) {
+                if (!fn_80063D78(SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU)) {
+                    return 0;
+                }
+            } else if ((!(lbl_8025D12C & 0x20) || fn_80064870()) && (lbl_8025D12C & 2)) {
                 fn_800640BC(szFileName, temp_r25, arg3);
             }
-            continue;
-        }
-
-        if (fn_800641CC_Inline(szFileName, nandFileInfo, arg4, lbl_801C8640, ARRAY_COUNT(lbl_801C8640)) == 0) {
+        } else if (fn_800641CC_Inline(szFileName, nandFileInfo, access, sBannerBuffer, ARRAY_COUNT(sBannerBuffer)) ==
+                   NAND_RESULT_OK) {
             return 1;
         }
-        continue;
     }
 }
 
@@ -862,115 +829,72 @@ bool fn_80064600(NANDFileInfo* info, s32 arg1) {
 static u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
 static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
 
-bool fn_80064634(char* arg0, char* arg1) {
+static inline void fn_80064634_inline(char* src, wchar_t* dest, s32 max) {
+    s32 i;
+    s32 nSize;
+
+    nSize = 0;
+
+    for (i = 0; i < max; i++) {
+        if (src[0] == 0x00 && src[1] == (char)0xBB) {
+            break;
+        }
+
+        // TODO
+        ((char*)dest)[1] = *src++;
+        ((char*)dest)[0] = *src++;
+
+        dest++;
+        nSize++;
+    }
+
+    if (nSize == 0) {
+        *dest++ = ' ';
+    }
+
+    *dest = '\0';
+}
+
+bool fn_80064634(char* szGameName, char* szEmpty) {
     wchar_t subtitle[BANNER_TITLE_MAX];
     wchar_t title[BANNER_TITLE_MAX];
     TPLPalette* tplPal;
-    s32 temp_cr0_lt;
-    s32 temp_r0_3;
-    s32 temp_r3;
-    s32 var_ctr;
-    s32 var_ctr_2;
-    s32 var_r29;
-    s32 var_r4;
-    s32 var_r4_2;
-    wchar_t* var_r3;
-    wchar_t* var_r3_2;
-    u32 var_r27_2;
-    char temp_r0;
-    u8 temp_r0_2;
-    u8* var_r28;
-    u8* var_r31;
+
+    u32 i;
     NANDBanner* temp_r26;
-    char* var_r25;
-    char* var_r27;
-    u8* var_r30;
 
-    var_r25 = arg0;
-    var_r27 = arg1;
+    xlHeapTake((void**)&sBannner, 0x10000 | 0x70000000);
 
-    xlHeapTake((void**)&lbl_8025D140, 0x10000 | 0x70000000);
-
-    temp_r26 = lbl_8025D140;
+    temp_r26 = sBannner;
 
     if (!xlFileLoad("save_banner.tpl", (void**)&tplPal)) {
         return false;
     }
 
     TPLBind(tplPal);
+
     memset(temp_r26, 0, 0xF0A0);
     memset(&title, 0, 0x80);
 
-    if (var_r25 != NULL) {
-        var_r3 = &title[0];
-        var_r4 = 0;
-
-        for (var_ctr = 0; var_ctr < 31; var_ctr++) {
-            if (var_r25[0] != 0x00 || var_r25[1] != -0x45) {
-                temp_r0 = var_r25[1];
-                var_r3[0] = temp_r0;
-                var_r3[1] = var_r25[0];
-                var_r4 += 1;
-                var_r25 += 2;
-                var_r3 += 2;
-            }
-        }
-
-        if (var_r4 == 0) {
-            *var_r3 = ' ';
-            var_r3 += 2;
-        }
-
-        *var_r3 = '\0';
+    if (szGameName != NULL) {
+        fn_80064634_inline(szGameName, title, 31);
     }
 
-    if (var_r27 != NULL) {
-        var_r3_2 = &subtitle[0];
-        var_r4_2 = 0;
-
-        for (var_ctr = 0; var_ctr < 31; var_ctr++) {
-            if (var_r27[0] != 0x00 || var_r27[1] != -0x45) {
-                temp_r0_2 = var_r27[1];
-                var_r3_2[0] = temp_r0_2;
-                var_r3_2[1] = var_r27[0];
-                var_r4_2 += 1;
-                var_r27 += 2;
-                var_r3_2 += 2;
-            }
-        }
-
-        if (var_r4_2 == 0) {
-            *var_r3_2 = ' ';
-            var_r3_2 += 2;
-        }
-
-        *var_r3_2 = '\0';
+    if (szEmpty != NULL) {
+        fn_80064634_inline(szEmpty, subtitle, 31);
     }
 
-    NANDInitBanner(temp_r26, 0x10, &title[0], &subtitle[4]);
-    memcpy(temp_r26->bannerTexture, tplPal->descriptors->texHeader->data, ARRAY_COUNT(temp_r26->bannerTexture));
+    NANDInitBanner(temp_r26, 0x10, &title[0], &subtitle[0]);
+    memcpy(temp_r26->bannerTexture, tplPal->descriptors[0].texHeader->data, ARRAY_COUNT(temp_r26->bannerTexture));
 
-    var_r30 = temp_r26->iconTexture[0];
-    var_r27_2 = 0;
-    var_r31 = &lbl_8025C890[0];
-    var_r29 = 0;
-    var_r28 = &lbl_8025C888[0];
-
-    while (temp_cr0_lt < 0) {
-        memcpy(var_r30, &tplPal->descriptors->texHeader->data[*var_r31 * 8], ARRAY_COUNT(temp_r26->iconTexture));
-        var_r27_2++;
-        temp_r0_3 = *var_r28 << var_r29;
-        temp_cr0_lt = var_r27_2 < 8;
-        var_r29 += 2;
-        temp_r3 = temp_r26->iconSpeed & ~(3 << var_r29);
-        temp_r26->iconSpeed = (temp_r3 | temp_r0_3);
-        var_r30 += 0x1200;
-        var_r28++;
-        var_r31++;
+    for (i = 0; i < 8; i++) {
+        memcpy(temp_r26->iconTexture[i * 0x240], tplPal->descriptors[lbl_8025C890[i]].texHeader->data,
+               ARRAY_COUNT(temp_r26->iconTexture));
+        temp_r26->iconSpeed = (temp_r26->iconSpeed & ~(3 << (i * 2))) | (lbl_8025C888[i] << (i * 2));
     }
 
-    if (temp_cr0_lt < 0) {
-        temp_r26->iconSpeed = (temp_r26->iconSpeed & ~(3 << (var_r27_2 * 2)));
+    if (i < 8) {
+        temp_r26->iconSpeed = (temp_r26->iconSpeed & ~(3 << (i * 2)));
     }
 
     xlHeapFree((void**)&tplPal);
@@ -982,14 +906,14 @@ static bool fn_80064870(void) {
     void* pBuffer;
     s32 nResult;
 
-    pBuffer = lbl_8025D140;
+    pBuffer = sBannner;
 
     nResult = NANDCreate("banner.bin", 0x34, 0);
     if (nResult != NAND_RESULT_EXISTS && nResult != NAND_RESULT_OK) {
         return false;
     }
 
-    if (NANDSafeOpen("banner.bin", &info, 3, lbl_801C8640, sizeof(lbl_801C8640))) {
+    if (NANDSafeOpen("banner.bin", &info, 3, sBannerBuffer, sizeof(sBannerBuffer))) {
         return false;
     }
 
@@ -1008,60 +932,63 @@ static void fn_8006496C(void) {
     fn_80063F30("banner.bin", 0xF0A0); // fn_80064960()?
 }
 
-s32* fn_80064980(char* pStrings, STStringID eStringID) {
-    s32 temp_r0;
-    char temp_r8;
-    s32 var_r5;
-    s32 var_r6;
-    s32 temp_r5;
-    STStringID temp_r0_2;
-    u32 var_r7;
+/**
+ * @brief Get the string table entry corresponding to the string ID
+ * @param pStringTable Pointer to the string table
+ * @param eStringID The ID of the string table entry to get
+ * @return STHeaderTableEntry pointer of the corresponding string table entry if found, else NULL
+ */
+STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID) {
+    u32 nStringID;
+    s32 lo;
+    s32 hi;
+    s32 mid;
+    u8* pEntries = (u8*)(&pStringTable->header.entries);
 
-    temp_r8 = pStrings[0x20];
-
-    if (pStrings == NULL || (temp_r5 = pStrings[8], ((temp_r5 == 0) != 0))) {
+    if (pStringTable == NULL || pStringTable->header.nEntries == 0) {
         return NULL;
     }
 
-    var_r7 = temp_r5 - 1;
-    var_r6 = 0;
-    var_r5 = var_r7 / 2;
+    hi = pStringTable->header.nEntries - 1;
+    lo = 0;
+    mid = hi / 2;
 
-    while (true) {
-        if (var_r7 < var_r6) {
-            break;
+    while (hi >= lo) {
+        STHeaderTableEntry* entry = (STHeaderTableEntry*)(pEntries + mid * pStringTable->header.nSizeEntry);
+
+        if (entry->nStringID == eStringID) {
+            return entry;
         }
 
-        temp_r0 = var_r5 * pStrings[0x1E];
-        temp_r0_2 = temp_r8 + temp_r0;
-
-        if (temp_r0_2 == eStringID) {
-            return (s32*)&temp_r0_2;
+        if (entry->nStringID < eStringID) {
+            lo = mid + 1;
+        } else if (entry->nStringID > eStringID) {
+            hi = mid - 1;
         }
 
-        if (temp_r0_2 < eStringID) {
-            var_r6 = var_r5 + 1;
-        } else if (temp_r0_2 > eStringID) {
-            var_r7 = var_r5 - 1;
-        }
-
-        var_r5 = var_r6 + ((var_r7 - var_r6) / 2);
+        mid = lo + ((hi - lo) / 2);
     }
 
     return NULL;
 }
 
-char* fn_80064A10(char* pStrings, STStringID eStringID) {
-    s32* temp_r3;
+/**
+ * @brief Get the string from the string table corresponding to the string ID
+ * @param pSTBuffer Pointer to the string table buffer
+ * @param eStringID The ID of the string to get
+ * @return char pointer of the corresponding string if found, else NULL
+ */
+char* fn_80064A10(void* pSTBuffer, STStringID eStringID) {
+    STHeaderTableEntry* pTableEntry;
 
-    if (pStrings == NULL) {
+    if (pSTBuffer == NULL) {
         return NULL;
     }
 
-    temp_r3 = fn_80064980(pStrings, eStringID);
+    pTableEntry = fn_80064980(pSTBuffer, eStringID);
 
-    if (temp_r3 != 0) {
-        return &pStrings[temp_r3[1]];
+    if (pTableEntry != NULL) {
+        return (char*)pSTBuffer + pTableEntry->nTextOffset1;
     }
 
     return NULL;

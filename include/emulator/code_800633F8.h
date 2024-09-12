@@ -14,9 +14,8 @@
 extern "C" {
 #endif
 
-#define ST10_MAGIC 'ST10'
-#define ENCODING_NAME_LENGTH 24
-#define BANNER_TITLE_MAX 28
+#define ENCODING_NAME_LENGTH 18
+#define BANNER_TITLE_MAX 32
 #define FADE_TIMER_MAX 15
 
 #define FLAG_COLOR_WHITE (0 << 0)
@@ -63,9 +62,10 @@ typedef enum STStringID {
 
 // clang-format off
 
-// Used as the index to `lbl_80174580`.
-// This happens to line up with `lbl_80174688` so we can use it for both.
+// Used as the index to `sStringBase`.
+// This happens to line up with `sStringDraw` so we can use it for both.
 typedef enum STStringIndex {
+    SI_NONE = -1,
     SI_ERROR_INS_SPACE = 0, // "There is not enough available space in the Wii system memory. Create %ld block(s) of free space by either moving files to an SD Card or deleting files in the Data Management Screen."
     SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU = 1, // "Press the A Button to return to the Wii Menu."
     SI_ERROR_INS_INNODE = 2, // "There is not enough available space in the Wii system memory. Either move files to an SD Card or delete files on the Data Management Screen."
@@ -83,53 +83,43 @@ typedef enum STStringIndex {
 
 // clang-format on
 
-/**
- * @brief Defines an entry to the ST10 string table
- * @param nTextId Text identifier.
- * @param nTextOffset1 File offset to the string.
- * @param nTextOffset2 Another file offset to the string. Same value as above?
- * @param nTextSize1 String size.
- * @param nTextSize2 Another string size. Same as above?
- */
 typedef struct STHeaderTableEntry {
-    /* 0x00 */ s32 nTextId;
+    /* 0x00 */ u32 nStringID;
     /* 0x04 */ s32 nTextOffset1;
     /* 0x08 */ s32 nTextOffset2;
     /* 0x0C */ s16 nTextSize1;
     /* 0x0E */ s16 nTextSize2;
 } STHeaderTableEntry; // size = 0x10
 
-/**
- * @brief The StringTable header.
- * @param magic Format identifier. Always "ST10".
- * @param eTableID The table's ID. See the STTableID enum.
- * @param szEncoding The encoding's name.
- * @param entries List of strings entries.
- */
 typedef struct STHeader {
     /* 0x00 */ s32 magic;
     /* 0x04 */ STTableID eTableID;
-    /* 0x08 */ char* szEncoding[ENCODING_NAME_LENGTH];
-    /* 0x20 */ STHeaderTableEntry* entries;
+    /* 0x08 */ u16 nEntries;
+    /* 0x0A */ char szEncoding[ENCODING_NAME_LENGTH];
+    /* 0x1C */ char unk1C[2];
+    /* 0x1E */ u8 nSizeEntry;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8* entries;
 } STHeader; // size = 0x24
 
-/**
- * @brief The String Table.
- * @param header String Table Header. Hosts the informations to find strings.
- * @param szStrings The strings.
- */
 typedef struct StringTable {
-    /* 0x00 */ STHeader* header;
-    /* 0x04 */ char* szStrings;
-} StringTable; // size = 0x8
+    /* 0x00 */ STHeader header;
+    /* 0x24 */ char* szStrings;
+} StringTable; // size = 0x28
 
-typedef struct STStringFiles {
+typedef struct STFiles {
     /* 0x00 */ SCLanguage eLanguage;
     /* 0x04 */ char* szErrors;
     /* 0x08 */ char* szSaveComments;
-} STStringFiles; // size = 0xC
+} STFiles; // size = 0xC
 
-typedef bool (*UnknownCallback)(void);
+typedef struct STString {
+    /* 0x00 */ struct STStringDraw* apStringDraw[SI_MAX];
+    /* 0x30 */ STStringIndex eStringIndex;
+    /* 0x34 */ s32 iAction;
+} STString; // size = 0x38
+
+typedef s32 (*UnknownCallback)(struct STString*);
 
 typedef struct STStringBase {
     /* 0x00 */ STStringID eSTStringID;
@@ -162,34 +152,33 @@ typedef struct STStringDraw {
     /* 0x3C */ s32 unk3C;
 } STStringDraw; // size = 0x40
 
-typedef struct UnknownData1 {
-    /* 0x00 */ STStringDraw* unk00[SI_MAX];
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-} UnknownData1; // size = 0x38
+typedef struct struct_80174988 {
+    NANDResult result;
+    STStringIndex eStringIndex;
+} struct_80174988;
 
 GXRenderModeObj* DEMOGetRenderModeObj(void);
 void fn_80063400(void);
-s32 fn_80063680(void);
-bool fn_80063688(UnknownData1* arg0, s32 arg1);
-bool fn_80063730(void);
-void fn_80063764(STStringBase* arg0);
+s32 fn_80063680(STString* pSTString);
+s32 fn_80063688(STString* arg0, s32 arg1);
+s32 fn_80063730(STString* pSTString);
+void fn_80063764(STStringBase* pStringBase);
 void fn_80063910(STStringDraw* pStringDraw);
-void fn_80063AFC(UnknownData1* pStringDraw);
+void fn_80063AFC(STString* pStringDraw);
 void* OSAllocFromHeap(s32 handle, s32 size);
 void OSFreeToHeap(s32 handle, void* p);
 void fn_80063C7C(void);
 bool fn_80063D78(STStringIndex eStringIndex);
-s32 fn_80063F30(char* arg0, u32 arg1);
-s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, s32 arg4);
+s32 fn_80063F30(char* szBannerFileName, u32 arg1);
+s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, u8 access);
 bool fn_80064600(NANDFileInfo* info, s32 arg1);
-bool fn_80064634(char* arg0, char* arg1);
+bool fn_80064634(char* szGameName, char* szEmpty);
 bool fn_80064870(void);
 s32 fn_80064930(void);
 s32 fn_80064960(void);
 void fn_8006496C(void);
-s32* fn_80064980(char* pStrings, STStringID eStringID);
-char* fn_80064A10(char* pStrings, STStringID eStringID);
+STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID);
+char* fn_80064A10(void* pSTBuffer, STStringID eStringID);
 
 #ifdef __cplusplus
 }
