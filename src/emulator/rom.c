@@ -487,7 +487,7 @@ static void* __ROMEntry(void* arg) {
     return NULL;
 }
 
-s32 fn_80042E30(STString* pSTString) {
+s32 fn_80042E30(EDString* pSTString) {
     s32 ret;
     bool bThread;
 
@@ -512,7 +512,7 @@ static bool romLoadFullOrPart(Rom* pROM) {
         if (OSCreateThread(&DefaultThread, (OSThreadFunc)__ROMEntry, pROM, (void*)((u8*)pBuffer + ROM_THREAD_SIZE),
                            ROM_THREAD_SIZE, OS_PRIORITY_MAX, 1)) {
             OSResumeThread(&DefaultThread);
-            fn_80063D78(pROM->unk_C ? SI_ERROR_NO_CONTROLLER : SI_ERROR_BLANK);
+            errordisplayShow(pROM->unk_C ? SI_ERROR_NO_CONTROLLER : SI_ERROR_BLANK);
             pROM->unk_C = 0;
         }
 

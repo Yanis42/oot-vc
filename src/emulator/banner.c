@@ -1,3 +1,10 @@
+/**
+ * @file banner.c
+ *
+ * This file implements methods to create, write and delete a banner to the NAND.
+ *
+ * The banner has a title (usually the emulated game's name), a subtitle (usually an empty string) and an icon.
+ */
 #include "emulator/banner.h"
 #include "emulator/errordisplay.h"
 #include "emulator/xlFile.h"
@@ -24,6 +31,14 @@
     (void)0;         \
     (void)0
 
+static bool bannerWrite(void);
+static s32 bannerDelete(void);
+static s32 bannerGetBufferSize(void);
+static void fn_8006496C(void);
+
+static u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
+static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
+
 static u8 sBannerBuffer[0x1000];
 static NANDBanner* sBanner;
 
@@ -39,7 +54,7 @@ static inline void fn_80063F30_Inline(NANDResult result) {
             if (var_r4->eStringIndex == SI_NULL) {
                 return;
             }
-            fn_80063D78(var_r4->eStringIndex);
+            errordisplayShow(var_r4->eStringIndex);
             return;
         }
     }
@@ -75,12 +90,12 @@ static inline s32 __fn_80063F30(char* szBannerFileName, u32 arg1) {
     }
 }
 
-s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
+static s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
     NO_INLINE2();
     return __fn_80063F30(szBannerFileName, arg1);
 }
 
-s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
+static s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
     NANDFileInfo arg10;
     char arg8[0x20];
     NANDResult result;
@@ -119,7 +134,7 @@ s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
     return 1;
 }
 
-static inline s32 fn_800641CC_Inline(char* szFileName, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
+static inline s32 bannerNANDOpen(char* szFileName, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
     if (access & 2) {
         return NANDOpen(szFileName, info, access);
     } else {
@@ -145,11 +160,11 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
         }
 
         if (NANDGetHomeDir((char*)sp10) != NAND_RESULT_OK) {
-            fn_80063D78(SI_ERROR_MAX_FILES);
+            errordisplayShow(SI_ERROR_MAX_FILES);
         }
 
         if (fn_800B48C4((char*)sp10) != NAND_RESULT_OK) {
-            fn_80063D78(SI_ERROR_MAX_FILES);
+            errordisplayShow(SI_ERROR_MAX_FILES);
         }
 
         lbl_8025D130 = true;
@@ -167,12 +182,12 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
         lbl_8025D12C |= var_r3;
 
         if (lbl_8025D12C & 0x11) {
-            if (!fn_80063D78(SI_ERROR_SYS_CORRUPT)) {
+            if (!errordisplayShow(SI_ERROR_SYS_CORRUPT)) {
                 return 0;
             }
 
             if (lbl_8025D12C & 0x10) {
-                fn_80064930();
+                bannerDelete();
             }
 
             if ((lbl_8025D12C & 1) && NANDDelete(szFileName) != NAND_RESULT_OK) {
@@ -184,7 +199,7 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
 
             if (lbl_8025D12C & 0x20) {
                 var_r4_4 = 1;
-                var_r3_2 = (s32)(((s32)(fn_80064960() + 0x3FFF) / 16384) << 0xE) / 16384;
+                var_r3_2 = (s32)(((s32)(bannerGetBufferSize() + 0x3FFF) / 16384) << 0xE) / 16384;
             }
 
             if (lbl_8025D12C & 2) {
@@ -198,25 +213,31 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
             fn_80063F30_UnknownInline(NANDCheck(var_r3_2, var_r4_4, &spC));
 
             if (spC & 5) {
-                if (!fn_80063D78(SI_ERROR_INS_SPACE)) {
+                if (!errordisplayShow(SI_ERROR_INS_SPACE)) {
                     return 0;
                 }
             } else if (spC & 0xA) {
-                if (!fn_80063D78(SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU)) {
+                if (!errordisplayShow(SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU)) {
                     return 0;
                 }
-            } else if ((!(lbl_8025D12C & 0x20) || fn_80064870()) && (lbl_8025D12C & 2)) {
+            } else if ((!(lbl_8025D12C & 0x20) || bannerWrite()) && (lbl_8025D12C & 2)) {
                 fn_800640BC(szFileName, temp_r25, arg3);
             }
-        } else if (fn_800641CC_Inline(szFileName, nandFileInfo, access, sBannerBuffer, ARRAY_COUNT(sBannerBuffer)) ==
+        } else if (bannerNANDOpen(szFileName, nandFileInfo, access, sBannerBuffer, ARRAY_COUNT(sBannerBuffer)) ==
                    NAND_RESULT_OK) {
             return 1;
         }
     }
 }
 
-bool fn_80064600(NANDFileInfo* info, s32 arg1) {
-    if (arg1 & 2) {
+/**
+ * @brief Close the NAND access.
+ * @param info Pointer to `NANDFileInfo`.
+ * @param access Access type, either safe or unsafe.
+ * @return `bool` – Always `true`.
+ */
+bool bannerNANDClose(NANDFileInfo* info, u8 access) {
+    if (access & 2) {
         NANDClose(info);
     } else {
         NANDSafeClose(info);
@@ -225,10 +246,7 @@ bool fn_80064600(NANDFileInfo* info, s32 arg1) {
     return true;
 }
 
-static u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
-static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
-
-static inline void fn_80064634_inline(char* src, wchar_t* dest, s32 max) {
+static inline void bannerSetString(char* src, wchar_t* dest, s32 max) {
     s32 i;
     s32 nSize;
 
@@ -239,7 +257,6 @@ static inline void fn_80064634_inline(char* src, wchar_t* dest, s32 max) {
             break;
         }
 
-        // TODO
         ((char*)dest)[1] = *src++;
         ((char*)dest)[0] = *src++;
 
@@ -254,7 +271,13 @@ static inline void fn_80064634_inline(char* src, wchar_t* dest, s32 max) {
     *dest = '\0';
 }
 
-bool fn_80064634(char* szGameName, char* szEmpty) {
+/**
+ * @brief Creates a new banner.
+ * @param szGameName The title of the banner, usually the emulated game's name.
+ * @param szEmpty The subtitle of the banner, usually an empty string.
+ * @return `bool` – `true` on success, `false` on failure.
+ */
+bool bannerCreate(char* szGameName, char* szEmpty) {
     wchar_t subtitle[BANNER_TITLE_MAX];
     wchar_t title[BANNER_TITLE_MAX];
     TPLPalette* tplPal;
@@ -276,11 +299,11 @@ bool fn_80064634(char* szGameName, char* szEmpty) {
     memset(&title, 0, 0x80);
 
     if (szGameName != NULL) {
-        fn_80064634_inline(szGameName, title, 31);
+        bannerSetString(szGameName, title, 31);
     }
 
     if (szEmpty != NULL) {
-        fn_80064634_inline(szEmpty, subtitle, 31);
+        bannerSetString(szEmpty, subtitle, 31);
     }
 
     NANDInitBanner(temp_r26, 0x10, &title[0], &subtitle[0]);
@@ -297,10 +320,14 @@ bool fn_80064634(char* szGameName, char* szEmpty) {
     }
 
     xlHeapFree((void**)&tplPal);
-    return 1;
+    return true;
 }
 
-static bool fn_80064870(void) {
+/**
+ * @brief Writes the banner file to the NAND.
+ * @return `bool` – `true` on success, `false` on failure.
+ */
+static bool bannerWrite(void) {
     NANDFileInfo info;
     void* pBuffer;
     s32 nResult;
@@ -323,8 +350,16 @@ static bool fn_80064870(void) {
     return nResult >= NAND_RESULT_OK;
 }
 
-static s32 fn_80064930(void) { return !NANDDelete("banner.bin"); }
+/**
+ * @brief Deletes the banner file from the NAND.
+ * @return `bool` – `true` on success, `false` on failure.
+ */
+static s32 bannerDelete(void) { return NANDDelete("banner.bin") == NAND_RESULT_OK; }
 
-static s32 fn_80064960(void) { return BANNER_BUFFER_SIZE; }
+/**
+ * @brief Returns the buffer size.
+ * @return `s32` – The size of the buffer.
+ */
+static s32 bannerGetBufferSize(void) { return BANNER_BUFFER_SIZE; }
 
-static void fn_8006496C(void) { fn_80063F30("banner.bin", fn_80064960()); }
+static void fn_8006496C(void) { fn_80063F30("banner.bin", bannerGetBufferSize()); }

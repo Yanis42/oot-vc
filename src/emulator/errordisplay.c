@@ -1,4 +1,14 @@
+/**
+ * @file errordisplay.c
+ *
+ * This file implements the screen that can be viewed during the emulator's initialization process.
+ * In most cases it prints "You will need the Classic Controller."
+ * but an error message can be printed if something goes wrong.
+ *
+ * This file is also responsible for reading the banner title and subtitle from the string table.
+ */
 #include "emulator/errordisplay.h"
+#include "emulator/banner.h"
 #include "emulator/controller.h"
 #include "emulator/frame.h"
 #include "emulator/rom.h"
@@ -8,16 +18,15 @@
 #include "emulator/xlFile.h"
 #include "emulator/xlHeap.h"
 #include "macros.h"
-
-#include "emulator/banner.h"
 #include "revolution/demo.h"
-
 #include "revolution/nand.h"
 #include "revolution/os.h"
-
 #include "revolution/vi.h"
 
-static STStringBase sStringBase[] = {
+static s32 fn_80063680(EDString* pEDString);
+static s32 errordisplayReturnToMenu(EDString* pEDString);
+
+static EDStringInfo sStringBase[] = {
     {SID_ERROR_INS_SPACE, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_INS_INNODE, 0, NULL, 0x00000000, 0x00000000},
@@ -33,7 +42,7 @@ static STStringBase sStringBase[] = {
     {SID_NONE, 0, NULL, 0x00000000, 0x00000000},
 };
 
-STStringDraw sStringDraw[] = {
+ErrorDisplay sStringDraw[] = {
     {
         {&sStringBase[SI_ERROR_INS_SPACE], FLAG_COLOR_WHITE, 0, 0},
         {{
@@ -41,7 +50,7 @@ STStringDraw sStringDraw[] = {
             FLAG_COLOR_WHITE,
             0,
             0,
-            (UnknownCallback)fn_80063730,
+            (ErrorCallback)errordisplayReturnToMenu,
         }},
         1,
         NULL,
@@ -58,7 +67,7 @@ STStringDraw sStringDraw[] = {
                 FLAG_COLOR_WHITE,
                 0,
                 0,
-                (UnknownCallback)fn_80063730,
+                (ErrorCallback)errordisplayReturnToMenu,
             },
         },
         1,
@@ -86,7 +95,7 @@ STStringDraw sStringDraw[] = {
                 FLAG_COLOR_WHITE,
                 0x0000,
                 0x00000000,
-                (UnknownCallback)fn_80063730,
+                (ErrorCallback)errordisplayReturnToMenu,
             },
         },
         1,
@@ -127,18 +136,18 @@ STStringDraw sStringDraw[] = {
         0,
     },
     {
-        {&sStringBase[SI_ERROR_NO_CONTROLLER], FLAG_UNK, 0, 0},
+        {&sStringBase[SI_ERROR_NO_CONTROLLER], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
                 &sStringBase[SI_NULL],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
-                (UnknownCallback)fn_80063680,
+                (ErrorCallback)fn_80063680,
             },
         },
         0,
-        (UnknownCallback)fn_80042E30,
+        (ErrorCallback)fn_80042E30,
         120,
         0,
         0,
@@ -149,14 +158,14 @@ STStringDraw sStringDraw[] = {
         {
             {
                 &sStringBase[SI_ERROR_NEED_CLASSIC],
-                FLAG_UNK | FLAG_COLOR_YELLOW,
+                FLAG_RESET_FADE_TIMER | FLAG_COLOR_YELLOW,
                 0,
                 0,
-                (UnknownCallback)fn_80063680,
+                (ErrorCallback)fn_80063680,
             },
         },
         1,
-        (UnknownCallback)fn_80062028,
+        (ErrorCallback)fn_80062028,
         120,
         0,
         0,
@@ -170,11 +179,11 @@ STStringDraw sStringDraw[] = {
                 FLAG_COLOR_WHITE,
                 0,
                 0,
-                (UnknownCallback)fn_80063680,
+                (ErrorCallback)fn_80063680,
             },
         },
         1,
-        (UnknownCallback)fn_80062028,
+        (ErrorCallback)fn_80062028,
         0,
         0,
         0,
@@ -188,29 +197,29 @@ STStringDraw sStringDraw[] = {
                 FLAG_COLOR_WHITE,
                 0,
                 0,
-                (UnknownCallback)fn_80063680,
+                (ErrorCallback)fn_80063680,
             },
         },
         1,
-        (UnknownCallback)fn_80062028,
+        (ErrorCallback)fn_80062028,
         0,
         0,
         0,
         0,
     },
     {
-        {&sStringBase[SI_ERROR_BLANK], FLAG_UNK, 0, 0},
+        {&sStringBase[SI_ERROR_BLANK], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
                 &sStringBase[SI_NULL],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
-                (UnknownCallback)fn_80063680,
+                (ErrorCallback)fn_80063680,
             },
         },
         0,
-        (UnknownCallback)fn_80042E30,
+        (ErrorCallback)fn_80042E30,
         120,
         0,
         0,
@@ -238,7 +247,7 @@ struct_80174988 lbl_80174988[] = {
     {NAND_RESULT_OK, SI_NULL},
 };
 
-static STFiles sSTFiles[] = {
+static DisplayFiles sSTFiles[] = {
     {SC_LANG_JP, "Errors_VC64ErrorStrings_jp.bin", "saveComments_saveComments_jp.bin"},
     {SC_LANG_NONE, NULL, NULL},
 };
@@ -249,9 +258,16 @@ bool lbl_8025D130;
 s32 lbl_8025D12C;
 static OSFontHeader* sFontHeader;
 
+/**
+ * @brief Custom implementation of the `DEMOGetRenderModeObj` SDK function.
+ * @return `GXRenderModeObj*` – Pointer to the render mode object.
+ */
 GXRenderModeObj* DEMOGetRenderModeObj(void) { return rmode; }
 
-void fn_80063400(void) {
+/**
+ * @brief Prepares the graphics interface for a draw action.
+ */
+static void errordisplayDrawSetup(void) {
     GXColor WHITE = {255, 255, 255, 255};
     GXColor BLACK = {0, 0, 0, 255};
 
@@ -293,40 +309,40 @@ void fn_80063400(void) {
     GXSetTevColor(GX_TEVREG0, WHITE);
 }
 
-s32 fn_80063680(STString* pSTString) { return 2; }
+static s32 fn_80063680(EDString* pEDString) { return 2; }
 
-s32 fn_80063688(STString* pSTString, s32 arg1) {
-    STStringDraw* pStringDraw = pSTString->apStringDraw[pSTString->eStringIndex];
+static s32 fn_80063688(EDString* pEDString, s32 arg1) {
+    ErrorDisplay* pErrorDisplay = pEDString->apStringDraw[pEDString->iString];
 
     if (arg1 & 0x08200000) {
-        if (pSTString->iAction > 0) {
-            pSTString->iAction--;
+        if (pEDString->iAction > 0) {
+            pEDString->iAction--;
         }
     } else if (arg1 & 0x10400000) {
-        if (pSTString->iAction < pStringDraw->nAction - 1) {
-            pSTString->iAction++;
+        if (pEDString->iAction < pErrorDisplay->nAction - 1) {
+            pEDString->iAction++;
         }
     } else if ((arg1 & 0x20000000 & ~1) | (arg1 & 1)) {
-        if (pStringDraw->nAction > 0 && pStringDraw->textAction[pSTString->iAction].unk0C != NULL) {
-            return pStringDraw->textAction[pSTString->iAction].unk0C(pSTString);
+        if (pErrorDisplay->nAction > 0 && pErrorDisplay->action[pEDString->iAction].callback != NULL) {
+            return pErrorDisplay->action[pEDString->iAction].callback(pEDString);
         }
-    } else if (pStringDraw->unk30 != NULL) {
-        return pStringDraw->unk30(pSTString);
+    } else if (pErrorDisplay->callback != NULL) {
+        return pErrorDisplay->callback(pEDString);
     }
 
     return 0;
 }
 
-s32 fn_80063730(STString* pSTString) {
+static s32 errordisplayReturnToMenu(EDString* pEDString) {
     VISetBlack(true);
     VIFlush();
     VIWaitForRetrace();
     OSReturnToMenu();
 
-    return false;
+    return 0;
 }
 
-void fn_80063764(STStringBase* pStringBase) {
+static void fn_80063764(EDStringInfo* pStringInfo) {
     u32 widthOut;
     s16 nSize;
     s16 nSpace;
@@ -334,38 +350,38 @@ void fn_80063764(STStringBase* pStringBase) {
     char* var_r31;
     char* var_r3;
     s32 var_r30;
-    u16 temp_r29;
+    s32 nCellWidth;
     s32 i;
     s32 temp_r27;
     char* temp_r3_2;
 
-    temp_r29 = sFontHeader->cellWidth;
+    nCellWidth = sFontHeader->cellWidth;
     DEMOGetROMFontSize(&nSize, &nSpace);
     nSize *= 0x10;
     nSpace *= 0x10;
-    pStringBase->unk10 = 0;
-    pStringBase->unk0C = 0;
+    pStringInfo->unk10 = 0;
+    pStringInfo->unk0C = 0;
 
-    if (pStringBase->eSTStringID != SID_NONE) {
-        pStringBase->szString = fn_80064A10(sBufferErrorStrings, pStringBase->eSTStringID);
+    if (pStringInfo->eStringID != SID_NONE) {
+        pStringInfo->szString = tableGetString(sBufferErrorStrings, pStringInfo->eStringID);
 
-        if (pStringBase->szString != NULL) {
-            var_r27 = pStringBase->szString;
-            pStringBase->nLines = 1;
+        if (pStringInfo->szString != NULL) {
+            var_r27 = pStringInfo->szString;
+            pStringInfo->nLines = 1;
 
             while (*var_r27 != '\0') {
                 temp_r3_2 = OSGetFontWidth(var_r27, &widthOut);
 
                 if (*var_r27 == '\n') {
-                    pStringBase->nLines++;
+                    pStringInfo->nLines++;
                     *var_r27 = '\0';
                 }
 
                 var_r27 = temp_r3_2;
             }
 
-            var_r3 = pStringBase->szString;
-            temp_r27 = pStringBase->nLines;
+            var_r3 = pStringInfo->szString;
+            temp_r27 = pStringInfo->nLines;
 
             for (i = 0; i < temp_r27; i++) {
                 var_r30 = 0;
@@ -377,77 +393,83 @@ void fn_80063764(STStringBase* pStringBase) {
                     }
 
                     var_r3 = OSGetFontWidth(var_r3, &widthOut);
-                    var_r30 = ((s32)(nSize * widthOut) / (s32)temp_r29) + (var_r30 + nSpace);
+                    var_r30 = ((s32)(nSize * widthOut) / nCellWidth) + var_r30 + nSpace;
 
-                    if (((s32)((s32)(var_r30 + 15) / 16) > 0x230) && (var_r31 != NULL)) {
+                    if (((var_r30 + 15) / 16 > 0x230) && var_r31 != NULL) {
                         *var_r31 = 0;
                         var_r3 = var_r31 + 1;
                         var_r30 = 0;
                         var_r31 = NULL;
-                        pStringBase->nLines++;
+                        pStringInfo->nLines++;
                     }
                 }
 
                 var_r3++;
             }
 
-            pStringBase->unk10 =
-                (s32)((pStringBase->nLines * ((s32)(sFontHeader->leading * nSize) / (s32)temp_r29)) + 15) / 16;
+            pStringInfo->unk10 = ((pStringInfo->nLines * ((sFontHeader->leading * nSize) / nCellWidth)) + 15) / 16;
         }
     }
 }
 
-void fn_80063910(STStringDraw* pStringDraw) {
+static void fn_80063910(ErrorDisplay* pErrorDisplay) {
     s32 i;
 
-    pStringDraw->unk3C = 0;
+    pErrorDisplay->unk3C = 0;
 
-    if (pStringDraw->textInfo.pBase != NULL) {
-        pStringDraw->textInfo.nShiftY = pStringDraw->textInfo.pBase->unk10;
+    if (pErrorDisplay->message.pStringInfo != NULL) {
+        pErrorDisplay->message.nShiftY = pErrorDisplay->message.pStringInfo->unk10;
     } else {
-        pStringDraw->textInfo.nShiftY = 0;
+        pErrorDisplay->message.nShiftY = 0;
     }
 
-    if (pStringDraw->nAction > 0) {
-        pStringDraw->textInfo.nShiftY += DEMOGetRFTextHeight("\n");
+    if (pErrorDisplay->nAction > 0) {
+        pErrorDisplay->message.nShiftY += DEMOGetRFTextHeight("\n");
     }
 
-    pStringDraw->unk3C = pStringDraw->textInfo.nShiftY;
+    pErrorDisplay->unk3C = pErrorDisplay->message.nShiftY;
 
-    for (i = 0; i < pStringDraw->nAction; i++) {
-        if (pStringDraw->textAction[i].textInfo.pBase != NULL) {
-            pStringDraw->textAction[i].textInfo.nShiftY = pStringDraw->textAction[i].textInfo.pBase->unk10;
+    for (i = 0; i < pErrorDisplay->nAction; i++) {
+        if (pErrorDisplay->action[i].message.pStringInfo != NULL) {
+            pErrorDisplay->action[i].message.nShiftY = pErrorDisplay->action[i].message.pStringInfo->unk10;
         } else {
-            pStringDraw->textAction[i].textInfo.nShiftY = 0;
+            pErrorDisplay->action[i].message.nShiftY = 0;
         }
 
-        pStringDraw->unk3C += pStringDraw->textAction[i].textInfo.nShiftY;
+        pErrorDisplay->unk3C += pErrorDisplay->action[i].message.nShiftY;
     }
 }
 
-void fn_800639D4(TextInfo* arg0, s32 nHeight, s32 arg2, GXColor color) {
+/**
+ * @brief Prints a message.
+ * @param pEDString Pointer to `EDString`.
+ * @param nHeight The Y-position of the message to print.
+ * @param arg2 Unknown.
+ * @param color The color of the message.
+ */
+static void errordisplayPrintMessage(EDMessage* pMessage, s32 nHeight, s32 arg2, GXColor color) {
     char* szString;
     s32 i;
-    STStringBase* pBase;
+    EDStringInfo* pStringInfo;
     s32 nY;
     s32 nTextHeight;
 
-    pBase = arg0->pBase;
+    pStringInfo = pMessage->pStringInfo;
 
-    if (pBase != NULL) {
+    if (pStringInfo != NULL) {
         nTextHeight = DEMOGetRFTextHeight("");
 
         nY = nHeight;
-        color.a = (arg0->nFadeInTimer * 255) / FADE_TIMER_MAX;
+        color.a = (pMessage->nFadeInTimer * 255) / FADE_TIMER_MAX;
 
-        if (arg0->nFadeInTimer < FADE_TIMER_MAX) {
-            arg0->nFadeInTimer++;
+        if (pMessage->nFadeInTimer < FADE_TIMER_MAX) {
+            pMessage->nFadeInTimer++;
         }
 
         GXSetTevColor(GX_TEVREG0, color);
-        szString = pBase->szString;
+        szString = pStringInfo->szString;
 
-        for (i = 0; i < pBase->nLines; i++) {
+        for (i = 0; i < pStringInfo->nLines; i++) {
             DEMOPrintf((GC_FRAME_WIDTH - DEMOGetRFTextWidth(szString)) / 2, nY, 1, szString, arg2);
 
             while (*szString != '\0') {
@@ -460,39 +482,48 @@ void fn_800639D4(TextInfo* arg0, s32 nHeight, s32 arg2, GXColor color) {
     }
 }
 
-void fn_80063AFC(STString* pSTString) {
-    s32 nHeight;
-    STStringDraw* pStringDraw;
-    GXColor var_r0;
-    s32 i;
-
+/**
+ * @brief Prints the error message and the corresponding action message (if applicable)
+ * @param pEDString Pointer to `EDString`.
+ */
+static void errordisplayPrint(EDString* pEDString) {
     GXColor YELLOW = {255, 255, 0, 255};
     GXColor WHITE = {255, 255, 255, 255};
+    GXColor color;
+    s32 nHeight;
+    ErrorDisplay* pErrorDisplay;
+    s32 i;
 
-    pStringDraw = pSTString->apStringDraw[pSTString->eStringIndex];
+    pErrorDisplay = pEDString->apStringDraw[pEDString->iString];
 
-    nHeight = pStringDraw->nStartY;
+    nHeight = pErrorDisplay->nStartY;
     if (nHeight == 0) {
-        nHeight = (GC_FRAME_HEIGHT - pStringDraw->unk3C) / 2;
+        nHeight = (GC_FRAME_HEIGHT - pErrorDisplay->unk3C) / 2;
     }
 
-    fn_800639D4(&pStringDraw->textInfo, nHeight, pStringDraw->unk38, WHITE);
+    errordisplayPrintMessage(&pErrorDisplay->message, nHeight, pErrorDisplay->unk38, WHITE);
+    nHeight += pErrorDisplay->message.nShiftY;
 
-    nHeight += pStringDraw->textInfo.nShiftY;
-
-    for (i = 0; i < pStringDraw->nAction;) {
-        if (i == pSTString->iAction && !(pStringDraw->textAction[i].textInfo.nFlags & FLAG_COLOR_YELLOW)) {
-            var_r0 = YELLOW;
+    i = 0;
+    while (i < pErrorDisplay->nAction) {
+        if (i == pEDString->iAction && !(pErrorDisplay->action[i].message.nFlags & FLAG_COLOR_YELLOW)) {
+            color = YELLOW;
         } else {
-            var_r0 = WHITE;
+            color = WHITE;
         }
 
-        fn_800639D4(&pStringDraw->textAction[i].textInfo, nHeight, 0, var_r0);
+        errordisplayPrintMessage(&pErrorDisplay->action[i].message, nHeight, 0, color);
         i++;
-        nHeight += pStringDraw->textAction[i].textInfo.nShiftY;
+        nHeight += pErrorDisplay->action[i].message.nShiftY;
     }
 }
 
+/**
+ * @brief Custom implementation of the `OSAllocFromHeap` SDK function
+ * @param handle Unused.
+ * @param size Size of the heap to allocate.
+ * @return `void*` – Pointer to the allocated heap.
+ */
 void* OSAllocFromHeap(s32 handle, s32 size) {
     void* pHeap;
 
@@ -501,25 +532,43 @@ void* OSAllocFromHeap(s32 handle, s32 size) {
     return pHeap;
 }
 
+/**
+ * @brief Custom implementation of the `OSFreeToHeap` SDK function
+ * @param handle Unused.
+ * @param p Pointer to the heap to free.
+ */
 void OSFreeToHeap(s32 handle, void* p) {
     void* pHeap = p;
 
     xlHeapFree(&pHeap);
 }
 
-void fn_80063C7C(void) {
-    STStringDraw* pStringDraw;
-    STStringBase* pStringBase;
-    s32 iStringDraw;
-    s32 iStringBase;
-    STFiles* var_r29;
-    u32 eLanguage;
+/**
+ * @brief Initializes the error display system and the NAND banner.
+ *
+ * This function does the following:
+ *
+ * - load the string tables corresponding to the system's language
+ *
+ * - load and setup the font to use
+ *
+ * - setup the print positions (the horizontal position is always centered to the screen)
+ *
+ * - prepare the NAND banner (the title and subtitle of the banner comes from the "save comments" string table)
+ */
+void errordisplayInit(void) {
+    ErrorDisplay* pErrorDisplay;
+    EDStringInfo* pStringInfo;
+    s32 iError;
+    s32 iInfo;
+    DisplayFiles* var_r29;
+    u32 nLanguage;
 
-    eLanguage = SCGetLanguage();
+    nLanguage = SCGetLanguage();
     var_r29 = &sSTFiles[0];
 
     while (var_r29->szErrors != NULL) {
-        if (var_r29->eLanguage == eLanguage) {
+        if (var_r29->eLanguage == nLanguage) {
             break;
         }
         var_r29++;
@@ -533,60 +582,65 @@ void fn_80063C7C(void) {
     xlFileLoad(var_r29->szSaveComments, (void**)&sBufferSaveCommentStrings);
     sFontHeader = DEMOInitROMFont();
 
-    pStringBase = &sStringBase[SI_ERROR_INS_SPACE];
-    for (iStringBase = 0; iStringBase < ARRAY_COUNT(sStringBase); iStringBase++) {
-        fn_80063764(pStringBase);
-        pStringBase++;
+    pStringInfo = &sStringBase[SI_ERROR_INS_SPACE];
+    for (iInfo = 0; iInfo < ARRAY_COUNT(sStringBase); iInfo++) {
+        fn_80063764(pStringInfo);
+        pStringInfo++;
     }
 
-    pStringDraw = &sStringDraw[0];
-    for (iStringDraw = 0; iStringDraw < ARRAY_COUNT(sStringDraw); iStringDraw++) {
-        fn_80063910(pStringDraw);
-        pStringDraw++;
+    pErrorDisplay = &sStringDraw[0];
+    for (iError = 0; iError < ARRAY_COUNT(sStringDraw); iError++) {
+        fn_80063910(pErrorDisplay);
+        pErrorDisplay++;
     }
 
-    fn_80064634(fn_80064A10(sBufferSaveCommentStrings, SID_COMMENT_GAME_NAME),
-                fn_80064A10(sBufferSaveCommentStrings, SID_COMMENT_EMPTY));
+    bannerCreate(tableGetString(sBufferSaveCommentStrings, SID_COMMENT_GAME_NAME),
+                 tableGetString(sBufferSaveCommentStrings, SID_COMMENT_EMPTY));
 }
 
-static inline void fn_80063D78_inline(STStringDraw* pStringDraw) {
+static inline void errordisplaySetFadeInTimer(ErrorDisplay* pErrorDisplay) {
     s32 i;
 
-    if (pStringDraw->textInfo.nFlags & FLAG_UNK) {
-        pStringDraw->textInfo.nFadeInTimer = 0;
+    if (pErrorDisplay->message.nFlags & FLAG_RESET_FADE_TIMER) {
+        pErrorDisplay->message.nFadeInTimer = 0;
     } else {
-        pStringDraw->textInfo.nFadeInTimer = FADE_TIMER_MAX;
+        pErrorDisplay->message.nFadeInTimer = FADE_TIMER_MAX;
     }
 
-    for (i = 0; i < pStringDraw->nAction; i++) {
-        if (pStringDraw->textAction[i].textInfo.nFlags & FLAG_UNK) {
-            pStringDraw->textAction[i].textInfo.nFadeInTimer = 0;
+    for (i = 0; i < pErrorDisplay->nAction; i++) {
+        if (pErrorDisplay->action[i].message.nFlags & FLAG_RESET_FADE_TIMER) {
+            pErrorDisplay->action[i].message.nFadeInTimer = 0;
         } else {
-            pStringDraw->textAction[i].textInfo.nFadeInTimer = FADE_TIMER_MAX;
+            pErrorDisplay->action[i].message.nFadeInTimer = FADE_TIMER_MAX;
         }
     }
 }
 
-bool fn_80063D78(STStringIndex eStringIndex) {
-    STString sp10;
+/**
+ * @brief Main error display function.
+ * @param iString Index of the message to show.
+ * @return `bool` – `true` on success, `false` on failure.
+ */
+bool errordisplayShow(StringIndex iString) {
+    EDString string;
     s32 var_r31;
     s32 var_r30;
     s32 iController;
     s32 spC;
     s32 sp8;
-    s32 temp_r3;
+    s32 nResult;
 
-    sp10.eStringIndex = SI_NONE;
+    string.iString = SI_NONE;
 
     if (!fn_800607B0(SYSTEM_HELP(gpSystem), 0)) {
         return false;
     }
 
-    sp10.eStringIndex++;
-    sp10.apStringDraw[sp10.eStringIndex] = &sStringDraw[eStringIndex];
-    sp10.iAction = 0;
+    string.iString++;
+    string.apStringDraw[string.iString] = &sStringDraw[iString];
+    string.iAction = 0;
 
-    fn_80063D78_inline(&sStringDraw[eStringIndex]);
+    errordisplaySetFadeInTimer(&sStringDraw[iString]);
     VISetBlack(false);
 
     do {
@@ -600,15 +654,15 @@ bool fn_80063D78(STStringIndex eStringIndex) {
         }
 
         xlCoreBeforeRender();
-        fn_80063400();
-        fn_80063AFC(&sp10);
+        errordisplayDrawSetup();
+        errordisplayPrint(&string);
         fn_8005F7E4(SYSTEM_HELP(gpSystem));
         fn_80007020();
-        temp_r3 = fn_80063688(&sp10, var_r31 & (var_r31 ^ var_r30));
-    } while (temp_r3 == 0);
+        nResult = fn_80063688(&string, var_r31 & (var_r31 ^ var_r30));
+    } while (nResult == 0);
 
     if (fn_800607B0(SYSTEM_HELP(gpSystem), 1)) {
-        return temp_r3 != 1;
+        return nResult != 1;
     }
 
     return false;

@@ -61,7 +61,7 @@ static inline bool unk4C_UnknownInline(Controller* pController) {
     return bRet;
 }
 
-s32 fn_80062028(STString* pSTString) {
+s32 fn_80062028(EDString* pSTString) {
     Controller* pController;
 
     OSGetTime();
@@ -301,7 +301,7 @@ bool controllerEvent(Controller* pController, s32 nEvent, void* pArgument) {
             if (!unk4C_UnknownInline(pController)) {
                 pController->unk_24C = pController->unk_248 = OSGetTime();
                 pController->unk_21C = 8;
-                fn_80063D78(SI_ERROR_NEED_CLASSIC);
+                errordisplayShow(SI_ERROR_NEED_CLASSIC);
                 pController->unk_21C = -1;
 
                 if (!controllerEvent_Inline()) {

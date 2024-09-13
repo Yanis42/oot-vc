@@ -9,13 +9,13 @@ extern "C" {
 
 #define ENCODING_NAME_LENGTH 18
 
-typedef enum STTableID {
+typedef enum StringTableID {
     TID_NONE = 0,
     TID_ERRORS = 0x2842C987,
     TID_COMMENTS = 0x3D2C2A7C
-} STTableID;
+} StringTableID;
 
-typedef enum STStringID {
+typedef enum StringID {
     SID_NONE = 0,
     SID_ERROR_BLANK = 0xA4E943CC,
     SID_ERROR_CHOICE_OK = 0xF6C5198F,
@@ -45,13 +45,11 @@ typedef enum STStringID {
     SID_ERROR_TIME_UP_OF_THE_TRIAL_VER = 0xA2B7EF38, // Brawl Demo only
     SID_COMMENT_GAME_NAME = 0x30690AFB,
     SID_COMMENT_EMPTY = 0x30690AFD
-} STStringID;
+} StringID;
 
 // clang-format off
 
-// Used as the index to `sStringBase`.
-// This happens to line up with `sStringDraw` so we can use it for both.
-typedef enum STStringIndex {
+typedef enum StringIndex {
     SI_NONE = -1,
     SI_ERROR_INS_SPACE = 0, // "There is not enough available space in the Wii system memory. Create %ld block(s) of free space by either moving files to an SD Card or deleting files in the Data Management Screen."
     SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU = 1, // "Press the A Button to return to the Wii Menu."
@@ -66,21 +64,21 @@ typedef enum STStringIndex {
     SI_ERROR_REMOTE_COMMUNICATION = 10, // "Communications with the Wii Remote have been interrupted."
     SI_ERROR_BLANK = 11, // ""
     SI_NULL = 12,
-} STStringIndex;
+} StringIndex;
 
 // clang-format on
 
-typedef struct STHeaderTableEntry {
+typedef struct STEntry {
     /* 0x00 */ u32 nStringID;
     /* 0x04 */ s32 nTextOffset1;
     /* 0x08 */ s32 nTextOffset2;
     /* 0x0C */ s16 nTextSize1;
     /* 0x0E */ s16 nTextSize2;
-} STHeaderTableEntry; // size = 0x10
+} STEntry; // size = 0x10
 
 typedef struct STHeader {
     /* 0x00 */ s32 magic;
-    /* 0x04 */ STTableID eTableID;
+    /* 0x04 */ StringTableID eTableID;
     /* 0x08 */ u16 nEntries;
     /* 0x0A */ char szEncoding[ENCODING_NAME_LENGTH];
     /* 0x1C */ char unk1C[2];
@@ -94,8 +92,8 @@ typedef struct StringTable {
     /* 0x24 */ char* szStrings;
 } StringTable; // size = 0x28
 
-STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID);
-char* fn_80064A10(void* pSTBuffer, STStringID eStringID);
+STEntry* tableGetEntry(StringTable* pStringTable, StringID eStringID);
+char* tableGetString(void* pSTBuffer, StringID eStringID);
 
 #ifdef __cplusplus
 }

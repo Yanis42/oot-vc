@@ -14,17 +14,12 @@ extern "C" {
 
 typedef struct struct_80174988 {
     NANDResult result;
-    STStringIndex eStringIndex;
+    StringIndex eStringIndex;
 } struct_80174988;
 
-s32 fn_80063F30(char* szBannerFileName, u32 arg1);
 s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, u8 access);
-bool fn_80064600(NANDFileInfo* info, s32 arg1);
-bool fn_80064634(char* szGameName, char* szEmpty);
-bool fn_80064870(void);
-s32 fn_80064930(void);
-s32 fn_80064960(void);
-void fn_8006496C(void);
+bool bannerNANDClose(NANDFileInfo* info, u8 access);
+bool bannerCreate(char* szGameName, char* szEmpty);
 
 #ifdef __cplusplus
 }

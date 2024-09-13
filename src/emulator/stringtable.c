@@ -7,12 +7,12 @@
 #include "emulator/stringtable.h"
 
 /**
- * @brief Get the string table entry corresponding to the string ID
- * @param pStringTable Pointer to the string table
- * @param eStringID The ID of the string table entry to get
- * @return STHeaderTableEntry pointer of the corresponding string table entry if found, else NULL
+ * @brief Get the string table entry corresponding to the string ID.
+ * @param pStringTable Pointer to the string table.
+ * @param eStringID The ID of the string table entry to get.
+ * @return `STEntry*` – pointer of the corresponding string table entry if found, else NULL.
  */
-STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID) {
+STEntry* tableGetEntry(StringTable* pStringTable, StringID eStringID) {
     u32 nStringID;
     s32 lo;
     s32 hi;
@@ -28,7 +28,7 @@ STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID)
     mid = hi / 2;
 
     while (hi >= lo) {
-        STHeaderTableEntry* entry = (STHeaderTableEntry*)(pEntries + mid * pStringTable->header.nSizeEntry);
+        STEntry* entry = (STEntry*)(pEntries + mid * pStringTable->header.nSizeEntry);
 
         if (entry->nStringID == eStringID) {
             return entry;
@@ -47,22 +47,22 @@ STHeaderTableEntry* fn_80064980(StringTable* pStringTable, STStringID eStringID)
 }
 
 /**
- * @brief Get the string from the string table corresponding to the string ID
- * @param pSTBuffer Pointer to the string table buffer
- * @param eStringID The ID of the string to get
- * @return char pointer of the corresponding string if found, else NULL
+ * @brief Get the string from the string table corresponding to the string ID.
+ * @param pSTBuffer Pointer to the string table buffer.
+ * @param eStringID The ID of the string to get.
+ * @return `char*` – pointer of the corresponding string if found, else NULL.
  */
-char* fn_80064A10(void* pSTBuffer, STStringID eStringID) {
-    STHeaderTableEntry* pTableEntry;
+char* tableGetString(void* pSTBuffer, StringID eStringID) {
+    STEntry* pEntry;
 
     if (pSTBuffer == NULL) {
         return NULL;
     }
 
-    pTableEntry = fn_80064980(pSTBuffer, eStringID);
+    pEntry = tableGetEntry(pSTBuffer, eStringID);
 
-    if (pTableEntry != NULL) {
-        return (char*)pSTBuffer + pTableEntry->nTextOffset1;
+    if (pEntry != NULL) {
+        return (char*)pSTBuffer + pEntry->nTextOffset1;
     }
 
     return NULL;
