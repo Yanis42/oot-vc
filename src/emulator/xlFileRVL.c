@@ -8,6 +8,9 @@
 //! TODO: document this
 void* fn_800B0DF0(void*, size_t, s32);
 
+MEMAllocator gCNTAllocator;
+CNTHandle gCNTHandle;
+
 _XL_OBJECTTYPE gTypeFile = {
     "FILE",
     sizeof(tXL_FILE),
@@ -26,7 +29,7 @@ static inline bool xlFileGetFile(tXL_FILE** ppFile, char* szFileName) {
     if (gpfOpen != NULL) {
         return gpfOpen(szFileName, (DVDFileInfo*)&(*ppFile)->info);
     } else {
-        return !ARCGetFile(&gUnkContent.fileInfo, szFileName, &(*ppFile)->info);
+        return contentOpenNAND(&gCNTHandle.handleNAND, szFileName, &(*ppFile)->info) == 0;
     }
 }
 
@@ -98,7 +101,7 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pTarget, nSizeBytes, nOffset, NULL);
                 } else {
-                    contentReadNAND((CNTFileInfo*)pFile->pData, pTarget, nSizeBytes, nOffset);
+                    contentReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
                 }
 
                 temp_r0 = pFile->nOffset + nSizeBytes;
@@ -117,7 +120,7 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pFile->pBuffer, nSize, nOffset, NULL);
                 } else {
-                    contentReadNAND((CNTFileInfo*)pFile->pData, pFile->pBuffer, nSize, nOffset);
+                    contentReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
                 }
             }
         }
@@ -148,7 +151,7 @@ static inline bool xlFileEventInline(void) {
         return false;
     }
 
-    fn_800B165C(&gCNTFileInfo, ret, 4);
+    fn_800B165C(&gCNTAllocator, ret, 4);
     return true;
 }
 
@@ -158,10 +161,10 @@ bool xlFileEvent(tXL_FILE* pFile, s32 nEvent, void* pArgument) {
             if (!xlFileEventInline()) {
                 return false;
             }
-            contentInitHandleNAND(5, &gUnkContent.fileInfo, &gCNTFileInfo);
+            contentInitHandleNAND(5, &gCNTHandle.handleNAND, &gCNTAllocator);
             break;
         case 1:
-            contentReleaseHandleNAND(&gUnkContent.fileInfo);
+            contentReleaseHandleNAND(&gCNTHandle.handleNAND);
             break;
         case 2:
             pFile->nSize = 0;

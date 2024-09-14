@@ -66,10 +66,7 @@ bool ARCInitHandle(void* bin, ARCHandle* handle) {
     ARCNode* nodes;
     ARCHeader* header = (ARCHeader*)bin;
 
-    // clang-format off
-#line 74
-    OS_ASSERT(header->magic == ARC_FILE_MAGIC, "ARCInitHandle: bad archive format");
-    // clang-format on
+    OSAssert("arc.c", 74, header->magic == ARC_FILE_MAGIC, "ARCInitHandle: bad archive format");
 
     handle->header = header;
 

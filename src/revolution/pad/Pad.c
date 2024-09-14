@@ -218,8 +218,7 @@ static void PADTypeAndStatusCallback(s32 chan, u32 type) {
             rc = SITransfer(ResettingChan, &CmdReadOrigin, 1, &Origin[ResettingChan], 10, (SICallback)PADOriginCallback,
                             0);
         }
-    } else if ((type & SI_WIRELESS_FIX_ID) && (type & SI_WIRELESS_CONT_MASK) == SI_WIRELESS_CONT &&
-               !(type & SI_WIRELESS_LITE)) {
+    } else if ((type & SI_WIRELESS_FIX_ID) && !(type & SI_WIRELESS_CONT_MASK) && !(type & SI_WIRELESS_LITE)) {
         if (type & SI_WIRELESS_RECEIVED) {
             rc = SITransfer(ResettingChan, &CmdReadOrigin, 1, &Origin[ResettingChan], 10, (SICallback)PADOriginCallback,
                             0);
@@ -252,7 +251,7 @@ static void PADReceiveCheckCallback(s32 chan, u32 type) {
 
     if (!(error & (SI_ERROR_UNDER_RUN | SI_ERROR_OVER_RUN | SI_ERROR_NO_RESPONSE | SI_ERROR_COLLISION)) &&
         (type & SI_GC_WIRELESS) && (type & SI_WIRELESS_FIX_ID) && (type & SI_WIRELESS_RECEIVED) &&
-        !(type & SI_WIRELESS_IR) && (type & SI_WIRELESS_CONT_MASK) == SI_WIRELESS_CONT && !(type & SI_WIRELESS_LITE)) {
+        !(type & SI_WIRELESS_IR) && !(type & SI_WIRELESS_CONT_MASK) && !(type & SI_WIRELESS_LITE)) {
         SITransfer(chan, &CmdReadOrigin, 1, &Origin[chan], 10, (SICallback)PADOriginUpdateCallback, 0);
     } else {
         PADDisable(chan);
@@ -551,18 +550,18 @@ static void SPEC1_MakeStatus(s32 chan, PADStatus* status, u32 data[2]) {
 }
 
 static inline s8 ClampS8(s8 var, s8 org) {
-    if (0 < org) {
-        s8 min = (s8)(-128 + org);
+    if (org > 0) {
+        s8 min = (s8)(org - 128);
         if (var < min) {
             var = min;
         }
     } else if (org < 0) {
-        s8 max = (s8)(127 + org);
+        s8 max = (s8)(org + 127);
         if (max < var) {
             var = max;
         }
     }
-    return var -= org;
+    return var - org;
 }
 
 static inline u8 ClampU8(u8 var, u8 org) {
@@ -633,9 +632,9 @@ static void SPEC2_MakeStatus(s32 chan, PADStatus* status, u32 data[2]) {
     status->substickX -= 128;
     status->substickY -= 128;
 
-    // type = Type[chan];
+    type = Type[chan];
 
-    if (((Type[chan] & 0xFFFF0000) == SI_GC_CONTROLLER) && ((status->button & 0x80) ^ 0x80)) {
+    if (((type & 0xFFFF0000) == SI_GC_CONTROLLER) && ((status->button & 0x80) ^ 0x80)) {
         BarrelBits |= (PAD_CHAN0_BIT >> chan);
         status->stickX = 0;
         status->stickY = 0;

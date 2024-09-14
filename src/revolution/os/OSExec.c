@@ -192,11 +192,11 @@ static s32 _ES_GetTicketViews(s32* fd, u64 tid, void* pViews, u32* count) {
 
     // Cast is necessary
     if (*fd < 0 || count == ((void*)NULL)) {
-        return -0x3F9;
+        return -1017;
     }
 
     if ((u32)pViews % 32 != 0) {
-        return -0x3F9;
+        return -1017;
     }
 
     *pTid = tid;
@@ -217,7 +217,7 @@ static s32 _ES_GetTicketViews(s32* fd, u64 tid, void* pViews, u32* count) {
     }
 
     if (*count == 0) {
-        return -0x3F9;
+        return -1017;
     }
 
     *pCount = *count;
@@ -239,11 +239,11 @@ static s32 _ES_LaunchTitle(s32* fd, u64 tid, void* pViews) {
     u64* pTid = (u64*)tidWork;
 
     if (*fd < 0) {
-        return -0x3F9;
+        return -1017;
     }
 
     if ((u32)pViews % 32 != 0) {
-        return -0x3F9;
+        return -1017;
     }
 
     *pTid = tid;

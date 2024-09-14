@@ -14,6 +14,7 @@ typedef enum {
     NAND_LIB_INITIALIZED
 } NANDLibState;
 
+static void fn_800B49B8(s32 result, void* arg);
 static void nandShutdownCallback(s32 result, void* arg);
 static void nandGetTypeCallback(s32 result, void* arg);
 static bool nandOnShutdown(bool final, u32 event);
@@ -25,9 +26,9 @@ static s32 _ES_CloseLib(s32* fd);
 const char* __NANDVersion = "<< RVL_SDK - NAND \trelease build: Sep 22 2006 02:01:36 (0x4200_60422) >>";
 
 static NANDLibState s_libState = NAND_LIB_UNINITIALIZED;
-static char s_currentDir[64] ATTRIBUTE_ALIGN(32) = "/";
+static char s_currentDir[FS_MAX_PATH] ATTRIBUTE_ALIGN(32) = "/";
 
-static char s_homeDir[64] ATTRIBUTE_ALIGN(32);
+static char s_homeDir[FS_MAX_PATH] ATTRIBUTE_ALIGN(32);
 
 void nandRemoveTailToken(char* newp, const char* oldp) {
     int i;
@@ -125,7 +126,7 @@ static inline bool nandIsRelativePath(const char* path) { return *path == '/' ? 
 
 bool nandIsPrivatePath(const char* path) {
     size_t len = sizeof("/shared2") - 1;
-    return strncmp(path, "/shared2", len) == 0;
+    return strncmp(path, "/shared2", len) == 0 ? true : false;
 }
 
 bool nandIsUnderPrivatePath(const char* path) {
@@ -299,6 +300,62 @@ s32 NANDInit(void) {
     }
 }
 
+static s32 fn_800B4630(const char* path, NANDCommandBlock* block, bool async, bool priv) {
+    char absPath[FS_MAX_PATH];
+    u32 numFiles;
+    s32 result;
+    bool interrupts;
+
+    if (async) {
+        nandGenerateAbsPath(block->path, path);
+
+        if (!priv && nandIsPrivatePath(block->path)) {
+            return IPC_RESULT_ACCESS;
+        }
+
+        return ISFS_ReadDirAsync(block->path, NULL, &block->dirFileCount, fn_800B49B8, block);
+    } else {
+        numFiles = 0;
+        MEMCLR(&absPath);
+        nandGenerateAbsPath(absPath, path);
+
+        if (!priv && nandIsPrivatePath(absPath)) {
+            return IPC_RESULT_ACCESS;
+        }
+
+        result = ISFS_ReadDir(absPath, NULL, &numFiles);
+
+        if (result == IPC_RESULT_OK) {
+            interrupts = OSDisableInterrupts();
+            strcpy(s_currentDir, absPath);
+            OSRestoreInterrupts(interrupts);
+        }
+
+        return result;
+    }
+}
+
+s32 fn_800B48C4(const char* path) {
+    if (s_libState != NAND_LIB_INITIALIZED) {
+        return NAND_RESULT_FATAL_ERROR;
+    }
+
+    return nandConvertErrorCode(fn_800B4630(path, NULL, false, false));
+}
+
+void fn_800B49B8(s32 result, void* arg) {
+    NANDCommandBlock* block = (NANDCommandBlock*)arg;
+    bool interrupts;
+
+    if (result == NAND_RESULT_OK) {
+        interrupts = OSDisableInterrupts();
+        strcpy(s_currentDir, block->path);
+        OSRestoreInterrupts(interrupts);
+    }
+
+    block->callback(nandConvertErrorCode(result), block);
+}
+
 s32 NANDGetCurrentDir(char* out) {
     bool enabled;
 
@@ -328,7 +385,7 @@ void nandCallback(s32 result, void* arg) {
 }
 
 static s32 nandGetType(const char* path, u8* type, NANDCommandBlock* block, bool async, bool priv) {
-    char absPath[64];
+    char absPath[FS_MAX_PATH];
     u32 numFiles;
     s32 result;
 
@@ -434,11 +491,11 @@ static s32 _ES_GetDataDir(s32* fd, u64 tid, char* dirOut) {
     u64* pTid = (u64*)tidWork;
 
     if (*fd < 0 || dirOut == NULL) {
-        return -0x3F9;
+        return -1017;
     }
 
     if ((u32)dirOut % 32 != 0) {
-        return -0x3F9;
+        return -1017;
     }
 
     *pTid = tid;
@@ -461,7 +518,7 @@ static inline s32 _ES_GetTitleId(s32* fd, u64* tidOut) {
 
     // Cast is necessary
     if (*fd < 0 || tidOut == ((void*)NULL)) {
-        return -0x3F9;
+        return -1017;
     }
 
     pTid = (u64*)tidWork;

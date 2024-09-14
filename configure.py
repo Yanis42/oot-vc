@@ -396,7 +396,7 @@ config.libs = [
     RevolutionLib(
         "ai",
         [
-            Object(NotLinked, "revolution/ai/ai.c"),
+            Object(LinkedFor("oot-j"), "revolution/ai/ai.c"),
         ]
     ),
     RevolutionLib(
@@ -433,7 +433,7 @@ config.libs = [
         [
             Object(LinkedFor("oot-j"), "revolution/nand/nand.c"),
             Object(LinkedFor("oot-j"), "revolution/nand/NANDOpenClose.c"),
-            Object(NotLinked, "revolution/nand/NANDCore.c"),
+            Object(LinkedFor("oot-j"), "revolution/nand/NANDCore.c"),
             Object(LinkedFor("oot-j"), "revolution/nand/NANDCheck.c"),
         ]
     ),
@@ -491,7 +491,7 @@ config.libs = [
     RevolutionLib(
         "usb",
         [
-            Object(NotLinked, "revolution/usb/usb.c"),
+            Object(LinkedFor("oot-j"), "revolution/usb/usb.c"),
         ]
     ),
     RevolutionLib(
@@ -529,7 +529,7 @@ config.libs = [
     RevolutionLib(
         "tpl",
         [
-            Object(NotLinked, "revolution/tpl/TPL.c"),
+            Object(LinkedFor("oot-j"), "revolution/tpl/TPL.c"),
         ]
     ),
     RuntimeLib(

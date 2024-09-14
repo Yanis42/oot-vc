@@ -3416,7 +3416,7 @@ static inline bool frameEvent_UnknownInline2(Frame* pFrame) {
         return false;
     }
 
-    if (!contentOpenDirNAND(&gUnkContent.fileInfo, ".", &arcDir)) {
+    if (!contentOpenDirNAND(&gCNTHandle.handleNAND, ".", &arcDir)) {
         if (ARCReadDir(&arcDir, &arcEntry)) {
             temp_r3_2 = (char**)&arcEntry.name;
 

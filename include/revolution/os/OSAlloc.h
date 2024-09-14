@@ -15,9 +15,7 @@ s32 OSSetCurrentHeap(s32 handle);
 void* OSInitAlloc(void* start, void* end, s32 numHeaps);
 s32 OSCreateHeap(void* start, void* end);
 
-extern void* fn_80063C28(s32 handle, s32 arg1);
-
-#define OSAlloc(size) fn_80063C28(__OSCurrHeap, size)
+#define OSAlloc(size) OSAllocFromHeap(__OSCurrHeap, size)
 #define OSFree(ptr) OSFreeToHeap(__OSCurrHeap, ptr)
 
 #ifdef __cplusplus

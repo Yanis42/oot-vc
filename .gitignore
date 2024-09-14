@@ -28,3 +28,11 @@ __pycache__/
 
 # Permuter artifacts
 nonmatchings/
+
+# Misc
+*.s
+*.arc
+*.lz7
+*.wad
+*.bin
+*.ctx

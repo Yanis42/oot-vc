@@ -17,11 +17,14 @@ typedef enum {
 
 AIDMACallback AIRegisterDMACallback(AIDMACallback callback);
 void AIInitDMA(void* buffer, u32 length);
+u32 AIGetDMAEnableFlag(void);
 void AIStartDMA(void);
+void AIStopDMA(void);
 u32 AIGetDMABytesLeft(void);
 void AISetDSPSampleRate(u32 rate);
 u32 AIGetDSPSampleRate(void);
 void AIInit(void* stack);
+void AIReset(void);
 void __AIDHandler(s16 intr, struct OSContext* ctx);
 
 #ifdef __cplusplus

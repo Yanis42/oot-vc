@@ -192,7 +192,7 @@ emulator/rdp.c:
 emulator/xlCoreRVL.c:
 	.text       start:0x8007F85C end:0x800800B4
 	.data       start:0x80175248 end:0x80175280
-	.bss        start:0x801C9640 end:0x801C96B8
+	.bss        start:0x801C9640 end:0x801C9680
 	.sdata      start:0x8025C8D0 end:0x8025C8D8
 	.sbss       start:0x8025D198 end:0x8025D1B0
 	.sdata2     start:0x8025E028 end:0x8025E038
@@ -203,6 +203,7 @@ emulator/xlPostRVL.c:
 emulator/xlFileRVL.c:
 	.text       start:0x800800C4 end:0x80080534
 	.data       start:0x80175280 end:0x80175290
+	.bss        start:0x801C9680 end:0x801C96B8
 	.sdata      start:0x8025C8D8 end:0x8025C8E0
 	.sbss       start:0x8025D1B0 end:0x8025D1B8
 
@@ -501,6 +502,9 @@ revolution/demo/DEMOPuts.c:
 
 revolution/ai/ai.c:
 	.text       start:0x800AB758 end:0x800ABD3C
+	.data       start:0x80186710 end:0x80186758
+	.sdata      start:0x8025CA70 end:0x8025CA78
+	.sbss       start:0x8025D890 end:0x8025D8D0
 
 revolution/ax/AX.c:
 	.text       start:0x800ABD3C end:0x800ABDB0
@@ -643,6 +647,9 @@ revolution/kpad/KPAD.c:
 
 revolution/usb/usb.c:
 	.text       start:0x800CBE48 end:0x800CCEE8
+	.data       start:0x8018BBB0 end:0x8018C168
+	.sdata      start:0x8025CC78 end:0x8025CC88
+	.sbss       start:0x8025DB38 end:0x8025DB48
 
 revolution/wud/WUD.c:
 	.text       start:0x800CCEE8 end:0x800D1080
@@ -661,12 +668,17 @@ revolution/bte/code_800D1614.c:
 
 revolution/cnt/cnt.c:
 	.text       start:0x800FEFB8 end:0x800FF54C
+	.data       start:0x801936C0 end:0x80193968
+	.sdata      start:0x8025CD40 end:0x8025CD50
 
 revolution/code_800FF54C.c:
 	.text       start:0x800FF54C end:0x80100644
 
 revolution/tpl/TPL.c:
-	.text       start:0x80100644 end:0x80100778
+	.text       start:0x80100644 end:0x80100858
+	.data       start:0x80193A80 end:0x80193AB0
+	.sdata      start:0x8025CD50 end:0x8025CD58
+	.sdata2     start:0x8025E590 end:0x8025E598
 
 runtime/__va_arg.c:
 	.text       start:0x80152514 end:0x801525DC

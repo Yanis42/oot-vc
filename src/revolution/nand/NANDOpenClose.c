@@ -125,8 +125,8 @@ s32 NANDCloseAsync(NANDFileInfo* info, NANDAsyncCallback callback, NANDCommandBl
 s32 lbl_8025DA18;
 s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len, bool private);
 
-void NANDSafeOpen(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
-    fn_800B3958(path, info, access, buffer, len, false);
+s32 NANDSafeOpen(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len) {
+    return fn_800B3958(path, info, access, buffer, len, false);
 }
 
 s32 fn_800B3958(const char* path, NANDFileInfo* info, u8 access, void* buffer, s32 len, bool private) {
