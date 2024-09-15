@@ -744,10 +744,14 @@ revolution/bte/code_800D1614.c:
 revolution/cnt/cnt.c:
 	.text       start:0x800FEFB8 end:0x800FF54C
 	.data       start:0x801936C0 end:0x80193968
-	.sdata      start:0x8025CD40 end:0x8025CD50
+	.sdata      start:0x8025CD40 end:0x8025CD48
 
-revolution/code_800FF54C.c:
-	.text       start:0x800FF54C end:0x80100644
+revolution/esp/esp.c:
+	.text       start:0x800FF54C end:0x800FF678
+	.sdata      start:0x8025CD48 end:0x8025CD50
+
+revolution/rso/RSOLink.c:
+	.text       start:0x800FF678 end:0x80100644
 
 revolution/tpl/TPL.c:
 	.text       start:0x80100644 end:0x80100858

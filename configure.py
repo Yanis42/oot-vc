@@ -540,9 +540,15 @@ config.libs = [
         ]
     ),
     RevolutionLib(
-        "code_800FF54C",
+        "esp",
         [
-            Object(NotLinked, "revolution/code_800FF54C.c"),
+            Object(LinkedFor("oot-j"), "revolution/esp/esp.c"),
+        ]
+    ),
+    RevolutionLib(
+        "rso",
+        [
+            Object(NotLinked, "revolution/rso/RSOLink.c"),
         ]
     ),
     RevolutionLib(

@@ -108,12 +108,11 @@ static inline CNTResult contentConvertErrorCode(s32 error) {
 }
 
 static char path[] = "/dev/es";
-static s32 lbl_8025CD48 = -1;
 
 void fn_800FEFB8(void) {
 
-    if (lbl_8025CD48 < 0) {
-        lbl_8025CD48 = IOS_Open(path, IPC_OPEN_NONE);
+    if (__esFd < 0) {
+        __esFd = IOS_Open(path, IPC_OPEN_NONE);
     }
 }
 
@@ -270,14 +269,14 @@ CNTResult contentReleaseHandleNAND(CNTHandleNAND* handle) {
     // sp->unk-4 = (s32) saved_reg_r31;
     var_f1 = fn_800B164C(handle->memAlloc, handle->arcHandle.header);
 
-    if (lbl_8025CD48 < 0 || handle->fd < 0) {
+    if (__esFd < 0 || handle->fd < 0) {
         var_r3 = -1017;
     } else {
         vectors[0].base = &var_f1;
         vectors[0].length = sizeof(s32);
         vectors[4].base = &handle->fd;
         vectors[4].length = sizeof(s32);
-        var_r3 = IOS_Ioctlv(lbl_8025CD48, 11, 1, 0, vectors);
+        var_r3 = IOS_Ioctlv(__esFd, 11, 1, 0, vectors);
     }
 
     return contentConvertErrorCode(var_r3);
