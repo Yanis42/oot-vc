@@ -13,6 +13,8 @@ static inline void* OSPhysicalToUncached(u32 ofs) { return (void*)(ofs + 0xC0000
 
 static inline void* OSCachedToPhysical(const void* ofs) { return (u8*)ofs - 0x80000000; }
 
+#define OSUncachedToPhysical(ucaddr) ((u32)((u8*)(ucaddr) - OS_BASE_UNCACHED))
+
 #ifdef __cplusplus
 }
 #endif

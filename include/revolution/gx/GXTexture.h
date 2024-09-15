@@ -17,6 +17,9 @@ typedef struct _GXTlutObj {
     u32 dummy[3];
 } GXTlutObj;
 
+typedef GXTexRegion* (*GXTexRegionCallback)(GXTexObj* t_obj, GXTexMapID id);
+typedef GXTlutRegion* (*GXTlutRegionCallback)(u32 idx);
+
 void __GXSetSUTexRegs(void);
 
 void GXInitTexObj(GXTexObj* obj, void* image, u16 w, u16 h, GXTexFmt fmt, GXTexWrapMode wrap_s, GXTexWrapMode wrap_t,
@@ -24,7 +27,8 @@ void GXInitTexObj(GXTexObj* obj, void* image, u16 w, u16 h, GXTexFmt fmt, GXTexW
 void GXInitTexObjCI(GXTexObj*, void*, u16, u16, GXTexFmt, GXTexWrapMode, GXTexWrapMode, GXBool, u32);
 void GXInitTexObjLOD(GXTexObj* obj, GXTexFilter min_filt, GXTexFilter mag_filt, f32 min_lod, f32 max_lod, f32 lod_bias,
                      GXBool bias_clamp, GXBool do_edge_lod, GXAnisotropy max_aniso);
-
+GXTexFmt GXGetTexObjFmt(GXTexObj* obj);
+GXBool GXGetTexObjMipMap(GXTexObj* obj);
 void GXLoadTexObj(GXTexObj*, GXTexMapID);
 
 u32 GXGetTexObjTlut(GXTexObj*);

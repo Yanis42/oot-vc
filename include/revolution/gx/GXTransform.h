@@ -9,9 +9,9 @@
 extern "C" {
 #endif
 
-void GXSetProjection(const Mtx44 proj, GXProjectionType type);
-void GXSetProjectionv(const f32 proj[7]);
-void GXGetProjectionv(f32 proj[7]);
+void GXSetProjection(const Mtx44 projMtx, GXProjectionType type);
+void GXSetProjectionv(const f32 projMtx[7]);
+void GXGetProjectionv(f32 projMtx[7]);
 void GXLoadPosMtxImm(const Mtx mtx, u32 id);
 void GXLoadPosMtxIndx(u16 index, u32 id);
 void GXLoadNrmMtxImm(const Mtx mtx, u32 id);

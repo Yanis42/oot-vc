@@ -189,6 +189,21 @@ typedef enum {
                   //! color 1
 } GXXfTexGen;
 
+#define SET_REG_FIELD(reg, size, shift, val)                                                      \
+    do {                                                                                          \
+        (reg) = ((u32)__rlwimi((u32)(reg), (val), (shift), 32 - (shift) - (size), 31 - (shift))); \
+    } while (0)
+
+
+#define GX_BITFIELD(field, pos, size, value) \
+    (__rlwimi((field), (value), 31 - (pos) - (size) + 1, (pos), (pos) + (size) - 1))
+#define GX_BITFIELD_SET(field, pos, size, value) ((field) = GX_BITFIELD(field, pos, size, value))
+#define GX_BITFIELD_TRUNC(field, pos, size, value) (__rlwimi((field), (value), 0, (pos), (pos) + (size) - 1))
+#define GX_BITGET(field, pos, size) ((field) >> (31 - (pos) - (size) + 1) & ((1 << (size)) - 1))
+
+#define GX_SET_REG(reg, x, st, end) GX_BITFIELD_SET((reg), (st), ((end) - (st) + 1), (x))
+#define GX_SET_REG2(reg, x, st, end) GX_SET_REG(reg, x, st, end)
+
 #ifdef __cplusplus
 }
 #endif

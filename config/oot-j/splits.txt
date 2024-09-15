@@ -436,6 +436,11 @@ revolution/mtx/mtx44.c:
 
 revolution/gx/GXInit.c:
 	.text       start:0x8009D1F8 end:0x8009E3C0
+	.data       start:0x80184A00 end:0x80184C40
+	.bss        start:0x801DDDF0 end:0x801DE470
+	.sdata      start:0x8025C9E0 end:0x8025C9E8
+	.sbss       start:0x8025D730 end:0x8025D758
+	.sdata2     start:0x8025E348 end:0x8025E370
 
 revolution/gx/GXFifo.c:
 	.text       start:0x8009E3C0 end:0x8009ED7C

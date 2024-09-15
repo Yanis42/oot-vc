@@ -371,7 +371,7 @@ config.libs = [
     RevolutionLib(
         "gx",
         [
-            Object(NotLinked, "revolution/gx/GXInit.c"),
+            Object(LinkedFor("oot-j"), "revolution/gx/GXInit.c"),
             Object(NotLinked, "revolution/gx/GXFifo.c"),
             Object(NotLinked, "revolution/gx/GXAttr.c"),
             Object(NotLinked, "revolution/gx/GXMisc.c"),
