@@ -36,7 +36,7 @@
 #define DPL2_SAMPLE_L_BEGIN (AUX_CHAN_SIZE * 0)
 #define DPL2_SAMPLE_R_BEGIN (AUX_CHAN_SIZE * 1)
 #define DPL2_SAMPLE_LS_BEGIN (AUX_CHAN_SIZE * 2)
-#define DPL2_SAMPLE_RS_BEGIN (AUX_CHAN_SIZE * 3)
+#define DPL2_SAMPLE_RS_BEGIN (AUX_CHAN_SIZE * 2)
 
 static u8 __AXBufferAuxA[AUX_RING_MAX][STEREO_FRAME_SIZE] ATTRIBUTE_ALIGN(32);
 static u8 __AXBufferAuxB[AUX_RING_MAX][STEREO_FRAME_SIZE] ATTRIBUTE_ALIGN(32);
@@ -193,7 +193,7 @@ void __AXProcessAux(void) {
             chans[AX_DPL2_RS] = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][DPL2_SAMPLE_RS_BEGIN];
             // clang-format on
 
-            DCInvalidateRange(chans[0], 0x480);
+            DCInvalidateRange(chans[0], 0x300);
             DCInvalidateRange(chans[3], 0x180);
             __AXCallbackAuxB(chans, __AXContextAuxB);
             DCFlushRangeNoSync(chans[0], 0x480);

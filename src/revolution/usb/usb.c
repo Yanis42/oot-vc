@@ -188,7 +188,7 @@ end:
     return result;
 }
 
-UNUSED_DATA(usb, "OpenDevice\n", "OpenDeviceIdsAsync: Not enough memory\n", "CloseDevice\n",
+FORCE_SYMBOL(usb, "OpenDevice\n", "OpenDeviceIdsAsync: Not enough memory\n", "CloseDevice\n",
             "CloseDevice returned: %d\n");
 
 IPCResult IUSB_CloseDeviceAsync(s32 fd, USBCallback callback, void* callbackArg) {
@@ -219,7 +219,7 @@ end:
     return result;
 }
 
-UNUSED_DATA(usb, "openDevice: Not enough memory\n", "getDeviceList: Not enough memory\n");
+FORCE_SYMBOL(usb, "openDevice: Not enough memory\n", "getDeviceList: Not enough memory\n");
 
 static IPCResult __IntrBlkMsgInt(s32 fd, u32 endpoint, u32 length, void* buffer, u8 ioctl, USBCallback callback,
                                  void* callbackArg, u8 async) {
@@ -455,7 +455,7 @@ IPCResult IUSB_WriteCtrlMsgAsync(s32 fd, u8 requestType, u8 request, u16 value, 
     return __CtrlMsgInt(fd, requestType, request, value, index, length, buffer, callback, callbackArg, true);
 }
 
-UNUSED_DATA(usb, "GetStrCb returned: %d\n", "GetStrCb: buf = 0x%x buflen = %u\n",
+FORCE_SYMBOL(usb, "GetStrCb returned: %d\n", "GetStrCb: buf = 0x%x buflen = %u\n",
             "Failed to convert buffer from unicode 2 ascii\n", "calling cb 0x%x with arg 0x%x\n",
             "Failed __CtrlMsg: %d", "Failed to convert unicode 2 ascii\n", "GetStr - _GetStrCb\n",
             " GetAsciiStrAsync: Not enough memory\n", "__CtrlMsgInt failed %d\n", "GetDescrCb returned: %d\n",

@@ -1,6 +1,7 @@
 #include "revolution/ax.h"
 #include "revolution/os.h"
 #include "stdint.h"
+#include "macros.h"
 
 // Compression parameters.
 // Later versions of AX have these as static vars
@@ -30,16 +31,17 @@ typedef enum {
     COMMAND_SUB_TO_LR,
     COMMAND_ADD_SUB_TO_LR,
     COMMAND_PROCESS,
-    COMMAND_MIX_AUXA,
-    COMMAND_MIX_AUXB,
-    COMMAND_MIX_AUXC,
+    COMMAND_5 = 5,
+    COMMAND_MIX_AUXA = 6,
+    COMMAND_MIX_AUXB = 7,
+    COMMAND_MIX_AUXC = 8,
     COMMAND_UPL_AUXA_MIX_LRSC,
     COMMAND_UPL_AUXB_MIX_LRSC,
-    COMMAND_COMPRESSOR,
-    COMMAND_OUTPUT,
+    COMMAND_COMPRESSOR = 11,
+    COMMAND_OUTPUT = 12,
     COMMAND_OUTPUT_DPL2,
     COMMAND_WM_OUTPUT,
-    COMMAND_END
+    COMMAND_END = 15,
 };
 
 static u32 __AXCommandListPosition;
@@ -55,7 +57,6 @@ static bool __AXCompressor;
 static volatile u16 __AXMasterVolume;
 static u16 __AXAuxAVolume;
 static u16 __AXAuxBVolume;
-static u16 __AXAuxCVolume;
 
 u32 __AXGetCommandListCycles(void) { return __AXCommandListCycles; }
 
@@ -69,7 +70,7 @@ void* __AXGetCommandListAddress(void) {
     return list;
 }
 
-void __AXWriteToCommandList(u16 cmd) {
+static inline void __AXWriteToCommandList(u16 cmd) {
     *__AXClWrite = cmd;
     __AXClWrite++;
 }
@@ -84,7 +85,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
 
     LIST_WRITE_16(COMMAND_SETUP);
     LIST_WRITE_32((uintptr_t)imm);
-    __AXCommandListCycles += 4126;
+    __AXCommandListCycles += 4246;
 
     switch (__AXClMode) {
         case AX_OUTPUT_STEREO:
@@ -107,12 +108,13 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
     imm = __AXGetPBs();
     LIST_WRITE_16(COMMAND_PROCESS);
     LIST_WRITE_32((uintptr_t)imm);
+    LIST_WRITE_16(COMMAND_5);
 
     if (__AXClMode == AX_OUTPUT_DPL2) {
         __AXGetAuxAInput(&imm);
         if (imm != NULL) {
             LIST_WRITE_16(COMMAND_UPL_AUXA_MIX_LRSC);
-            LIST_WRITE_16(__AXAuxAVolume);
+            LIST_WRITE_16(__AXMasterVolume);
             LIST_WRITE_32((uintptr_t)imm);
 
             __AXGetAuxAInputDpl2(&imm);
@@ -130,13 +132,13 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxAOutputDpl2Rs(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 3036;
+            __AXCommandListCycles += 1747;
         }
 
         __AXGetAuxBInput(&imm);
         if (imm != NULL) {
             LIST_WRITE_16(COMMAND_UPL_AUXB_MIX_LRSC);
-            LIST_WRITE_16(__AXAuxBVolume);
+            LIST_WRITE_16(__AXAuxAVolume);
             LIST_WRITE_32((uintptr_t)imm);
 
             __AXGetAuxBInputDpl2(&imm);
@@ -154,43 +156,43 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxBOutputDpl2Rs(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 3036;
+            __AXCommandListCycles += 1747;
         }
     } else {
         __AXGetAuxAInput(&imm);
         if (imm != NULL) {
             LIST_WRITE_16(COMMAND_MIX_AUXA);
-            LIST_WRITE_16(__AXAuxAVolume);
+            LIST_WRITE_16(__AXMasterVolume);
             LIST_WRITE_32((uintptr_t)imm);
 
             __AXGetAuxAOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += 1249;
         }
 
         __AXGetAuxBInput(&imm);
         if (imm != NULL) {
             LIST_WRITE_16(COMMAND_MIX_AUXB);
-            LIST_WRITE_16(__AXAuxBVolume);
+            LIST_WRITE_16(__AXAuxAVolume);
             LIST_WRITE_32((uintptr_t)imm);
 
             __AXGetAuxBOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += 1249;
         }
 
         __AXGetAuxCInput(&imm);
         if (imm != NULL) {
             LIST_WRITE_16(COMMAND_MIX_AUXC);
-            LIST_WRITE_16(__AXAuxCVolume);
+            LIST_WRITE_16(__AXAuxBVolume);
             LIST_WRITE_32((uintptr_t)imm);
 
             __AXGetAuxCOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += 1249;
         }
     }
 
@@ -211,16 +213,14 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
 
     if (__AXClMode == AX_OUTPUT_DPL2) {
         LIST_WRITE_16(COMMAND_OUTPUT_DPL2);
-        LIST_WRITE_16(__AXMasterVolume);
         LIST_WRITE_32((uintptr_t)surround);
         LIST_WRITE_32((uintptr_t)lr);
-        __AXCommandListCycles += 1195;
+        __AXCommandListCycles += 687;
     } else {
         LIST_WRITE_16(COMMAND_OUTPUT);
-        LIST_WRITE_16(__AXMasterVolume);
         LIST_WRITE_32((uintptr_t)surround);
         LIST_WRITE_32((uintptr_t)lr);
-        __AXCommandListCycles += 1172;
+        __AXCommandListCycles += 665;
     }
 
     LIST_WRITE_16(COMMAND_END);
@@ -235,19 +235,21 @@ void __AXClInit(void) {
     __AXClWrite = (u16*)__AXCommandList;
     __AXCompressor = true;
 
-    __AXAuxCVolume = __AXAuxBVolume = __AXAuxAVolume = AX_MAX_VOLUME;
+    __AXAuxBVolume = __AXAuxAVolume = __AXMasterVolume = AX_MAX_VOLUME;
 }
 
 void __AXClQuit(void) {}
 
 void AXSetMode(u32 mode) { __AXClMode = mode; }
 
-u32 AXGetMode(void) { return __AXClMode; }
+u16 AXGetMasterVolume(void) { return __AXMasterVolume; }
 
 u16 AXGetAuxAReturnVolume(void) { return __AXAuxAVolume; }
+
 u16 AXGetAuxBReturnVolume(void) { return __AXAuxBVolume; }
-u16 AXGetAuxCReturnVolume(void) { return __AXAuxCVolume; }
 
 void AXSetMasterVolume(u16 volume) { __AXMasterVolume = volume; }
 
 void AXSetAuxAReturnVolume(u16 volume) { __AXAuxAVolume = volume; }
+
+void AXSetAuxBReturnVolume(u16 volume) { __AXAuxBVolume = volume; }

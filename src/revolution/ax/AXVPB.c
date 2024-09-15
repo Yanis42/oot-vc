@@ -172,12 +172,12 @@ void __AXServiceVPB(AXVPB* vpb) {
         FUNNY_COPY(&dst->adpcmLoop, &src->adpcmLoop, u16, sizeof(AXPBADPCMLOOP));
     }
 
-    if (sync & AX_PBSYNC_LPF_COEFS) {
-        dst->lpf.a0 = src->lpf.a0;
-        dst->lpf.b0 = src->lpf.b0;
-    } else if (sync & AX_PBSYNC_LPF) {
-        FUNNY_COPY(&dst->lpf, &src->lpf, u16, sizeof(AXPBLPF));
-    }
+    // if (sync & AX_PBSYNC_LPF_COEFS) {
+    //     dst->lpf.a0 = src->lpf.a0;
+    //     dst->lpf.b0 = src->lpf.b0;
+    // } else if (sync & AX_PBSYNC_LPF) {
+    //     FUNNY_COPY(&dst->lpf, &src->lpf, u16, sizeof(AXPBLPF));
+    // }
 
     if (sync & AX_PBSYNC_BIQUAD_COEFS) {
         dst->biquad.b0 = src->biquad.b0;
@@ -261,9 +261,9 @@ void __AXSyncPBs(u32 baseCycles) {
             if (head->pb.state == AX_VOICE_RUN) {
                 cycles += 387;
 
-                if (head->pb.lpf.on) {
-                    cycles += 309;
-                }
+                // if (head->pb.lpf.on) {
+                //     cycles += 309;
+                // }
 
                 if (head->pb.biquad.on) {
                     cycles += 1024;
@@ -333,7 +333,7 @@ void __AXSetPBDefault(AXVPB* vpb) {
     vpb->pb.itd.flag = 0;
     vpb->sync = AX_PBSYNC_STATE | AX_PBSYNC_ITD | AX_PBSYNC_LPF | AX_PBSYNC_BIQUAD | AX_PBSYNC_REMOTE |
                 AX_PBSYNC_RMTSRC | AX_PBSYNC_RMTIIR;
-    vpb->pb.lpf.on = 0;
+    // vpb->pb.lpf.on = 0;
     vpb->pb.biquad.on = 0;
     vpb->pb.remote = 0;
     vpb->pb.rmtIIR.lpf.on = 0;

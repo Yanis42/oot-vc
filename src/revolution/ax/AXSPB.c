@@ -107,7 +107,7 @@ void __AXPrintStudio(void) {
     __AXDepopFadeRmt(&__AXSpbAux2, &__AXStudio.Aux2, &__AXStudio.dAux2);
     __AXDepopFadeRmt(&__AXSpbAux3, &__AXStudio.Aux3, &__AXStudio.dAux3);
 
-    DCFlushRange(&__AXStudio, sizeof(AXSTUDIO));
+    DCFlushRange(&__AXStudio, sizeof(AXSTUDIO) - sizeof(s64));
 }
 
 void __AXSPBInit(void) {

@@ -526,17 +526,17 @@ revolution/ax/AXAlloc.c:
 revolution/ax/AXAux.c:
 	.text       start:0x800AC318 end:0x800AC92C
 	.bss        start:0x801E34E0 end:0x801E5D60
-	.sbss       start:0x8025D8D8 end:0x8025D914
+	.sbss       start:0x8025D8D8 end:0x8025D918
 
 revolution/ax/AXCL.c:
 	.text       start:0x800AC92C end:0x800AD388
 	.bss        start:0x801E5D60 end:0x801E6360
-	.sbss       start:0x8025D914 end:0x8025D930
+	.sbss       start:0x8025D918 end:0x8025D934
 
 revolution/ax/AXOut.c:
 	.text       start:0x800AD388 end:0x800ADBA8
 	.bss        start:0x801E6360 end:0x801EB120
-	.sbss       start:0x8025D930 end:0x8025D970
+	.sbss       start:0x8025D934 end:0x8025D970
 
 revolution/ax/AXSPB.c:
 	.text       start:0x800ADBA8 end:0x800ADFCC
@@ -548,6 +548,7 @@ revolution/ax/AXVPB.c:
 
 revolution/ax/AXProf.c:
 	.text       start:0x800AF598 end:0x800AF5D8
+	.sbss       start:0x8025D9D8 end:0x8025D9E8
 
 revolution/axfx/code_800AF5D8.c:
 	.text       start:0x800AF5D8 end:0x800B1BEC

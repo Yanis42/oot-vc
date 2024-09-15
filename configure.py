@@ -405,13 +405,13 @@ config.libs = [
             Object(LinkedFor("oot-j"), "revolution/ax/AX.c"),
             Object(LinkedFor("oot-j"), "revolution/ax/AXAlloc.c"),
             Object(NotLinked, "revolution/ax/AXAux.c"),
-            Object(NotLinked, "revolution/ax/AXCL.c"),
+            Object(LinkedFor("oot-j"), "revolution/ax/AXCL.c"),
             Object(NotLinked, "revolution/ax/AXOut.c"),
-            Object(NotLinked, "revolution/ax/AXSPB.c"),
+            Object(LinkedFor("oot-j"), "revolution/ax/AXSPB.c"),
             Object(NotLinked, "revolution/ax/AXVPB.c"),
             Object(LinkedFor("oot-j"), "revolution/ax/AXComp.c"),
             Object(LinkedFor("oot-j"), "revolution/ax/DSPCode.c"),
-            Object(NotLinked, "revolution/ax/AXProf.c"),
+            Object(LinkedFor("oot-j"), "revolution/ax/AXProf.c"),
         ]
     ),
     RevolutionLib(
