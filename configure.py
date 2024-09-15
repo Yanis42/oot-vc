@@ -459,9 +459,9 @@ config.libs = [
     RevolutionLib(
         "sc",
         [
-            Object(NotLinked, "revolution/sc/scsystem.c"),
-            Object(NotLinked, "revolution/sc/scapi.c"),
-            Object(NotLinked, "revolution/sc/scapi_prdinfo.c"),
+            Object(LinkedFor("oot-j"), "revolution/sc/scsystem.c"),
+            Object(LinkedFor("oot-j"), "revolution/sc/scapi.c"),
+            Object(LinkedFor("oot-j"), "revolution/sc/scapi_prdinfo.c"),
         ]
     ),
     RevolutionLib(

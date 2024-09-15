@@ -665,12 +665,19 @@ revolution/nand/NANDCheck.c:
 
 revolution/sc/scsystem.c:
 	.text       start:0x800B5570 end:0x800B6EA0
+	.rodata     start:0x8016BE18 end:0x8016BE70
+	.data       start:0x8018A8C0 end:0x8018AA40
+	.bss        start:0x80200D20 end:0x80208EC0
+	.sdata      start:0x8025CAD8 end:0x8025CBB0
+	.sbss       start:0x8025DA28 end:0x8025DA40
 
 revolution/sc/scapi.c:
 	.text       start:0x800B6EA0 end:0x800B7224
 
 revolution/sc/scapi_prdinfo.c:
 	.text       start:0x800B7224 end:0x800B7414
+	.data       start:0x8018AA40 end:0x8018AA88
+	.sdata      start:0x8025CBB0 end:0x8025CBB8
 
 revolution/arc/arc.c:
 	.text       start:0x800B7414 end:0x800B808C
