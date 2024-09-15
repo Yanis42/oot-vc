@@ -58,12 +58,6 @@ void AIStopDMA(void) { DSP_HW_REGS[DSP_AI_DMA_CSR] &= ~DSP_AI_DMA_CSR_PLAY; }
 
 u32 AIGetDMABytesLeft(void) { return (DSP_HW_REGS[DSP_AI_DMA_BYTES_LEFT] & 0x7FFF) * 32; }
 
-u32 AIGetDMAStartAddr(void) {
-    return ((DSP_HW_REGS[DSP_AI_DMA_START_H] & 0x1FFF) << 16) | (DSP_HW_REGS[DSP_AI_DMA_START_L] & 0xFFE0);
-}
-
-u32 AIGetDMALength(void) { return (DSP_HW_REGS[DSP_AI_DMA_CSR] & 0x7FFF) << 5; }
-
 bool AICheckInit(void) { return __AI_init_flag; }
 
 void AISetDSPSampleRate(u32 rate) {
@@ -83,7 +77,7 @@ void AISetDSPSampleRate(u32 rate) {
     }
 }
 
-u32 AIGetDSPSampleRate(void) { return ((AI_HW_REGS[AI_AICR] & AI_AICR_SAMPLERATE) >> 6) ^ 1; }
+static inline u32 AIGetDSPSampleRate(void) { return ((AI_HW_REGS[AI_AICR] & AI_AICR_SAMPLERATE) >> 6) ^ 1; }
 
 void AIInit(void* stack) {
     if (__AI_init_flag != true) {

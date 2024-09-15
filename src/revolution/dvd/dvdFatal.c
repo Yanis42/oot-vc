@@ -107,8 +107,6 @@ bool DVDSetAutoFatalMessaging(bool enable) {
     return old;
 }
 
-bool __DVDGetAutoFatalMessaging(void) { return FatalFunc != NULL; }
-
 void __DVDPrintFatalMessage(void) {
     if (FatalFunc != NULL) {
         FatalFunc();

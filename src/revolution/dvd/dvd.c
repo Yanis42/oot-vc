@@ -1628,7 +1628,7 @@ bool DVDSetAutoInvalidation(bool autoInval) {
     return prev;
 }
 
-void DVDPause(void) {
+static inline void DVDPause(void) {
     bool enabled = OSDisableInterrupts();
 
     PauseFlag = true;
@@ -1838,7 +1838,7 @@ static void cbForCancelSync(s32 result, DVDCommandBlock* block) {
     OSWakeupThread(&__DVDThreadQueue);
 }
 
-bool DVDCancelAllAsync(DVDCommandCallback callback) {
+static inline bool DVDCancelAllAsync(DVDCommandCallback callback) {
     bool success;
     DVDCommandBlock* block;
     bool enabled = OSDisableInterrupts();
@@ -1861,8 +1861,6 @@ bool DVDCancelAllAsync(DVDCommandCallback callback) {
     OSRestoreInterrupts(enabled);
     return success;
 }
-
-const DVDDiskID* DVDGetCurrentDiskID(void) { return &((OSBootInfo*)OSPhysicalToCached(OS_PHYS_BOOT_INFO))->diskID; }
 
 static void __BS2DVDLowCallback(u32 intType) { __BS2DVDLowIntType = intType; }
 
@@ -1937,7 +1935,7 @@ bool __DVDTestAlarm(const OSAlarm* alarm) {
     return __DVDLowTestAlarm(alarm);
 }
 
-bool __DVDLowBreak(void) {
+static inline bool __DVDLowBreak(void) {
     Breaking = true;
     return true;
 }

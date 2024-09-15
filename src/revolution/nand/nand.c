@@ -227,14 +227,6 @@ s32 NANDCreateDir(const char* path, u8 perm, u8 attr) {
     return nandConvertErrorCode(nandCreateDir(path, perm, attr, NULL, false, false));
 }
 
-s32 NANDPrivateCreateDir(const char* path, u8 perm, u8 attr) {
-    if (!nandIsInitialized()) {
-        return NAND_RESULT_FATAL_ERROR;
-    }
-
-    return nandConvertErrorCode(nandCreateDir(path, perm, attr, NULL, false, true));
-}
-
 s32 NANDPrivateCreateDirAsync(const char* path, u8 perm, u8 attr, NANDAsyncCallback callback, NANDCommandBlock* block) {
     if (!nandIsInitialized()) {
         return NAND_RESULT_FATAL_ERROR;
@@ -268,42 +260,6 @@ s32 NANDGetLength(NANDFileInfo* info, u32* length) {
     }
 
     return nandConvertErrorCode(nandGetFileStatus(info->fd, length, NULL));
-}
-
-static s32 nandGetFileStatusAsync(s32 fd, NANDCommandBlock* block) {
-    // Work buffer???
-    return ISFS_GetFileStatsAsync(fd, (FSFileStats*)ROUND_UP_PTR(block->path, 32), nandGetFileStatusAsyncCallback,
-                                  block);
-}
-
-static void nandGetFileStatusAsyncCallback(s32 result, void* arg) {
-    // Implicit cast required
-    NANDCommandBlock* block = arg;
-    // Work buffer???
-    FSFileStats* stats = (FSFileStats*)ROUND_UP_PTR(block->path, 32);
-
-    if (result == IPC_RESULT_OK) {
-        if (block->length != NULL) {
-            *block->length = stats->length;
-        }
-
-        if (block->position != NULL) {
-            *block->position = stats->position;
-        }
-    }
-
-    block->callback(nandConvertErrorCode(result), arg);
-}
-
-s32 NANDGetLengthAsync(NANDFileInfo* info, u32* lengthOut, NANDAsyncCallback callback, NANDCommandBlock* block) {
-    if (!nandIsInitialized()) {
-        return NAND_RESULT_FATAL_ERROR;
-    }
-
-    block->callback = callback;
-    block->length = lengthOut;
-    block->position = NULL;
-    return nandConvertErrorCode(nandGetFileStatusAsync(info->fd, block));
 }
 
 static void nandComposePerm(u8* out, u32 ownerPerm, u32 groupPerm, u32 otherPerm) {
