@@ -1,6 +1,6 @@
 #include "revolution/gx.h"
-#include "revolution/os.h"
 #include "revolution/gx/GXRegs.h"
+#include "revolution/os.h"
 
 static __GXFifoObj CPUFifo;
 static __GXFifoObj GPFifo;
@@ -11,7 +11,7 @@ volatile void* __GXCurrentBP;
 #define TOPHYSICAL(a) (((u32)a) & 0x3FFFFFFF)
 
 static void __GXFifoLink(GXBool en) {
-    FAST_FLAG_SET(gx->cpEnable, (en ? 1 : 0), 4, 1); 
+    FAST_FLAG_SET(gx->cpEnable, (en ? 1 : 0), 4, 1);
     GX_CP_REG_WRITE_U16(1, (u16)gx->cpEnable);
 }
 
@@ -28,12 +28,12 @@ static void __GXWriteFifoIntReset(GXBool hiWatermarkClr, GXBool loWatermarkClr) 
 }
 
 static void __GXFifoReadEnable(void) {
-    FAST_FLAG_SET(gx->cpEnable, 1, 0, 1); 
+    FAST_FLAG_SET(gx->cpEnable, 1, 0, 1);
     GX_CP_REG_WRITE_U16(1, (u16)gx->cpEnable);
 }
 
 static void __GXFifoReadDisable(void) {
-    FAST_FLAG_SET(gx->cpEnable, 0, 0, 1); 
+    FAST_FLAG_SET(gx->cpEnable, 0, 0, 1);
     GX_CP_REG_WRITE_U16(1, (u16)gx->cpEnable);
 }
 
@@ -66,9 +66,9 @@ void __GXCleanGPFifo(void) {
         CPUFifo.rdPtr = GPFifo.rdPtr;
         CPUFifo.wrPtr = GPFifo.wrPtr;
         CPUFifo.count = GPFifo.count;
-        
+
         FAST_FLAG_SET(reg, (GX_PHY_ADDR(TOPHYSICAL(CPUFifo.wrPtr)) >> 5), 5, 24);
-        GX_PI_REG_WRITE_U32(0x14, reg);  
+        GX_PI_REG_WRITE_U32(0x14, reg);
 
         __GXWriteFifoIntEnable(GX_TRUE, GX_FALSE);
         __GXFifoLink(GX_TRUE);
@@ -83,6 +83,4 @@ void __GXCleanGPFifo(void) {
     OSRestoreInterrupts(enabled);
 }
 
-GXBool __GXIsGPFifoReady(void) {
-    return GPFifoReady;
-}
+GXBool __GXIsGPFifoReady(void) { return GPFifoReady; }

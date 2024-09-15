@@ -3,8 +3,7 @@
 
 #define XF_MEM_LOBJ_SIZE 16
 
-void GXInitLightAttn(GXLightObj* light, f32 aa, f32 ab, f32 ac, f32 ka, f32 kb,
-                     f32 kc) {
+void GXInitLightAttn(GXLightObj* light, f32 aa, f32 ab, f32 ac, f32 ka, f32 kb, f32 kc) {
     GXLightObjImpl* impl = (GXLightObjImpl*)light;
 
     impl->aa = aa;
@@ -43,45 +42,45 @@ void GXInitLightSpot(GXLightObj* light, f32 angle, GXSpotFn fn) {
     rad = cosf(M_PI * angle / 180.0f);
 
     switch (fn) {
-    case GX_SP_FLAT:
-        a = -1000.0f * rad;
-        b = 1000.0f;
-        c = 0.0f;
-        break;
-    case GX_SP_COS:
-        b = 1.0f / (1.0f - rad);
-        a = -rad * b;
-        c = 0.0f;
-        break;
-    case GX_SP_COS2:
-        c = 1.0f / (1.0f - rad);
-        a = 0.0f;
-        b = -rad * c;
-        break;
-    case GX_SP_SHARP:
-        d = 1.0f / ((1.0f - rad) * (1.0f - rad));
-        a = (rad * (rad - 2.0f)) * d;
-        b = 2.0f * d;
-        c = -d;
-        break;
-    case GX_SP_RING1:
-        d = 1.0f / ((1.0f - rad) * (1.0f - rad));
-        c = -4.0f * d;
-        a = c * rad;
-        b = 4.0f * (1.0f + rad) * d;
-        break;
-    case GX_SP_RING2:
-        d = 1.0f / ((1.0f - rad) * (1.0f - rad));
-        a = 1.0f - 2.0f * rad * rad * d;
-        b = 4.0f * rad * d;
-        c = -2.0f * d;
-        break;
-    case GX_SP_OFF:
-    default:
-        a = 1.0f;
-        b = 0.0f;
-        c = 0.0f;
-        break;
+        case GX_SP_FLAT:
+            a = -1000.0f * rad;
+            b = 1000.0f;
+            c = 0.0f;
+            break;
+        case GX_SP_COS:
+            b = 1.0f / (1.0f - rad);
+            a = -rad * b;
+            c = 0.0f;
+            break;
+        case GX_SP_COS2:
+            c = 1.0f / (1.0f - rad);
+            a = 0.0f;
+            b = -rad * c;
+            break;
+        case GX_SP_SHARP:
+            d = 1.0f / ((1.0f - rad) * (1.0f - rad));
+            a = (rad * (rad - 2.0f)) * d;
+            b = 2.0f * d;
+            c = -d;
+            break;
+        case GX_SP_RING1:
+            d = 1.0f / ((1.0f - rad) * (1.0f - rad));
+            c = -4.0f * d;
+            a = c * rad;
+            b = 4.0f * (1.0f + rad) * d;
+            break;
+        case GX_SP_RING2:
+            d = 1.0f / ((1.0f - rad) * (1.0f - rad));
+            a = 1.0f - 2.0f * rad * rad * d;
+            b = 4.0f * rad * d;
+            c = -2.0f * d;
+            break;
+        case GX_SP_OFF:
+        default:
+            a = 1.0f;
+            b = 0.0f;
+            c = 0.0f;
+            break;
     }
 
     impl->aa = a;
@@ -89,8 +88,7 @@ void GXInitLightSpot(GXLightObj* light, f32 angle, GXSpotFn fn) {
     impl->ac = c;
 }
 
-void GXInitLightDistAttn(GXLightObj* light, f32 distance, f32 brightness,
-                         GXDistAttnFn fn) {
+void GXInitLightDistAttn(GXLightObj* light, f32 distance, f32 brightness, GXDistAttnFn fn) {
     GXLightObjImpl* impl = (GXLightObjImpl*)light;
     f32 a, b, c;
 
@@ -103,27 +101,27 @@ void GXInitLightDistAttn(GXLightObj* light, f32 distance, f32 brightness,
     }
 
     switch (fn) {
-    case GX_DA_GENTLE:
-        a = 1.0f;
-        b = (1.0f - brightness) / (brightness * distance);
-        c = 0.0f;
-        break;
-    case GX_DA_MEDIUM:
-        a = 1.0f;
-        b = (0.5f * (1.0f - brightness)) / (brightness * distance);
-        c = (0.5f * (1.0f - brightness)) / (distance * (brightness * distance));
-        break;
-    case GX_DA_STEEP:
-        a = 1.0f;
-        b = 0.0f;
-        c = (1.0f - brightness) / (distance * (brightness * distance));
-        break;
-    case GX_DA_OFF:
-    default:
-        a = 1.0f;
-        b = 0.0f;
-        c = 0.0f;
-        break;
+        case GX_DA_GENTLE:
+            a = 1.0f;
+            b = (1.0f - brightness) / (brightness * distance);
+            c = 0.0f;
+            break;
+        case GX_DA_MEDIUM:
+            a = 1.0f;
+            b = (0.5f * (1.0f - brightness)) / (brightness * distance);
+            c = (0.5f * (1.0f - brightness)) / (distance * (brightness * distance));
+            break;
+        case GX_DA_STEEP:
+            a = 1.0f;
+            b = 0.0f;
+            c = (1.0f - brightness) / (distance * (brightness * distance));
+            break;
+        case GX_DA_OFF:
+        default:
+            a = 1.0f;
+            b = 0.0f;
+            c = 0.0f;
+            break;
     }
 
     impl->ka = a;
@@ -192,8 +190,7 @@ void GXInitLightColor(GXLightObj* light, GXColor color) {
 }
 
 // TODO: This inline is fake, and also is a fake match (r6 hardcoded)
-inline void WriteLightObj(register volatile void* dst,
-                          register const GXLightObjImpl* src) {
+inline void WriteLightObj(register volatile void* dst, register const GXLightObjImpl* src) {
     register u32 color;
     register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
 
@@ -251,34 +248,32 @@ void GXSetChanAmbColor(GXChannelID chan, GXColor color) {
     u32 colorId;
 
     switch (chan) {
-    case GX_COLOR0:
-        ambColor =
-            GX_BITSET_TRUNC(*(u32*)&gx->ambColor[0], 0, 24, *(u32*)&color);
-        colorId = 0;
-        break;
-    case GX_COLOR1:
-        ambColor =
-            GX_BITSET_TRUNC(*(u32*)&gx->ambColor[1], 0, 24, *(u32*)&color);
-        colorId = 1;
-        break;
-    case GX_ALPHA0:
-        ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[0], 24, 8, color.a);
-        colorId = 0;
-        break;
-    case GX_ALPHA1:
-        ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[1], 24, 8, color.a);
-        colorId = 1;
-        break;
-    case GX_COLOR0A0:
-        ambColor = *(u32*)&color;
-        colorId = 0;
-        break;
-    case GX_COLOR1A1:
-        ambColor = *(u32*)&color;
-        colorId = 1;
-        break;
-    default:
-        return;
+        case GX_COLOR0:
+            ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[0], 0, 24, *(u32*)&color);
+            colorId = 0;
+            break;
+        case GX_COLOR1:
+            ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[1], 0, 24, *(u32*)&color);
+            colorId = 1;
+            break;
+        case GX_ALPHA0:
+            ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[0], 24, 8, color.a);
+            colorId = 0;
+            break;
+        case GX_ALPHA1:
+            ambColor = GX_BITSET_TRUNC(*(u32*)&gx->ambColor[1], 24, 8, color.a);
+            colorId = 1;
+            break;
+        case GX_COLOR0A0:
+            ambColor = *(u32*)&color;
+            colorId = 0;
+            break;
+        case GX_COLOR1A1:
+            ambColor = *(u32*)&color;
+            colorId = 1;
+            break;
+        default:
+            return;
     }
 
     gx->dirtyState |= GX_DIRTY_AMB_COLOR0 << colorId;
@@ -290,34 +285,32 @@ void GXSetChanMatColor(GXChannelID chan, GXColor color) {
     u32 colorId;
 
     switch (chan) {
-    case GX_COLOR0:
-        matColor =
-            GX_BITSET_TRUNC(*(u32*)&gx->matColor[0], 0, 24, *(u32*)&color);
-        colorId = 0;
-        break;
-    case GX_COLOR1:
-        matColor =
-            GX_BITSET_TRUNC(*(u32*)&gx->matColor[1], 0, 24, *(u32*)&color);
-        colorId = 1;
-        break;
-    case GX_ALPHA0:
-        matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[0], 24, 8, color.a);
-        colorId = 0;
-        break;
-    case GX_ALPHA1:
-        matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[1], 24, 8, color.a);
-        colorId = 1;
-        break;
-    case GX_COLOR0A0:
-        matColor = *(u32*)&color;
-        colorId = 0;
-        break;
-    case GX_COLOR1A1:
-        matColor = *(u32*)&color;
-        colorId = 1;
-        break;
-    default:
-        return;
+        case GX_COLOR0:
+            matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[0], 0, 24, *(u32*)&color);
+            colorId = 0;
+            break;
+        case GX_COLOR1:
+            matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[1], 0, 24, *(u32*)&color);
+            colorId = 1;
+            break;
+        case GX_ALPHA0:
+            matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[0], 24, 8, color.a);
+            colorId = 0;
+            break;
+        case GX_ALPHA1:
+            matColor = GX_BITSET_TRUNC(*(u32*)&gx->matColor[1], 24, 8, color.a);
+            colorId = 1;
+            break;
+        case GX_COLOR0A0:
+            matColor = *(u32*)&color;
+            colorId = 0;
+            break;
+        case GX_COLOR1A1:
+            matColor = *(u32*)&color;
+            colorId = 1;
+            break;
+        default:
+            return;
     }
 
     gx->dirtyState |= GX_DIRTY_MAT_COLOR0 << colorId;
@@ -330,17 +323,15 @@ void GXSetNumChans(u8 num) {
     gx->dirtyState |= GX_DIRTY_GEN_MODE;
 }
 
-void GXSetChanCtrl(GXChannelID chan, GXBool enable, GXColorSrc ambSrc,
-                   GXColorSrc matSrc, GXLightID lightMask, GXDiffuseFn diffFn,
-                   GXAttnFn attnFn) {
+void GXSetChanCtrl(GXChannelID chan, GXBool enable, GXColorSrc ambSrc, GXColorSrc matSrc, GXLightID lightMask,
+                   GXDiffuseFn diffFn, GXAttnFn attnFn) {
     u32 regIdx = (u32)chan % 4;
     u32 reg = 0;
 
     GX_XF_SET_COLOR0CNTRL_LIGHT(reg, enable);
     GX_XF_SET_COLOR0CNTRL_MATSRC(reg, matSrc);
     GX_XF_SET_COLOR0CNTRL_AMBSRC(reg, ambSrc);
-    GX_XF_SET_COLOR0CNTRL_DIFFUSEATTN(reg, attnFn == GX_AF_SPEC ? GX_DF_NONE
-                                                                : diffFn);
+    GX_XF_SET_COLOR0CNTRL_DIFFUSEATTN(reg, attnFn == GX_AF_SPEC ? GX_DF_NONE : diffFn);
     GX_XF_SET_COLOR0CNTRL_ATTNENABLE(reg, attnFn != GX_AF_NONE);
     GX_XF_SET_COLOR0CNTRL_ATTNSELECT(reg, attnFn != GX_AF_SPEC);
     GX_XF_SET_COLOR0CNTRL_LMASKHI(reg, (u32)lightMask);

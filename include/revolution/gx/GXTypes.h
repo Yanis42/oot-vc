@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define PHY_ADDR_MASK ~((~0x3FFF) << 16)
-#define GX_PHY_ADDR(a)  ((u32)a & PHY_ADDR_MASK)
+#define GX_PHY_ADDR(a) ((u32)a & PHY_ADDR_MASK)
 
 /**
  * Pack value into bitfield.

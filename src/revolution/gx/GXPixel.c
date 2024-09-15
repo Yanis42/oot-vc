@@ -1,8 +1,7 @@
 #include "math.h"
 #include "revolution/gx.h"
 
-void GXSetFog(GXFogType type, GXColor color, f32 start, f32 end, f32 near,
-              f32 far) {
+void GXSetFog(GXFogType type, GXColor color, f32 start, f32 end, f32 near, f32 far) {
     f32 a, c;
     u32 a_bits, c_bits;
 
@@ -132,8 +131,7 @@ void GXSetFogRangeAdj(GXBool enable, u16 center, const GXFogAdjTable* table) {
     gx->bpSentNot = false;
 }
 
-void GXSetBlendMode(GXBlendMode mode, GXBlendFactor src, GXBlendFactor dst,
-                    GXLogicOp op) {
+void GXSetBlendMode(GXBlendMode mode, GXBlendFactor src, GXBlendFactor dst, GXLogicOp op) {
     u32 blendModeReg = gx->cmode0;
     GX_BP_SET_BLENDMODE_SUBTRACT(blendModeReg, mode == GX_BM_SUBTRACT);
     GX_BP_SET_BLENDMODE_BLEND_ENABLE(blendModeReg, mode);
@@ -187,9 +185,8 @@ void GXSetZCompLoc(GXBool beforeTex) {
 }
 
 void GXSetPixelFmt(GXPixelFmt pixelFmt, GXZFmt16 zFmt) {
-    static u32 p2f[GX_MAX_PIXELFMT] = {
-        GX_PF_RGB8_Z24, GX_PF_RGBA6_Z24, GX_PF_RGBA565_Z16, GX_PF_Z24,
-        GX_PF_Y8,       GX_PF_Y8,        GX_PF_Y8,          GX_PF_U8};
+    static u32 p2f[GX_MAX_PIXELFMT] = {GX_PF_RGB8_Z24, GX_PF_RGBA6_Z24, GX_PF_RGBA565_Z16, GX_PF_Z24,
+                                       GX_PF_Y8,       GX_PF_Y8,        GX_PF_Y8,          GX_PF_U8};
 
     u32 zControlRegOld = gx->peCtrl;
 
@@ -198,8 +195,7 @@ void GXSetPixelFmt(GXPixelFmt pixelFmt, GXZFmt16 zFmt) {
 
     if (zControlRegOld != gx->peCtrl) {
         GX_BP_LOAD_REG(gx->peCtrl);
-        GX_BP_SET_GENMODE_MULTISAMPLE(gx->genMode,
-                                      pixelFmt == GX_PF_RGBA565_Z16);
+        GX_BP_SET_GENMODE_MULTISAMPLE(gx->genMode, pixelFmt == GX_PF_RGBA565_Z16);
         gx->dirtyState |= GX_DIRTY_GEN_MODE;
     }
 

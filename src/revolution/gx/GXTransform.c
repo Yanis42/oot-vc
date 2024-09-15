@@ -181,9 +181,7 @@ void GXLoadTexMtxImm(const Mtx mtx, u32 id, GXMtxType type) {
     u32 num;
 
     // Base row address in XF memory
-    addr = id >= GX_DUALMTX0
-               ? (id - GX_DUALMTX0) * sizeof(f32) + GX_XF_MEM_DUALTEXMTX
-               : id * 4 + (u64)GX_XF_MEM_POSMTX;
+    addr = id >= GX_DUALMTX0 ? (id - GX_DUALMTX0) * sizeof(f32) + GX_XF_MEM_DUALTEXMTX : id * 4 + (u64)GX_XF_MEM_POSMTX;
 
     // Number of elements in matrix
     num = type == GX_MTX_2x4 ? (u64)(2 * 4) : 3 * 4;
@@ -221,8 +219,7 @@ void __GXSetViewport(void) {
     WGPIPE.f = f;
 }
 
-void GXSetViewportJitter(f32 ox, f32 oy, f32 sx, f32 sy, f32 near, f32 far,
-                         u32 nextField) {
+void GXSetViewportJitter(f32 ox, f32 oy, f32 sx, f32 sy, f32 near, f32 far, u32 nextField) {
     // "Field" as in VI field
     // TODO: Is this an enum? I don't know anything about the return value other
     // than that it is a u32 (NW4R signature)
@@ -249,12 +246,10 @@ void GXSetViewport(f32 ox, f32 oy, f32 sx, f32 sy, f32 near, f32 far) {
     gx->dirtyState |= GX_DIRTY_VIEWPORT;
 }
 
-void GXGetViewportv(f32 view[6]) {
-    Copy6Floats(view, gx->view);
-}
+void GXGetViewportv(f32 view[6]) { Copy6Floats(view, gx->view); }
 
 void GXSetZScaleOffset(f32 scale, f32 offset) {
-    gx->zOffset = (f32)0xFFFFFF * offset;      // ???
+    gx->zOffset = (f32)0xFFFFFF * offset; // ???
     gx->zScale = 1.0f + (f32)0xFFFFFF * scale; // ???
     gx->dirtyState |= GX_DIRTY_VIEWPORT;
 }

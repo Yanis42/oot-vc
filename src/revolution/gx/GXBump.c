@@ -1,9 +1,7 @@
 #include "revolution/gx.h"
 
-void GXSetTevIndirect(GXTevStageID tevStage, GXIndTexStageID texStage,
-                      GXIndTexFormat texFmt, GXIndTexBiasSel biasSel,
-                      GXIndTexMtxID mtxId, GXIndTexWrap wrapS,
-                      GXIndTexWrap wrapT, GXBool addPrev, GXBool utcLod,
+void GXSetTevIndirect(GXTevStageID tevStage, GXIndTexStageID texStage, GXIndTexFormat texFmt, GXIndTexBiasSel biasSel,
+                      GXIndTexMtxID mtxId, GXIndTexWrap wrapS, GXIndTexWrap wrapT, GXBool addPrev, GXBool utcLod,
                       GXIndTexAlphaSel alphaSel) {
     u32 opcode = tevStage + GX_BP_REG_INDTEVSTAGE0;
 
@@ -28,25 +26,25 @@ void GXSetIndTexMtx(GXIndTexMtxID id, const f32 offset[2][3], s8 scaleExp) {
     u32 cmd;
 
     switch (id) {
-    case GX_ITM_0:
-    case GX_ITM_1:
-    case GX_ITM_2:
-        index = id - GX_ITM_0;
-        break;
-    case GX_ITM_S0:
-    case GX_ITM_S1:
-    case GX_ITM_S2:
-        index = id - GX_ITM_S0;
-        break;
-    case GX_ITM_T0:
-    case GX_ITM_T1:
-    case GX_ITM_T2:
-        index = id - GX_ITM_T0;
-        break;
-    case 4:
-    case 8:
-    default:
-        index = 0;
+        case GX_ITM_0:
+        case GX_ITM_1:
+        case GX_ITM_2:
+            index = id - GX_ITM_0;
+            break;
+        case GX_ITM_S0:
+        case GX_ITM_S1:
+        case GX_ITM_S2:
+            index = id - GX_ITM_S0;
+            break;
+        case GX_ITM_T0:
+        case GX_ITM_T1:
+        case GX_ITM_T2:
+            index = id - GX_ITM_T0;
+            break;
+        case 4:
+        case 8:
+        default:
+            index = 0;
     }
 
     scaleExp += 17;
@@ -77,40 +75,38 @@ void GXSetIndTexMtx(GXIndTexMtxID id, const f32 offset[2][3], s8 scaleExp) {
     gx->bpSentNot = false;
 }
 
-void GXSetIndTexCoordScale(GXIndTexStageID stage, GXIndTexScale scaleS,
-                           GXIndTexScale scaleT) {
+void GXSetIndTexCoordScale(GXIndTexStageID stage, GXIndTexScale scaleS, GXIndTexScale scaleT) {
     switch (stage) {
-    case GX_INDTEXSTAGE0:
-        GX_BP_SET_RAS1_SS0_S0(gx->IndTexScale0, scaleS);
-        GX_BP_SET_RAS1_SS0_T0(gx->IndTexScale0, scaleT);
-        GX_BP_SET_OPCODE(gx->IndTexScale0, GX_BP_REG_RAS1_SS0);
-        GX_BP_LOAD_REG(gx->IndTexScale0);
-        break;
-    case GX_INDTEXSTAGE1:
-        GX_BP_SET_RAS1_SS0_S1(gx->IndTexScale0, scaleS);
-        GX_BP_SET_RAS1_SS0_T1(gx->IndTexScale0, scaleT);
-        GX_BP_SET_OPCODE(gx->IndTexScale0, GX_BP_REG_RAS1_SS0);
-        GX_BP_LOAD_REG(gx->IndTexScale0);
-        break;
-    case GX_INDTEXSTAGE2:
-        GX_BP_SET_RAS1_SS1_S2(gx->IndTexScale1, scaleS);
-        GX_BP_SET_RAS1_SS1_T2(gx->IndTexScale1, scaleT);
-        GX_BP_SET_OPCODE(gx->IndTexScale1, GX_BP_REG_RAS1_SS1);
-        GX_BP_LOAD_REG(gx->IndTexScale1);
-        break;
-    case GX_INDTEXSTAGE3:
-        GX_BP_SET_RAS1_SS1_S3(gx->IndTexScale1, scaleS);
-        GX_BP_SET_RAS1_SS1_T3(gx->IndTexScale1, scaleT);
-        GX_BP_SET_OPCODE(gx->IndTexScale1, GX_BP_REG_RAS1_SS1);
-        GX_BP_LOAD_REG(gx->IndTexScale1);
-        break;
+        case GX_INDTEXSTAGE0:
+            GX_BP_SET_RAS1_SS0_S0(gx->IndTexScale0, scaleS);
+            GX_BP_SET_RAS1_SS0_T0(gx->IndTexScale0, scaleT);
+            GX_BP_SET_OPCODE(gx->IndTexScale0, GX_BP_REG_RAS1_SS0);
+            GX_BP_LOAD_REG(gx->IndTexScale0);
+            break;
+        case GX_INDTEXSTAGE1:
+            GX_BP_SET_RAS1_SS0_S1(gx->IndTexScale0, scaleS);
+            GX_BP_SET_RAS1_SS0_T1(gx->IndTexScale0, scaleT);
+            GX_BP_SET_OPCODE(gx->IndTexScale0, GX_BP_REG_RAS1_SS0);
+            GX_BP_LOAD_REG(gx->IndTexScale0);
+            break;
+        case GX_INDTEXSTAGE2:
+            GX_BP_SET_RAS1_SS1_S2(gx->IndTexScale1, scaleS);
+            GX_BP_SET_RAS1_SS1_T2(gx->IndTexScale1, scaleT);
+            GX_BP_SET_OPCODE(gx->IndTexScale1, GX_BP_REG_RAS1_SS1);
+            GX_BP_LOAD_REG(gx->IndTexScale1);
+            break;
+        case GX_INDTEXSTAGE3:
+            GX_BP_SET_RAS1_SS1_S3(gx->IndTexScale1, scaleS);
+            GX_BP_SET_RAS1_SS1_T3(gx->IndTexScale1, scaleT);
+            GX_BP_SET_OPCODE(gx->IndTexScale1, GX_BP_REG_RAS1_SS1);
+            GX_BP_LOAD_REG(gx->IndTexScale1);
+            break;
     }
 
     gx->bpSentNot = false;
 }
 
-void GXSetIndTexOrder(GXIndTexStageID stage, GXTexCoordID coord,
-                      GXTexMapID map) {
+void GXSetIndTexOrder(GXIndTexStageID stage, GXTexCoordID coord, GXTexMapID map) {
     if (map == GX_TEXMAP_NULL) {
         map = GX_TEXMAP0;
     }
@@ -120,22 +116,22 @@ void GXSetIndTexOrder(GXIndTexStageID stage, GXTexCoordID coord,
     }
 
     switch (stage) {
-    case GX_INDTEXSTAGE0:
-        GX_BP_SET_RAS1_IREF_MAP0(gx->iref, map);
-        GX_BP_SET_RAS1_IREF_TXC0(gx->iref, coord);
-        break;
-    case GX_INDTEXSTAGE1:
-        GX_BP_SET_RAS1_IREF_MAP1(gx->iref, map);
-        GX_BP_SET_RAS1_IREF_TXC1(gx->iref, coord);
-        break;
-    case GX_INDTEXSTAGE2:
-        GX_BP_SET_RAS1_IREF_MAP2(gx->iref, map);
-        GX_BP_SET_RAS1_IREF_TXC2(gx->iref, coord);
-        break;
-    case GX_INDTEXSTAGE3:
-        GX_BP_SET_RAS1_IREF_MAP3(gx->iref, map);
-        GX_BP_SET_RAS1_IREF_TXC3(gx->iref, coord);
-        break;
+        case GX_INDTEXSTAGE0:
+            GX_BP_SET_RAS1_IREF_MAP0(gx->iref, map);
+            GX_BP_SET_RAS1_IREF_TXC0(gx->iref, coord);
+            break;
+        case GX_INDTEXSTAGE1:
+            GX_BP_SET_RAS1_IREF_MAP1(gx->iref, map);
+            GX_BP_SET_RAS1_IREF_TXC1(gx->iref, coord);
+            break;
+        case GX_INDTEXSTAGE2:
+            GX_BP_SET_RAS1_IREF_MAP2(gx->iref, map);
+            GX_BP_SET_RAS1_IREF_TXC2(gx->iref, coord);
+            break;
+        case GX_INDTEXSTAGE3:
+            GX_BP_SET_RAS1_IREF_MAP3(gx->iref, map);
+            GX_BP_SET_RAS1_IREF_TXC3(gx->iref, coord);
+            break;
     }
 
     GX_BP_LOAD_REG(gx->iref);
@@ -151,8 +147,8 @@ void GXSetNumIndStages(u8 num) {
 }
 
 void GXSetTevDirect(GXTevStageID stage) {
-    GXSetTevIndirect(stage, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_NONE, GX_ITM_OFF,
-                     GX_ITW_OFF, GX_ITW_OFF, false, false, GX_ITBA_OFF);
+    GXSetTevIndirect(stage, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_NONE, GX_ITM_OFF, GX_ITW_OFF, GX_ITW_OFF, false, false,
+                     GX_ITBA_OFF);
 }
 
 void __GXUpdateBPMask(void) {}

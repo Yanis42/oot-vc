@@ -133,8 +133,7 @@ void GXDrawSphere(u32 stacks, u32 sectors) {
                 // Vertex 2 position
                 GXPosition3f32(cosv * next_xy, sinv * next_xy, next_z);
                 // Vertex 2 hasNrms
-                GXPosition3f32(cosv * next_xy / radius, sinv * next_xy / radius,
-                               next_z / radius);
+                GXPosition3f32(cosv * next_xy / radius, sinv * next_xy / radius, next_z / radius);
 
                 // Vertex 2 texcoord (S,T)
                 if (tex0_copy != GX_NONE) {
@@ -144,8 +143,7 @@ void GXDrawSphere(u32 stacks, u32 sectors) {
                 // Vertex 1 position
                 GXPosition3f32(cosv * now_xy, sinv * now_xy, now_z);
                 // Vertex 1 hasNrms
-                GXPosition3f32(cosv * now_xy / radius, sinv * now_xy / radius,
-                               now_z / radius);
+                GXPosition3f32(cosv * now_xy / radius, sinv * now_xy / radius, now_z / radius);
 
                 // Vertex 1 texcoord (S,T)
                 if (tex0_copy != GX_NONE) {
