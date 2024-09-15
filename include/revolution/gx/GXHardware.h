@@ -203,6 +203,10 @@ typedef enum {
 #define GX_SET_REG(reg, x, st, end) GX_BITFIELD_SET((reg), (st), ((end) - (st) + 1), (x))
 #define GX_SET_REG2(reg, x, st, end) GX_SET_REG(reg, x, st, end)
 
+#define GX_BITGET(field, pos, size) ((field) >> (31 - (pos) - (size) + 1) & ((1 << (size)) - 1))
+#define GX_GET_REG(reg, st, end) GX_BITGET((reg), (st), ((end) - (st) + 1))
+#define GET_REG_FIELD(reg, size, shift) ((int)((reg) >> (shift)) & ((1 << (size)) - 1))
+
 #ifdef __cplusplus
 }
 #endif

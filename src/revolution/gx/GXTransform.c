@@ -5,7 +5,7 @@ inline void LoadProjPS(register f32* dst) {
     register f32 ps_0, ps_1, ps_2;
     register GXData* src;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         lwz src, gx
         psq_l  ps_0,  0  + GXData.projMtx(src), 0, 0
@@ -15,13 +15,13 @@ inline void LoadProjPS(register f32* dst) {
         psq_st ps_1,  8(dst),                0, 0
         psq_st ps_2, 16(dst),                0, 0
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 inline void WriteProjPS(register volatile void* dst, register const f32* src) {
     register f32 ps_0, ps_1, ps_2;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         psq_l  ps_0,  0(src), 0, 0
         psq_l  ps_1,  8(src), 0, 0
@@ -30,13 +30,13 @@ inline void WriteProjPS(register volatile void* dst, register const f32* src) {
         psq_st ps_1,  0(dst), 0, 0
         psq_st ps_2,  0(dst), 0, 0
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 inline void Copy6Floats(register f32* dst, register const f32* src) {
     register f32 ps_0, ps_1, ps_2;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         psq_l  ps_0,  0(src), 0, 0
         psq_l  ps_1,  8(src), 0, 0
@@ -45,7 +45,7 @@ inline void Copy6Floats(register f32* dst, register const f32* src) {
         psq_st ps_1,  8(dst), 0, 0
         psq_st ps_2, 16(dst), 0, 0
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 void __GXSetProjection(void) {
@@ -82,15 +82,10 @@ void GXSetProjectionv(const f32 projMtx[7]) {
     gx->dirtyState |= GX_DIRTY_PROJECTION;
 }
 
-void GXGetProjectionv(f32 projMtx[7]) {
-    projMtx[0] = gx->projType != GX_PERSPECTIVE ? 1.0f : 0.0f;
-    LoadProjPS(projMtx + 1);
-}
-
 inline void WriteMTXPS4x3(register volatile void* dst, register const Mtx src) {
     register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         psq_l  ps_0,  0(src), 0, 0
         psq_l  ps_1,  8(src), 0, 0
@@ -106,13 +101,13 @@ inline void WriteMTXPS4x3(register volatile void* dst, register const Mtx src) {
         psq_st ps_4, 0(dst),  0, 0
         psq_st ps_5, 0(dst),  0, 0
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 inline void WriteMTXPS3x3(register volatile void* dst, register const Mtx src) {
     register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         psq_l  ps_0,  0(src), 0, 0
         lfs    ps_1,  8(src)
@@ -128,13 +123,13 @@ inline void WriteMTXPS3x3(register volatile void* dst, register const Mtx src) {
         psq_st ps_4, 0(dst),  0, 0
         stfs   ps_5, 0(dst)
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 inline void WriteMTXPS4x2(register volatile void* dst, register const Mtx src) {
     register f32 ps_0, ps_1, ps_2, ps_3;
 
-    // clang-format off
+#ifdef __MWERKS__ // clang-format off
     asm volatile {
         psq_l  ps_0,  0(src), 0, 0
         psq_l  ps_1,  8(src), 0, 0
@@ -146,7 +141,7 @@ inline void WriteMTXPS4x2(register volatile void* dst, register const Mtx src) {
         psq_st ps_2, 0(dst),  0, 0
         psq_st ps_3, 0(dst),  0, 0
     }
-    // clang-format on
+#endif // clang-format on
 }
 
 void GXLoadPosMtxImm(const Mtx mtx, u32 id) {
@@ -155,20 +150,10 @@ void GXLoadPosMtxImm(const Mtx mtx, u32 id) {
     WriteMTXPS4x3(&WGPIPE, mtx);
 }
 
-void GXLoadPosMtxIndx(u16 index, u32 id) {
-    // Position matrices are 4x3
-    GX_FIFO_LOAD_INDX_A(id * 4 + GX_XF_MEM_POSMTX, 4 * 3 - 1, index);
-}
-
 void GXLoadNrmMtxImm(const Mtx mtx, u32 id) {
     // Normal matrices are 3x3
     GX_XF_LOAD_REGS(3 * 3 - 1, id * 3 + GX_XF_MEM_NRMMTX);
     WriteMTXPS3x3(&WGPIPE, mtx);
-}
-
-void GXLoadNrmMtxIndx3x3(u16 index, u32 id) {
-    // Normal matrices are 3x3
-    GX_FIFO_LOAD_INDX_B(id * 3 + GX_XF_MEM_NRMMTX, 3 * 3 - 1, index);
 }
 
 void GXSetCurrentMtx(u32 id) {
@@ -176,19 +161,23 @@ void GXSetCurrentMtx(u32 id) {
     gx->dirtyState |= GX_DIRTY_MTX_IDX;
 }
 
-void GXLoadTexMtxImm(const Mtx mtx, u32 id, GXMtxType type) {
+void GXLoadTexMtxImm(const Mtx mtx, u32 id, GXTexMtxType type) {
     u32 addr;
     u32 num;
+    u32 reg;
 
-    // Base row address in XF memory
-    addr = id >= GX_DUALMTX0 ? (id - GX_DUALMTX0) * sizeof(f32) + GX_XF_MEM_DUALTEXMTX : id * 4 + (u64)GX_XF_MEM_POSMTX;
+    // Matrix address in XF memory
+    addr = id >= GX_PTTEXMTX0 ? (id - GX_PTTEXMTX0) * 4 + GX_XF_MEM_DUALTEXMTX : id * 4 + (u64)GX_XF_MEM_POSMTX;
 
     // Number of elements in matrix
-    num = type == GX_MTX_2x4 ? (u64)(2 * 4) : 3 * 4;
+    num = type == GX_MTX2x4 ? (u64)(2 * 4) : 3 * 4;
 
-    GX_XF_LOAD_REGS(num - 1, addr);
+    reg = addr;
+    reg |= (num - 1) << 16;
 
-    if (type == GX_MTX_3x4) {
+    GX_XF_LOAD_REG_HDR(reg);
+
+    if (type == GX_MTX3x4) {
         WriteMTXPS4x3(&WGPIPE, mtx);
     } else {
         WriteMTXPS4x2(&WGPIPE, mtx);
@@ -247,12 +236,6 @@ void GXSetViewport(f32 ox, f32 oy, f32 sx, f32 sy, f32 near, f32 far) {
 }
 
 void GXGetViewportv(f32 view[6]) { Copy6Floats(view, gx->view); }
-
-void GXSetZScaleOffset(f32 scale, f32 offset) {
-    gx->zOffset = (f32)0xFFFFFF * offset; // ???
-    gx->zScale = 1.0f + (f32)0xFFFFFF * scale; // ???
-    gx->dirtyState |= GX_DIRTY_VIEWPORT;
-}
 
 void GXSetScissor(u32 x, u32 y, u32 w, u32 h) {
     u32 x1, y1, x2, y2;

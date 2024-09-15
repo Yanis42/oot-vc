@@ -1,14 +1,125 @@
+#include "mem_funcs.h"
+#include "revolution/base.h"
 #include "revolution/gx.h"
 #include "revolution/gx/GXRegs.h"
 #include "revolution/os.h"
 
 static __GXFifoObj CPUFifo;
 static __GXFifoObj GPFifo;
-static GXBool GPFifoReady = false;
-static GXBool CPGPLinked;
+
+static OSThread* __GXCurrentThread;
+static bool GXOverflowSuspendInProgress;
+static GXBreakPtCallback BreakPointCB;
 volatile void* __GXCurrentBP;
+static u32 __GXOverflowCount;
+static GXBool GPFifoReady;
+static GXBool CPGPLinked;
 
 #define TOPHYSICAL(a) (((u32)a) & 0x3FFFFFFF)
+
+void GXInitFifoPtrs(GXFifoObj* fifo, void* readPtr, void* writePtr);
+void GXInitFifoLimits(GXFifoObj* fifo, u32 highWatermark, u32 lowWatermark);
+
+static void __GXFifoLink(GXBool en);
+static void __GXWriteFifoIntEnable(GXBool hi, GXBool lo);
+static void __GXWriteFifoIntReset(GXBool hiWatermarkClr, GXBool loWatermarkClr);
+static void __GXFifoReadEnable(void);
+static void __GXFifoReadDisable(void);
+
+static inline void GXOverflowHandler(void) {
+    __GXOverflowCount += 1;
+    __GXWriteFifoIntEnable(0, 1);
+    __GXWriteFifoIntReset(1, 0);
+    GXOverflowSuspendInProgress = true;
+    OSSuspendThread(__GXCurrentThread);
+}
+
+static inline void GXUnderflowHandler(void) {
+    OSResumeThread(__GXCurrentThread);
+    GXOverflowSuspendInProgress = false;
+    __GXWriteFifoIntReset(1, 1);
+    __GXWriteFifoIntEnable(1, 0);
+}
+
+static inline void GXBreakPointHandler(OSContext* context) {
+    OSContext bpContext;
+    GX_SET_REG(gx->cpEnable, 0, 26, 26);
+    GX_SET_CP_REG(1, gx->cpEnable);
+
+    if (BreakPointCB) {
+        OSClearContext(&bpContext);
+        OSSetCurrentContext(&bpContext);
+        BreakPointCB();
+        OSClearContext(&bpContext);
+        OSSetCurrentContext(context);
+    }
+}
+
+void GXCPInterruptHandler(s16 p1, OSContext* context) {
+
+    gx->cpStatus = GX_GET_CP_REG(0);
+
+    if ((gx->cpEnable >> 3 & 1) && (gx->cpStatus >> 1 & 1)) {
+        GXUnderflowHandler();
+    }
+
+    if ((gx->cpEnable >> 2 & 1) && (gx->cpStatus >> 0 & 1)) {
+        GXOverflowHandler();
+    }
+
+    if ((gx->cpEnable >> 5 & 1) && (gx->cpStatus >> 4 & 1)) {
+        GXBreakPointHandler(context);
+    }
+}
+
+void GXInitFifoBase(GXFifoObj* fifo, void* base, u32 size) {
+    GXFifoObjPriv* pFifo = (GXFifoObjPriv*)fifo;
+    pFifo->base = base;
+    pFifo->end = (void*)((u32)base + size - 4);
+    pFifo->size = size;
+    pFifo->rwDistance = 0;
+    GXInitFifoLimits(fifo, size - 0x4000, OSRoundDown32B(size / 2));
+    GXInitFifoPtrs(fifo, base, base);
+}
+
+void GXInitFifoPtrs(GXFifoObj* fifo, void* readPtr, void* writePtr) {
+    GXFifoObjPriv* pFifo = (GXFifoObjPriv*)fifo;
+    int interrupts = OSDisableInterrupts();
+    pFifo->readPtr = readPtr;
+    pFifo->writePtr = writePtr;
+    pFifo->rwDistance = (u32)writePtr - (u32)readPtr;
+    if (pFifo->rwDistance < 0) {
+        pFifo->rwDistance += pFifo->size;
+    }
+    OSRestoreInterrupts(interrupts);
+}
+
+void GXInitFifoLimits(GXFifoObj* fifo, u32 highWatermark, u32 lowWatermark) {
+    GXFifoObjPriv* pFifo = (GXFifoObjPriv*)fifo;
+    pFifo->highWatermark = highWatermark;
+    pFifo->lowWatermark = lowWatermark;
+}
+
+GXBool __GXIsGPFifoReady(void) { return GPFifoReady; }
+
+GXBreakPtCallback GXSetBreakPtCallback(GXBreakPtCallback cb) {
+    GXBreakPtCallback oldCallback = BreakPointCB;
+    int interrupts = OSDisableInterrupts();
+    BreakPointCB = cb;
+    OSRestoreInterrupts(interrupts);
+    return oldCallback;
+}
+
+void __GXFifoInit(void) {
+    __OSSetInterruptHandler(OS_INTR_PI_CP, GXCPInterruptHandler);
+    __OSUnmaskInterrupts(0x4000);
+    __GXCurrentThread = OSGetCurrentThread();
+    GXOverflowSuspendInProgress = 0;
+    memset(&CPUFifo, 0, sizeof(__GXFifoObj));
+    memset(&GPFifo, 0, sizeof(__GXFifoObj));
+    CPGPLinked = false;
+    GPFifoReady = false;
+}
 
 static void __GXFifoLink(GXBool en) {
     FAST_FLAG_SET(gx->cpEnable, (en ? 1 : 0), 4, 1);
@@ -82,5 +193,3 @@ void __GXCleanGPFifo(void) {
     __GXFifoReadEnable();
     OSRestoreInterrupts(enabled);
 }
-
-GXBool __GXIsGPFifoReady(void) { return GPFifoReady; }

@@ -191,6 +191,15 @@ static inline u32 GXReadPIReg(u32 addrLo, u32 addrHi) {
     return ((hiStart << 16) | lo);
 }
 
+#define GX_WRITE_SOME_REG4(a, b, c, addr) \
+    do {                                  \
+        long regAddr;                     \
+        GX_WRITE_U8(a);                   \
+        GX_WRITE_U8(b);                   \
+        GX_WRITE_U32(c);                  \
+        regAddr = addr;                   \
+    } while (0)
+
 #ifdef __cplusplus
 }
 #endif

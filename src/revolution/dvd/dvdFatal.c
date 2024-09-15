@@ -1,6 +1,6 @@
-#include <revolution/DVD.h>
-#include <revolution/OS.h>
-#include <revolution/SC.h>
+#include "revolution/dvd.h"
+#include "revolution/os.h"
+#include "revolution/sc.h"
 
 static funcptr_t FatalFunc = NULL;
 

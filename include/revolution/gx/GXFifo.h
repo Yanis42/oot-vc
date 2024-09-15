@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+typedef void (*GXBreakPtCallback)(void);
+
 GX_DECL_PUBLIC_STRUCT(GXFifoObj, 128);
 
 typedef struct __GXFifoObj {
@@ -24,13 +26,28 @@ typedef struct __GXFifoObj {
     GXBool bind_gp;
 } __GXFifoObj;
 
+// Internal struct for FIFO access.
+typedef struct _GXFifoObjPriv {
+    /* 0x00 */ void* base;
+    /* 0x04 */ void* end;
+    /* 0x08 */ u32 size;
+    /* 0x0C */ u32 highWatermark;
+    /* 0x10 */ u32 lowWatermark;
+    /* 0x14 */ void* readPtr;
+    /* 0x18 */ void* writePtr;
+    /* 0x1C */ s32 rwDistance;
+    /* 0x20 */ u8 _20[0x60];
+} GXFifoObjPriv;
+
 void GXGetGPStatus(u8*, u8*, u8*, u8*, u8*);
 
 void GXSetCPUFifo(GXFifoObj*);
-bool GXGetCPUFifo(GXFifoObj*);
+bool GXGetCPUFifo(void);
 
 u32 GXGetFifoCount(GXFifoObj*);
 u8 GXGetFifoWrap(GXFifoObj*);
+
+GXBool __GXIsGPFifoReady(void);
 
 #ifdef __cplusplus
 }

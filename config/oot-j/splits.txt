@@ -444,39 +444,56 @@ revolution/gx/GXInit.c:
 
 revolution/gx/GXFifo.c:
 	.text       start:0x8009E3C0 end:0x8009ED7C
+	.data       start:0x80184C40 end:0x80184C70
+	.bss        start:0x801DE470 end:0x801DE4C0
+	.sbss       start:0x8025D758 end:0x8025D778
 
 revolution/gx/GXAttr.c:
 	.text       start:0x8009ED7C end:0x8009F870
+	.data       start:0x80184C70 end:0x80184DD0
+	.sdata      start:0x8025C9E8 end:0x8025C9F8
 
 revolution/gx/GXMisc.c:
 	.text       start:0x8009F870 end:0x800A01A0
+	.sbss       start:0x8025D778 end:0x8025D790
 
 revolution/gx/GXGeometry.c:
 	.text       start:0x800A01A0 end:0x800A0664
 
 revolution/gx/GXFrameBuf.c:
 	.text       start:0x800A0664 end:0x800A1038
+	.data       start:0x80184DD0 end:0x80184F00
+	.sdata2     start:0x8025E370 end:0x8025E378
 
 revolution/gx/GXLight.c:
 	.text       start:0x800A1038 end:0x800A12B0
 
 revolution/gx/GXTexture.c:
 	.text       start:0x800A12B0 end:0x800A2074
+	.data       start:0x80184F00 end:0x80185030
+	.sdata      start:0x8025C9F8 end:0x8025CA38
+	.sdata2     start:0x8025E378 end:0x8025E3A0
 
 revolution/gx/GXBump.c:
 	.text       start:0x800A2074 end:0x800A24C0
+	.sdata2     start:0x8025E3A0 end:0x8025E3A8
 
 revolution/gx/GXTev.c:
 	.text       start:0x800A24C0 end:0x800A2B40
+	.data       start:0x80185030 end:0x801850A8
 
 revolution/gx/GXPixel.c:
 	.text       start:0x800A2B40 end:0x800A3144
+	.data       start:0x801850A8 end:0x801850C8
+	.sdata2     start:0x8025E3A8 end:0x8025E3E0
 
 revolution/gx/GXTransform.c:
 	.text       start:0x800A3144 end:0x800A3668
+	.sdata2     start:0x8025E3E0 end:0x8025E3F0
 
 revolution/gx/GXPerf.c:
 	.text       start:0x800A3668 end:0x800A3EA4
+	.data       start:0x801850C8 end:0x801851B8
 
 revolution/dvd/dvdfs.c:
 	.text       start:0x800A3EA4 end:0x800A498C

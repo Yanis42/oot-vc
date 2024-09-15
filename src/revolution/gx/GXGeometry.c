@@ -1,4 +1,5 @@
 #include "revolution/gx.h"
+#include "revolution/gx/GXRegs.h"
 
 inline void __GXSetAmbMat(u32 dirtyFlags) {
     if (dirtyFlags & GX_DIRTY_AMB_COLOR0) {
@@ -133,7 +134,7 @@ void GXBegin(GXPrimitive prim, GXVtxFmt fmt, u16 verts) {
         __GXSetDirtyState();
     }
 
-    if (gx->vNumNot == 0) {
+    if (GX_CHECK_FLUSH()) {
         __GXSendFlushPrim();
     }
 
@@ -141,7 +142,7 @@ void GXBegin(GXPrimitive prim, GXVtxFmt fmt, u16 verts) {
     WGPIPE.s = verts;
 }
 
-void __GXSendFlushPrim(void) {
+static inline void __GXSendFlushPrim(void) {
     u32 i;
     u32 sz = gx->vNum * gx->vLim;
 
@@ -183,14 +184,6 @@ void GXSetCullMode(GXCullMode mode) {
     gx->dirtyState |= GX_DIRTY_GEN_MODE;
 }
 
-void GXGetCullMode(GXCullMode* out) {
-    // TODO: Fakematch? Should use GX_BP_GET_GENMODE_CULLMODE if possible
-    s32 bits = 0;
-    bits |= (s32)(gx->genMode >> (13 + 1) & 2) >> 1;
-    bits |= (s32)(gx->genMode >> 13 & 2);
-    *out = (GXCullMode)bits;
-}
-
 void GXSetCoPlanar(GXBool coplanar) {
     u32 reg;
 
@@ -206,7 +199,7 @@ void GXSetCoPlanar(GXBool coplanar) {
     GX_BP_LOAD_REG(gx->genMode);
 }
 
-void __GXSetGenMode(void) {
+static inline void __GXSetGenMode(void) {
     GX_BP_LOAD_REG(gx->genMode);
     gx->bpSentNot = false;
 }

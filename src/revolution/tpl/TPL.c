@@ -1,5 +1,5 @@
-#include <revolution/OS.h>
-#include <revolution/TPL.h>
+#include "revolution/tpl.h"
+#include "revolution/os.h"
 
 #define TPL_VERSION 0x0020AF30
 
