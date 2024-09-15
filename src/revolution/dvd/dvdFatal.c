@@ -21,7 +21,10 @@ const char* const __DVDErrorMessage[] = {
 
     // SC_LANG_DE
     "\n\n\nEin Fehler ist aufgetreten.\n"
-    "Dr""\xFC""cke"" den Ausgabeknopf, entnimm die\n"
+    "Dr"
+    "\xFC"
+    "cke"
+    " den Ausgabeknopf, entnimm die\n"
     "Game Disc und schalte die Wii-Konsole\n"
     "aus. Bitte lies die Bedienungsanleitung der\n"
     "Wii-Konsole, um weitere Informationen zu\n"
@@ -30,20 +33,34 @@ const char* const __DVDErrorMessage[] = {
     // SC_LANG_FR
     "\n\n\nUne erreur est survenue.\n"
     "Appuyez sur le bouton EJECT, retirez\n"
-    "le disque de jeu et ""\xE9""teignez la console.\n"
-    "Veuillez vous r""\xE9""f""\xE9""rer au mode d'emploi\n"
+    "le disque de jeu et "
+    "\xE9"
+    "teignez la console.\n"
+    "Veuillez vous r"
+    "\xE9"
+    "f"
+    "\xE9"
+    "rer au mode d'emploi\n"
     "de la console pour de plus amples\n"
     "informations.",
 
     // SC_LANG_SP
     "\n\n\nSe ha producido un error.\n"
-    "Pulsa el Bot""\xF3""n EJECT, saca el disco y\n"
+    "Pulsa el Bot"
+    "\xF3"
+    "n EJECT, saca el disco y\n"
     "apaga la consola. Consulta el manual de\n"
     "instrucciones de la consola Wii para\n"
-    "obtener m""\xE1""s informaci""\xF3""n.",
+    "obtener m"
+    "\xE1"
+    "s informaci"
+    "\xF3"
+    "n.",
 
     // SC_LANG_IT
-    "\n\n\nSi ""\xE8"" verificato un errore.\n"
+    "\n\n\nSi "
+    "\xE8"
+    " verificato un errore.\n"
     "Premi il pulsante EJECT, estrai il disco\n"
     "di gioco e spegni la console. Per maggiori\n"
     "informazioni consulta il manuale di\n"

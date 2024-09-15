@@ -5,11 +5,6 @@
 #include "revolution/os.h"
 #include "stdarg.h"
 
-extern u32 DEMOFontBitmap[];
-extern u32 DemoUseMEMHeap;
-extern MEMAllocator DemoAllocator1;
-extern MEMAllocator DemoAllocator2;
-
 static OSFontHeader* FontData;
 static void* LastSheet;
 static s16 FontSize;

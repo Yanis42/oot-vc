@@ -189,7 +189,7 @@ end:
 }
 
 FORCE_SYMBOL(usb, "OpenDevice\n", "OpenDeviceIdsAsync: Not enough memory\n", "CloseDevice\n",
-            "CloseDevice returned: %d\n");
+             "CloseDevice returned: %d\n");
 
 IPCResult IUSB_CloseDeviceAsync(s32 fd, USBCallback callback, void* callbackArg) {
     IPCResult result;
@@ -456,8 +456,8 @@ IPCResult IUSB_WriteCtrlMsgAsync(s32 fd, u8 requestType, u8 request, u16 value, 
 }
 
 FORCE_SYMBOL(usb, "GetStrCb returned: %d\n", "GetStrCb: buf = 0x%x buflen = %u\n",
-            "Failed to convert buffer from unicode 2 ascii\n", "calling cb 0x%x with arg 0x%x\n",
-            "Failed __CtrlMsg: %d", "Failed to convert unicode 2 ascii\n", "GetStr - _GetStrCb\n",
-            " GetAsciiStrAsync: Not enough memory\n", "__CtrlMsgInt failed %d\n", "GetDescrCb returned: %d\n",
-            "GetDevDescr\n", "GetDevDescr: Not enough memory\n", "GetDevDescr: %d\n", "GetDevDescr - _GetDescrCb\n",
-            "GetDevDescrAsync: Not enough memory\n", "DeviceRemovalNotifyAsync\n");
+             "Failed to convert buffer from unicode 2 ascii\n", "calling cb 0x%x with arg 0x%x\n",
+             "Failed __CtrlMsg: %d", "Failed to convert unicode 2 ascii\n", "GetStr - _GetStrCb\n",
+             " GetAsciiStrAsync: Not enough memory\n", "__CtrlMsgInt failed %d\n", "GetDescrCb returned: %d\n",
+             "GetDevDescr\n", "GetDevDescr: Not enough memory\n", "GetDevDescr: %d\n", "GetDevDescr - _GetDescrCb\n",
+             "GetDevDescrAsync: Not enough memory\n", "DeviceRemovalNotifyAsync\n");

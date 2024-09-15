@@ -1,7 +1,7 @@
+#include "macros.h"
 #include "revolution/ax.h"
 #include "revolution/os.h"
 #include "stdint.h"
-#include "macros.h"
 
 // Compression parameters.
 // Later versions of AX have these as static vars

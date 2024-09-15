@@ -509,9 +509,13 @@ revolution/dvd/dvdFatal.c:
 revolution/dvd/dvd_broadway.c:
 	.text       start:0x800A95B4 end:0x800AAFA0
 	.data       start:0x80185A90 end:0x80186688
-	.bss        start:0x801E3260 end:0x801E33C0
+	.bss        start:0x801E3260 end:0x801E3380
 	.sdata      start:0x8025CA60 end:0x8025CA70
 	.sbss       start:0x8025D848 end:0x8025D870
+
+revolution/demo/DEMOInit.c:
+	.bss        start:0x801E3380 end:0x801E33D0
+	.sbss       start:0x8025D870 end:0x8025D880
 
 revolution/demo/DEMOPuts.c:
 	.text       start:0x800AAFA0 end:0x800AB758

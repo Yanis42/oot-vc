@@ -34,7 +34,7 @@ extern "C" {
 #define CONCAT(x, y) __CONCAT(x, y)
 
 #ifndef NON_MATCHING
-#define FORCE_SYMBOL(module, ...)                      \
+#define FORCE_SYMBOL(module, ...)                     \
     void fake_function(char, ...);                    \
     void CONCAT(##module##_unused_L, __LINE__)(void); \
     void CONCAT(##module##_unused_L, __LINE__)(void) { fake_function(0, __VA_ARGS__); }

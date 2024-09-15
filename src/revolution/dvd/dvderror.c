@@ -1,6 +1,6 @@
+#include "macros.h"
 #include "revolution/dvd.h"
 #include "revolution/nand.h"
-#include "macros.h"
 
 static NANDFileInfo NandInfo;
 static NANDCommandBlock NandCb;
@@ -30,8 +30,7 @@ static void cbForNandOpen(s32 result, NANDCommandBlock* block) {
 #pragma unused(block)
 
     if (result == NAND_RESULT_OK) {
-        if (NANDWriteAsync(&NandInfo, &__ErrorInfo, sizeof(DVDErrorInfo),
-                           cbForNandWrite, &NandCb) != NAND_RESULT_OK) {
+        if (NANDWriteAsync(&NandInfo, &__ErrorInfo, sizeof(DVDErrorInfo), cbForNandWrite, &NandCb) != NAND_RESULT_OK) {
             // Must call callback function manually
             cbForNandWrite(-1, null);
         }
@@ -44,9 +43,8 @@ static void cbForNandCreate(s32 result, NANDCommandBlock* block) {
 #pragma unused(block)
 
     if (result == NAND_RESULT_OK || result == NAND_RESULT_EXISTS) {
-        if (NANDPrivateOpenAsync("/shared2/test/dvderror.dat", &NandInfo,
-                                 NAND_ACCESS_WRITE, cbForNandOpen,
-                                 &NandCb) != NAND_RESULT_OK) {
+        if (NANDPrivateOpenAsync("/shared2/test/dvderror.dat", &NandInfo, NAND_ACCESS_WRITE, cbForNandOpen, &NandCb) !=
+            NAND_RESULT_OK) {
             // Must call callback function manually
             cbForNandOpen(-1, null);
         }
@@ -59,9 +57,8 @@ static void cbForNandCreateDir(s32 result, NANDCommandBlock* block) {
 #pragma unused(block)
 
     if (result == NAND_RESULT_OK || result == NAND_RESULT_EXISTS) {
-        if (NANDPrivateCreateAsync("/shared2/test/dvderror.dat",
-                                   NAND_PERM_RWALL, 0, cbForNandCreate,
-                                   &NandCb) != NAND_RESULT_OK) {
+        if (NANDPrivateCreateAsync("/shared2/test/dvderror.dat", NAND_PERM_RWALL, 0, cbForNandCreate, &NandCb) !=
+            NAND_RESULT_OK) {
             // Must call callback function manually
             cbForNandCreate(-1, null);
         }
@@ -75,8 +72,7 @@ void __DVDStoreErrorCode(u32 error, DVDErrorCallback callback) {
     __ErrorInfo.sec = OS_TICKS_TO_SEC(OSGetTime());
     Callback = callback;
 
-    if (NANDPrivateCreateDirAsync("/shared2/test", NAND_PERM_RWALL, 0,
-                                  cbForNandCreateDir, &NandCb) != 0) {
+    if (NANDPrivateCreateDirAsync("/shared2/test", NAND_PERM_RWALL, 0, cbForNandCreateDir, &NandCb) != 0) {
         // Must call callback function manually
         cbForNandCreateDir(-1, null);
     }

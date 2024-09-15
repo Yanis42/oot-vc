@@ -3,8 +3,7 @@
 
 bool DVDCompareDiskID(const DVDDiskID* id1, const DVDDiskID* id2) {
     // Compare game name
-    if (id1->game[0] != '\0' && id2->game[0] != '\0' &&
-        strncmp(id1->game, id2->game, sizeof(id1->game)) != 0) {
+    if (id1->game[0] != '\0' && id2->game[0] != '\0' && strncmp(id1->game, id2->game, sizeof(id1->game)) != 0) {
         return false;
     }
 
@@ -20,8 +19,7 @@ bool DVDCompareDiskID(const DVDDiskID* id1, const DVDDiskID* id2) {
     }
 
     // Compare version number
-    if (id1->version != 0xFF && id2->version != 0xFF &&
-        id1->version != id2->version) {
+    if (id1->version != 0xFF && id2->version != 0xFF && id1->version != id2->version) {
         return false;
     }
 
