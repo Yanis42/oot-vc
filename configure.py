@@ -473,10 +473,10 @@ config.libs = [
     RevolutionLib(
         "ipc",
         [
-            Object(NotLinked, "revolution/ipc/ipcMain.c"),
-            Object(NotLinked, "revolution/ipc/ipcclt.c"),
-            Object(NotLinked, "revolution/ipc/memory.c"),
-            Object(NotLinked, "revolution/ipc/ipcProfile.c"),
+            Object(LinkedFor("oot-j"), "revolution/ipc/ipcMain.c"),
+            Object(LinkedFor("oot-j"), "revolution/ipc/ipcclt.c"),
+            Object(LinkedFor("oot-j"), "revolution/ipc/memory.c"),
+            Object(LinkedFor("oot-j"), "revolution/ipc/ipcProfile.c"),
         ]
     ),
     RevolutionLib(

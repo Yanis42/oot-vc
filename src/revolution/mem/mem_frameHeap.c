@@ -23,12 +23,12 @@ static MEMiHeapHead* InitFrameHeap_(MEMiHeapHead* heap, void* end, u16 opt) {
     return heap;
 }
 
-static void* AllocFromHead_(MEMiFrmHeapHead* frm, u32 size, s32 ATTRIBUTE_ALIGN) {
+static void* AllocFromHead_(MEMiFrmHeapHead* frm, u32 size, s32 align) {
     void* start;
     void* end;
 
     // Memory block to be allocated
-    start = ROUND_UP_PTR(GetUIntPtr(frm->head), ATTRIBUTE_ALIGN);
+    start = ROUND_UP_PTR(GetUIntPtr(frm->head), align);
     end = AddU32ToPtr(start, size);
 
     // Not enough memory
@@ -45,12 +45,12 @@ static void* AllocFromHead_(MEMiFrmHeapHead* frm, u32 size, s32 ATTRIBUTE_ALIGN)
     return start;
 }
 
-static void* AllocFromTail_(MEMiFrmHeapHead* frm, u32 size, s32 ATTRIBUTE_ALIGN) {
+static void* AllocFromTail_(MEMiFrmHeapHead* frm, u32 size, s32 align) {
     void* start;
 
     // Memory block to be allocated (starts from tail)
     start = SubU32ToPtr(frm->tail, size);
-    start = ROUND_DOWN_PTR(GetUIntPtr(start), ATTRIBUTE_ALIGN);
+    start = ROUND_DOWN_PTR(GetUIntPtr(start), align);
 
     // Not enough memory
     if (start < frm->head) {
@@ -106,7 +106,7 @@ MEMiHeapHead* MEMDestroyFrmHeap(MEMiHeapHead* heap) {
     return heap;
 }
 
-void* MEMAllocFromFrmHeapEx(MEMiHeapHead* heap, u32 size, s32 ATTRIBUTE_ALIGN) {
+void* MEMAllocFromFrmHeapEx(MEMiHeapHead* heap, u32 size, s32 align) {
     MEMiFrmHeapHead* frm;
     void* memBlock;
 
@@ -118,11 +118,11 @@ void* MEMAllocFromFrmHeapEx(MEMiHeapHead* heap, u32 size, s32 ATTRIBUTE_ALIGN) {
     size = ROUND_UP(size, 4);
 
     LockHeap(heap);
-    // ATTRIBUTE_ALIGNment sign determines alloc direction
-    if (ATTRIBUTE_ALIGN >= 0) {
-        memBlock = AllocFromHead_(frm, size, ATTRIBUTE_ALIGN);
+    // alignment sign determines alloc direction
+    if (align >= 0) {
+        memBlock = AllocFromHead_(frm, size, align);
     } else {
-        memBlock = AllocFromTail_(frm, size, -ATTRIBUTE_ALIGN);
+        memBlock = AllocFromTail_(frm, size, -align);
     }
     UnlockHeap(heap);
 
@@ -140,18 +140,18 @@ void MEMFreeToFrmHeap(MEMiHeapHead* heap, u32 flags) {
     UnlockHeap(heap);
 }
 
-u32 MEMGetAllocatableSizeForFrmHeapEx(MEMiHeapHead* heap, s32 ATTRIBUTE_ALIGN) {
+u32 MEMGetAllocatableSizeForFrmHeapEx(MEMiHeapHead* heap, s32 align) {
     MEMiFrmHeapHead* frm;
     bool enabled;
     void* start;
     u32 size;
 
-    ATTRIBUTE_ALIGN = __abs(ATTRIBUTE_ALIGN);
+    align = __abs(align);
 
     enabled = OSDisableInterrupts();
     frm = GetFrmHeapHeadPtrFromHeapHead_(heap);
 
-    start = ROUND_UP_PTR(frm->head, ATTRIBUTE_ALIGN);
+    start = ROUND_UP_PTR(frm->head, align);
 
     if (start > frm->tail) {
         size = 0;

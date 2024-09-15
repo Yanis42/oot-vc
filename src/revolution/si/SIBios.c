@@ -254,7 +254,7 @@ void SIInit(void) {
 static bool __SITransfer(s32 chan, void* outAddr, u32 outSize, void* inAddr, u32 inSize, SICallback callback) {
     bool enabled;
     u32 sr;
-    u32 ATTRIBUTE_ALIGNSize;
+    u32 alignSize;
     u32 i;
 
     union {
@@ -292,8 +292,8 @@ static bool __SITransfer(s32 chan, void* outAddr, u32 outSize, void* inAddr, u32
     Si.inSize = inSize;
     Si.inAddr = inAddr;
 
-    ATTRIBUTE_ALIGNSize = (outSize + 3) / 4;
-    for (i = 0; i < ATTRIBUTE_ALIGNSize; i++) {
+    alignSize = (outSize + 3) / 4;
+    for (i = 0; i < alignSize; i++) {
         SI_HW_REGS[SI_RAM_BASE + i] = ((u32*)outAddr)[i];
     }
 

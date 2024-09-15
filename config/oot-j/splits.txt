@@ -686,15 +686,22 @@ revolution/arc/arc.c:
 
 revolution/ipc/ipcMain.c:
 	.text       start:0x800B808C end:0x800B8110
+	.sbss       start:0x8025DA40 end:0x8025DA58
 
 revolution/ipc/ipcclt.c:
 	.text       start:0x800B8110 end:0x800B9810
+	.bss        start:0x80208EC0 end:0x80208F10
+	.sdata      start:0x8025CBC0 end:0x8025CBC8
+	.sbss       start:0x8025DA58 end:0x8025DA68
 
 revolution/ipc/memory.c:
 	.text       start:0x800B9810 end:0x800B9D34
+	.bss        start:0x80208F10 end:0x80208F90
 
 revolution/ipc/ipcProfile.c:
 	.text       start:0x800B9D34 end:0x800B9EF8
+	.bss        start:0x80208F90 end:0x80209090
+	.sbss       start:0x8025DA68 end:0x8025DA70
 
 revolution/fs/fs.c:
 	.text       start:0x800B9EF8 end:0x800BB2B8
