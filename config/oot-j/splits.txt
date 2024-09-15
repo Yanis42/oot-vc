@@ -595,8 +595,37 @@ revolution/ax/AXProf.c:
 	.text       start:0x800AF598 end:0x800AF5D8
 	.sbss       start:0x8025D9D8 end:0x8025D9E8
 
-revolution/axfx/code_800AF5D8.c:
-	.text       start:0x800AF5D8 end:0x800B1BEC
+revolution/axfx/AXFXReverbHi.c:
+	.text       start:0x800AF5D8 end:0x800AF664
+	.sdata2     start:0x8025E438 end:0x8025E440
+
+revolution/axfx/AXFXReverbHiExp.c:
+	.text       start:0x800AF664 end:0x800B043C
+
+revolution/axfx/AXFXHooks.c:
+	.text       start:0x800B043C end:0x800B0474
+	.sdata      start:0x8025CA88 end:0x8025CA90
+
+revolution/mem/mem_heapCommon.c:
+	.text       start:0x800B0474 end:0x800B08E0
+	.bss        start:0x801FDFA0 end:0x801FDFC8
+	.sbss       start:0x8025D9E8 end:0x8025D9F0
+
+revolution/mem/mem_expHeap.c:
+	.text       start:0x800B08E0 end:0x800B104C
+
+revolution/mem/mem_frameHeap.c:
+	.text       start:0x800B104C end:0x800B1610
+
+revolution/mem/mem_allocator.c:
+	.text       start:0x800B1610 end:0x800B1694
+	.sdata2     start:0x8025E480 end:0x8025E490
+
+revolution/mem/mem_list.c:
+	.text       start:0x800B1694 end:0x800B17A8
+
+revolution/code_800B17A8.c:
+	.text       start:0x800B17A8 end:0x800B1BEC
 
 revolution/dsp/dsp.c:
 	.text       start:0x800B1BEC end:0x800B1E68

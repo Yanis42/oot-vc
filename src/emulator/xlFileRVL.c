@@ -5,9 +5,6 @@
 #include "revolution/cnt.h"
 #include "stddef.h"
 
-//! TODO: document this
-void* fn_800B0DF0(void*, size_t, s32);
-
 MEMAllocator gCNTAllocator;
 CNTHandle gCNTHandle;
 
@@ -146,12 +143,12 @@ static inline bool xlFileEventInline(void) {
         return false;
     }
 
-    ret = fn_800B0DF0(buffer, 0x20000, 0);
+    ret = MEMCreateExpHeapEx(buffer, 0x20000, 0);
     if (ret == NULL) {
         return false;
     }
 
-    fn_800B165C(&gCNTAllocator, ret, 4);
+    MEMInitAllocatorForExpHeap(&gCNTAllocator, ret, 4);
     return true;
 }
 

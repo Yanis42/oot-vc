@@ -195,17 +195,6 @@ def RevolutionLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
         "objects": objects,
     }
 
-# The DVD library is using a different compiler
-# TODO: determine if the newer version works
-def RevolutionDVDLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
-    return {
-        "lib": lib_name,
-        "mw_version": "GC/3.0a5.2",
-        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
-        "host": False,
-        "objects": objects,
-    }
-
 def LibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
@@ -386,7 +375,7 @@ config.libs = [
             Object(LinkedFor("oot-j"), "revolution/gx/GXPerf.c"),
         ]
     ),
-    RevolutionDVDLib(
+    RevolutionLib(
         "dvd",
         [
             Object(NotLinked, "revolution/dvd/dvdfs.c"),
@@ -429,7 +418,25 @@ config.libs = [
     RevolutionLib(
         "axfx",
         [
-            Object(NotLinked, "revolution/axfx/code_800AF5D8.c"),
+            Object(LinkedFor("oot-j"), "revolution/axfx/AXFXReverbHi.c"),
+            Object(NotLinked, "revolution/axfx/AXFXReverbHiExp.c"),
+            Object(LinkedFor("oot-j"), "revolution/axfx/AXFXHooks.c"),
+        ]
+    ),
+    RevolutionLib(
+        "mem",
+        [
+            Object(LinkedFor("oot-j"), "revolution/mem/mem_heapCommon.c"),
+            Object(NotLinked, "revolution/mem/mem_expHeap.c"),
+            Object(NotLinked, "revolution/mem/mem_frameHeap.c"),
+            Object(LinkedFor("oot-j"), "revolution/mem/mem_allocator.c"),
+            Object(LinkedFor("oot-j"), "revolution/mem/mem_list.c"),
+        ]
+    ),
+    RevolutionLib(
+        "code_800B17A8",
+        [
+            Object(NotLinked, "revolution/code_800B17A8.c")
         ]
     ),
     RevolutionLib(
