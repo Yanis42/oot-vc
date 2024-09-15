@@ -255,7 +255,7 @@ inline void StampCommand(u32 command, u32 param1, u32 param2) {
     OSRestoreInterrupts(enabled);
 }
 
-FORCE_SYMBOL(dvd, StampCommand);
+FORCE_ACTIVE(dvd, StampCommand);
 
 inline void StampIntType(u32 intType) {
     bool enabled = OSDisableInterrupts();

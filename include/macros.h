@@ -29,17 +29,17 @@ extern "C" {
 
 #define NO_INLINE __attribute__((never_inline))
 
-// Force unused data to be exported
 #define __CONCAT(x, y) x##y
 #define CONCAT(x, y) __CONCAT(x, y)
 
+// Force unused data to be exported
 #ifndef NON_MATCHING
-#define FORCE_SYMBOL(module, ...)                     \
+#define FORCE_ACTIVE(module, ...)                     \
     void fake_function(char, ...);                    \
     void CONCAT(##module##_unused_L, __LINE__)(void); \
     void CONCAT(##module##_unused_L, __LINE__)(void) { fake_function(0, __VA_ARGS__); }
 #else
-#define FORCE_SYMBOL(module, ...)
+#define FORCE_ACTIVE(module, ...)
 #endif
 
 // Adds a stack variable in an inline function, which can be used to pad the

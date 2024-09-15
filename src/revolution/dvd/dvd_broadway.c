@@ -83,7 +83,7 @@ static DVDLowRegBuffer registerBuf ATTRIBUTE_ALIGN(32);
 static IPCIOVector ioVec[5] ATTRIBUTE_ALIGN(32);
 static u8 lastTicketError[32] ATTRIBUTE_ALIGN(32);
 
-FORCE_SYMBOL(dvd_broadway, dvdContexts);
+FORCE_ACTIVE(dvd_broadway, dvdContexts);
 
 static void nextCommandBuf(void);
 static DVDLowContext* newContext(DVDLowCallback callback, UNKWORD arg2);
@@ -165,7 +165,7 @@ static s32 doTransactionCallback(s32 intType, void* arg) {
     return IPC_RESULT_OK;
 }
 
-FORCE_SYMBOL(dvd_broadway, "(doCoverCallback) Error - context mangled!\n");
+FORCE_ACTIVE(dvd_broadway, "(doCoverCallback) Error - context mangled!\n");
 
 static s32 doPrepareCoverRegisterCallback(s32 intType, void* arg) {
     DVDLowContext* ctx = (DVDLowContext*)arg;
@@ -453,7 +453,7 @@ bool DVDLowStopMotor(bool eject, bool kill, DVDLowCallback callback) {
     return true;
 }
 
-FORCE_SYMBOL(dvd_broadway, "@@@ (DVDLowWaitForCoverClose) IOS_IoctlAsync returned error: %d\n");
+FORCE_ACTIVE(dvd_broadway, "@@@ (DVDLowWaitForCoverClose) IOS_IoctlAsync returned error: %d\n");
 
 bool DVDLowInquiry(DVDDriveInfo* out, DVDLowCallback callback) {
     DVDLowContext* ctx;
@@ -501,7 +501,7 @@ bool DVDLowRequestError(DVDLowCallback callback) {
     return true;
 }
 
-FORCE_SYMBOL(dvd_broadway, "(DVDLowSetSpinupFlag): Synch functions can't be called in callbacks\n",
+FORCE_ACTIVE(dvd_broadway, "(DVDLowSetSpinupFlag): Synch functions can't be called in callbacks\n",
              "@@@ (DVDLowNotifyReset) IOS_IoctlAsync returned error: %d\n");
 
 bool DVDLowSetSpinupFlag(bool enable) {
@@ -558,7 +558,7 @@ bool DVDLowAudioBufferConfig(bool enable, u32 size, DVDLowCallback callback) {
     return true;
 }
 
-FORCE_SYMBOL(dvd_broadway, "(DVDLowGetCoverStatus): Synch functions can't be called in callbacks\n",
+FORCE_ACTIVE(dvd_broadway, "(DVDLowGetCoverStatus): Synch functions can't be called in callbacks\n",
              "@@@ (DVDLowGetCoverStatus) IOS_Ioctl returned error: %d\n",
              "@@@ (DVDLowReadDVD) IOS_IoctlAsync returned error: %d\n",
              "@@@ (DVDLowReadDVDConfig) IOS_IoctlAsync returned error: %d\n",
@@ -653,7 +653,7 @@ bool DVDLowSeek(u32 offset, DVDLowCallback callback) {
     return true;
 }
 
-FORCE_SYMBOL(dvd_broadway, "(DVDLowGetCoverReg): Synch functions can't be called in callbacks\n",
+FORCE_ACTIVE(dvd_broadway, "(DVDLowGetCoverReg): Synch functions can't be called in callbacks\n",
              "@@@ (DVDLowGetCoverReg) IOS_Ioctl returned error: %d\n");
 
 u32 DVDLowGetCoverRegister(void) { return diRegValCache.dicvr; }
@@ -720,4 +720,4 @@ bool __DVDLowTestAlarm(const OSAlarm* alarm) {
     return false;
 }
 
-FORCE_SYMBOL(dvd_broadway, "@@@ (DVDLowEnableDvdVideo) IOS_IoctlAsync returned error: %d\n");
+FORCE_ACTIVE(dvd_broadway, "@@@ (DVDLowEnableDvdVideo) IOS_IoctlAsync returned error: %d\n");
