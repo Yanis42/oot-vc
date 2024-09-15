@@ -475,24 +475,43 @@ revolution/gx/GXPerf.c:
 
 revolution/dvd/dvdfs.c:
 	.text       start:0x800A3EA4 end:0x800A498C
+	.data       start:0x801851B8 end:0x80185320
+	.sdata      start:0x8025CA38 end:0x8025CA48
+	.sbss       start:0x8025D790 end:0x8025D7B0
 
 revolution/dvd/dvd.c:
-	.text       start:0x800A498C end:0x800A8E38
+	.text       start:0x800A498C end:0x800A8E3C
+	.data       start:0x80185320 end:0x801855B0
+	.bss        start:0x801DE4C0 end:0x801E3050
+	.sdata      start:0x8025CA48 end:0x8025CA60
+	.sbss       start:0x8025D7B0 end:0x8025D838
 
 revolution/dvd/dvdqueue.c:
-	.text       start:0x800A8E38 end:0x800A9094
+	.text       start:0x800A8E3C end:0x800A9094
+	.bss        start:0x801E3050 end:0x801E3080
 
 revolution/dvd/dvderror.c:
 	.text       start:0x800A9094 end:0x800A939C
+	.data       start:0x801855B0 end:0x801855E0
+	.bss        start:0x801E3080 end:0x801E3260
+	.sbss       start:0x8025D838 end:0x8025D840
 
 revolution/dvd/dvdidutils.c:
 	.text       start:0x800A939C end:0x800A948C
 
 revolution/dvd/dvdFatal.c:
 	.text       start:0x800A948C end:0x800A95B4
+	.rodata     start:0x8016BCC0 end:0x8016BCE0
+	.data       start:0x801855E0 end:0x80185A90
+	.sbss       start:0x8025D840 end:0x8025D848
+	.sdata2     start:0x8025E3F0 end:0x8025E3F8
 
 revolution/dvd/dvd_broadway.c:
 	.text       start:0x800A95B4 end:0x800AAFA0
+	.data       start:0x80185A90 end:0x80186688
+	.bss        start:0x801E3260 end:0x801E33C0
+	.sdata      start:0x8025CA60 end:0x8025CA70
+	.sbss       start:0x8025D848 end:0x8025D870
 
 revolution/demo/DEMOPuts.c:
 	.text       start:0x800AAFA0 end:0x800AB758

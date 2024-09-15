@@ -43,6 +43,10 @@ typedef int bool;
 #define NULL (void*)0
 #endif
 
+#ifndef null
+#define null 0
+#endif
+
 typedef int UNKWORD;
 typedef void UNKTYPE;
 typedef void (*funcptr_t)(void);

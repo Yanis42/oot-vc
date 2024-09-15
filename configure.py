@@ -195,6 +195,17 @@ def RevolutionLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
         "objects": objects,
     }
 
+# The DVD library is using a different compiler
+# TODO: determine if the newer version works
+def RevolutionDVDLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
+    return {
+        "lib": lib_name,
+        "mw_version": "GC/3.0a5.2",
+        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
+        "host": False,
+        "objects": objects,
+    }
+
 def LibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
@@ -375,16 +386,16 @@ config.libs = [
             Object(NotLinked, "revolution/gx/GXPerf.c"),
         ]
     ),
-    RevolutionLib(
+    RevolutionDVDLib(
         "dvd",
-        [    
+        [
             Object(NotLinked, "revolution/dvd/dvdfs.c"),
-            Object(NotLinked, "revolution/dvd/dvd.c"),
-            Object(NotLinked, "revolution/dvd/dvdqueue.c"),
-            Object(NotLinked, "revolution/dvd/dvderror.c"),
-            Object(NotLinked, "revolution/dvd/dvdidutils.c"),
-            Object(NotLinked, "revolution/dvd/dvdFatal.c"),
-            Object(NotLinked, "revolution/dvd/dvd_broadway.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvd.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvdqueue.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvderror.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvdidutils.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvdFatal.c"),
+            Object(LinkedFor("oot-j"), "revolution/dvd/dvd_broadway.c"),
         ]
     ),
     RevolutionLib(

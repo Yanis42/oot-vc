@@ -97,6 +97,18 @@ typedef struct DVDFileInfo {
     /* 0x38 */ DVDAsyncCallback callback;
 } DVDFileInfo;
 
+typedef struct DVDDir {
+    /* 0x0 */ u32 entryNum;
+    /* 0x4 */ u32 location;
+    /* 0x8 */ u32 next;
+} DVDDir;
+
+typedef struct DVDDirEntry {
+    /* 0x0 */ u32 entryNum;
+    /* 0x4 */ bool isDir;
+    /* 0x8 */ char* name;
+} DVDDirEntry;
+
 extern volatile u32 __DVDLayoutFormat;
 
 void DVDInit(void);
