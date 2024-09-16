@@ -280,6 +280,13 @@ config.libs = [
         ]
     ),
     RevolutionLib(
+        "NdevExi2AD",
+        [
+            Object(LinkedFor("oot-j"), "revolution/NdevExi2AD/DebuggerDriver.c"),
+            Object(LinkedFor("oot-j"), "revolution/NdevExi2AD/exi2.c"),
+        ]
+    ),
+    RevolutionLib(
         "base",
         [
             Object(LinkedFor("oot-j"), "revolution/base/PPCArch.c"),
@@ -555,6 +562,14 @@ config.libs = [
         "tpl",
         [
             Object(LinkedFor("oot-j"), "revolution/tpl/TPL.c"),
+        ]
+    ),
+    RevolutionLib(
+        "hbm",
+        [
+            Object(NotLinked, "revolution/hbm/code_80109CB8.cpp"),
+            Object(NotLinked, "revolution/hbm/nw4hbm/ut/ut_ResFont.cpp"),
+            Object(NotLinked, "revolution/hbm/code_80144E2C.cpp"),
         ]
     ),
     RuntimeLib(

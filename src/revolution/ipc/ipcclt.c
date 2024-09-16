@@ -6,10 +6,10 @@
 #define IPC_HEAP_SIZE 0x800
 
 typedef struct IPCRequestQueue {
-    u32 sent;                                // at 0x0
-    u32 queued;                              // at 0x4
-    u32 front;                               // at 0x8
-    u32 back;                                // at 0xC
+    u32 sent; // at 0x0
+    u32 queued; // at 0x4
+    u32 front; // at 0x8
+    u32 back; // at 0xC
     IPCRequestEx* queue[IPC_QUEUE_CAPACITY]; // at 0x10
 } IPCRequestQueue;
 
@@ -31,9 +31,7 @@ size_t strnlen(const char* s, size_t maxlen) {
     return (uintptr_t)p - (uintptr_t)s;
 }
 
-static IPCRequestEx* ipcAllocReq(void) {
-    return (IPCRequestEx*)iosAllocAligned(hid, sizeof(IPCRequestEx), 32);
-}
+static IPCRequestEx* ipcAllocReq(void) { return (IPCRequestEx*)iosAllocAligned(hid, sizeof(IPCRequestEx), 32); }
 
 static s32 ipcFree(void* block) {
     iosFree(hid, block);
@@ -44,12 +42,11 @@ static inline s32 __ipcQueueRequest(IPCRequestEx* req) {
     s32 ret = IPC_RESULT_OK;
     s32 waiting;
 
-    waiting =
-        (__responses.queued < __responses.sent)
-            // Difference of count
-            ? __responses.queued - __responses.sent
-            // Is queue full?
-            : (__responses.queued - __responses.sent) >= IPC_QUEUE_CAPACITY;
+    waiting = (__responses.queued < __responses.sent)
+                  // Difference of count
+                  ? __responses.queued - __responses.sent
+                  // Is queue full?
+                  : (__responses.queued - __responses.sent) >= IPC_QUEUE_CAPACITY;
 
     if (waiting != 0) {
         ret = IPC_RESULT_BUSY_INTERNAL;
@@ -118,56 +115,45 @@ static void IpcReplyHandler(s16 intr, OSContext* ctx) {
 
         // Not type??
         switch (req->base.fd) {
-        case IPC_REQ_READ:
-            req->base.rw.data = (req->base.rw.data != NULL)
-                                    ? OSPhysicalToCached((u32)req->base.rw.data)
-                                    : NULL;
+            case IPC_REQ_READ:
+                req->base.rw.data = (req->base.rw.data != NULL) ? OSPhysicalToCached((u32)req->base.rw.data) : NULL;
 
-            if (req->base.ret > 0) {
-                DCInvalidateRange(req->base.rw.data, req->base.ret);
-            }
-            break;
-        case IPC_REQ_IOCTL:
-            req->base.ioctl.out =
-                (req->base.ioctl.out != NULL)
-                    ? OSPhysicalToCached((u32)req->base.ioctl.out)
-                    : NULL;
-
-            DCInvalidateRange(req->base.ioctl.in, req->base.ioctl.inSize);
-            DCInvalidateRange(req->base.ioctl.out, req->base.ioctl.outSize);
-            break;
-        case IPC_REQ_IOCTLV:
-            args = &req->base.ioctlv;
-
-            req->base.ioctlv.vectors =
-                (req->base.ioctlv.vectors != NULL)
-                    ? OSPhysicalToCached((u32)req->base.ioctlv.vectors)
-                    : NULL;
-
-            DCInvalidateRange(req->base.ioctlv.vectors,
-                              (args->inCount + args->outCount) *
-                                  sizeof(IPCIOVector));
-
-            for (i = 0; i < args->inCount + args->outCount; i++) {
-                // Just trust me
-                i++;
-                i--;
-
-                req->base.ioctlv.vectors[i].base =
-                    (args->vectors[i].base != NULL)
-                        ? OSPhysicalToCached((u32)args->vectors[i].base)
-                        : NULL;
-                DCInvalidateRange(args->vectors[i].base,
-                                  req->base.ioctlv.vectors[i].length);
-            }
-
-            if (__relnchFl && __relnchRpc == req) {
-                __relnchFl = false;
-                if (__mailboxAck < 1) {
-                    __mailboxAck++;
+                if (req->base.ret > 0) {
+                    DCInvalidateRange(req->base.rw.data, req->base.ret);
                 }
-            }
-            break;
+                break;
+            case IPC_REQ_IOCTL:
+                req->base.ioctl.out =
+                    (req->base.ioctl.out != NULL) ? OSPhysicalToCached((u32)req->base.ioctl.out) : NULL;
+
+                DCInvalidateRange(req->base.ioctl.in, req->base.ioctl.inSize);
+                DCInvalidateRange(req->base.ioctl.out, req->base.ioctl.outSize);
+                break;
+            case IPC_REQ_IOCTLV:
+                args = &req->base.ioctlv;
+
+                req->base.ioctlv.vectors =
+                    (req->base.ioctlv.vectors != NULL) ? OSPhysicalToCached((u32)req->base.ioctlv.vectors) : NULL;
+
+                DCInvalidateRange(req->base.ioctlv.vectors, (args->inCount + args->outCount) * sizeof(IPCIOVector));
+
+                for (i = 0; i < args->inCount + args->outCount; i++) {
+                    // Just trust me
+                    i++;
+                    i--;
+
+                    req->base.ioctlv.vectors[i].base =
+                        (args->vectors[i].base != NULL) ? OSPhysicalToCached((u32)args->vectors[i].base) : NULL;
+                    DCInvalidateRange(args->vectors[i].base, req->base.ioctlv.vectors[i].length);
+                }
+
+                if (__relnchFl && __relnchRpc == req) {
+                    __relnchFl = false;
+                    if (__mailboxAck < 1) {
+                        __mailboxAck++;
+                    }
+                }
+                break;
         }
 
         if (req->callback != NULL) {
@@ -209,7 +195,7 @@ static void IpcAckHandler(u8 intr, OSContext* ctx) {
     }
 }
 
-static void IPCInterruptHandler(s16 intr, OSContext* ctx) {
+static void IPCInterruptHandler(__OSInterrupt intr, OSContext* ctx) {
     if ((IPCReadReg(1) & 0x14) == 0x14) {
         IpcReplyHandler(intr, ctx);
     }
@@ -245,8 +231,7 @@ s32 IPCCltInit(void) {
     return err;
 }
 
-static s32 __ios_Ipc1(s32 fd, IPCRequestType type, IPCAsyncCallback callback,
-                      void* callbackArg, IPCRequestEx** out) {
+static s32 __ios_Ipc1(s32 fd, IPCRequestType type, IPCAsyncCallback callback, void* callbackArg, IPCRequestEx** out) {
     IPCRequest* req;
     s32 ret = IPC_RESULT_OK;
 
@@ -329,8 +314,7 @@ static s32 __ios_Open(IPCRequestEx* req, const char* path, IPCOpenMode mode) {
     return ret;
 }
 
-s32 IOS_OpenAsync(const char* path, IPCOpenMode mode, IPCAsyncCallback callback,
-                  void* callbackArg) {
+s32 IOS_OpenAsync(const char* path, IPCOpenMode mode, IPCAsyncCallback callback, void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(0, IPC_REQ_OPEN, callback, callbackArg, &req);
     if (ret == IPC_RESULT_OK) {
@@ -390,8 +374,7 @@ static s32 __ios_Read(IPCRequestEx* req, void* buf, s32 len) {
     return ret;
 }
 
-s32 IOS_ReadAsync(s32 fd, void* buf, s32 len, IPCAsyncCallback callback,
-                  void* callbackArg) {
+s32 IOS_ReadAsync(s32 fd, void* buf, s32 len, IPCAsyncCallback callback, void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_READ, callback, callbackArg, &req);
     if (ret == IPC_RESULT_OK) {
@@ -431,8 +414,7 @@ static s32 __ios_Write(IPCRequestEx* req, const void* buf, s32 len) {
     return ret;
 }
 
-s32 IOS_WriteAsync(s32 fd, const void* buf, s32 len, IPCAsyncCallback callback,
-                   void* callbackArg) {
+s32 IOS_WriteAsync(s32 fd, const void* buf, s32 len, IPCAsyncCallback callback, void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_WRITE, callback, callbackArg, &req);
     if (ret == IPC_RESULT_OK) {
@@ -471,8 +453,7 @@ static s32 __ios_Seek(IPCRequestEx* req, s32 offset, IPCSeekMode mode) {
     return ret;
 }
 
-s32 IOS_SeekAsync(s32 fd, s32 offset, IPCSeekMode mode,
-                  IPCAsyncCallback callback, void* callbackArg) {
+s32 IOS_SeekAsync(s32 fd, s32 offset, IPCSeekMode mode, IPCAsyncCallback callback, void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_SEEK, callback, callbackArg, &req);
     if (ret == IPC_RESULT_OK) {
@@ -498,8 +479,7 @@ s32 IOS_Seek(s32 fd, s32 offset, IPCSeekMode mode) {
     return ret;
 }
 
-static s32 __ios_Ioctl(IPCRequestEx* req, s32 type, void* in, s32 inSize,
-                       void* out, s32 outSize) {
+static s32 __ios_Ioctl(IPCRequestEx* req, s32 type, void* in, s32 inSize, void* out, s32 outSize) {
     s32 ret = IPC_RESULT_OK;
 
     if (req == NULL) {
@@ -518,8 +498,8 @@ static s32 __ios_Ioctl(IPCRequestEx* req, s32 type, void* in, s32 inSize,
     return ret;
 }
 
-s32 IOS_IoctlAsync(s32 fd, s32 type, void* in, s32 inSize, void* out,
-                   s32 outSize, IPCAsyncCallback callback, void* callbackArg) {
+s32 IOS_IoctlAsync(s32 fd, s32 type, void* in, s32 inSize, void* out, s32 outSize, IPCAsyncCallback callback,
+                   void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_IOCTL, callback, callbackArg, &req);
     if (ret == IPC_RESULT_OK) {
@@ -545,8 +525,7 @@ s32 IOS_Ioctl(s32 fd, s32 type, void* in, s32 inSize, void* out, s32 outSize) {
     return ret;
 }
 
-static s32 __ios_Ioctlv(IPCRequestEx* req, s32 type, s32 inCount, s32 outCount,
-                        IPCIOVector* vectors) {
+static s32 __ios_Ioctlv(IPCRequestEx* req, s32 type, s32 inCount, s32 outCount, IPCIOVector* vectors) {
     int i;
     s32 ret = IPC_RESULT_OK;
 
@@ -559,39 +538,32 @@ static s32 __ios_Ioctlv(IPCRequestEx* req, s32 type, s32 inCount, s32 outCount,
         req->base.ioctlv.vectors = vectors;
 
         for (i = 0; i < req->base.ioctlv.outCount; i++) {
-            DCFlushRange(req->base.ioctlv.vectors[inCount + i].base,
-                         req->base.ioctlv.vectors[inCount + i].length);
+            DCFlushRange(req->base.ioctlv.vectors[inCount + i].base, req->base.ioctlv.vectors[inCount + i].length);
 
             req->base.ioctlv.vectors[inCount + i].base =
                 (req->base.ioctlv.vectors[inCount + i].base != NULL)
-                    ? OSCachedToPhysical(
-                          req->base.ioctlv.vectors[inCount + i].base)
+                    ? OSCachedToPhysical(req->base.ioctlv.vectors[inCount + i].base)
                     : NULL;
         }
 
         for (i = 0; i < req->base.ioctlv.inCount; i++) {
-            DCFlushRange(req->base.ioctlv.vectors[i].base,
-                         req->base.ioctlv.vectors[i].length);
+            DCFlushRange(req->base.ioctlv.vectors[i].base, req->base.ioctlv.vectors[i].length);
 
-            req->base.ioctlv.vectors[i].base =
-                (req->base.ioctlv.vectors[i].base != NULL)
-                    ? OSCachedToPhysical(req->base.ioctlv.vectors[i].base)
-                    : NULL;
+            req->base.ioctlv.vectors[i].base = (req->base.ioctlv.vectors[i].base != NULL)
+                                                   ? OSCachedToPhysical(req->base.ioctlv.vectors[i].base)
+                                                   : NULL;
         }
 
         DCFlushRange(req->base.ioctlv.vectors,
-                     (req->base.ioctlv.inCount + req->base.ioctlv.outCount) *
-                         sizeof(IPCIOVector));
+                     (req->base.ioctlv.inCount + req->base.ioctlv.outCount) * sizeof(IPCIOVector));
 
-        req->base.ioctlv.vectors =
-            (vectors != NULL) ? OSCachedToPhysical(vectors) : NULL;
+        req->base.ioctlv.vectors = (vectors != NULL) ? OSCachedToPhysical(vectors) : NULL;
     }
 
     return ret;
 }
 
-s32 IOS_IoctlvAsync(s32 fd, s32 type, s32 inCount, s32 outCount,
-                    IPCIOVector* vectors, IPCAsyncCallback callback,
+s32 IOS_IoctlvAsync(s32 fd, s32 type, s32 inCount, s32 outCount, IPCIOVector* vectors, IPCAsyncCallback callback,
                     void* callbackArg) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_IOCTLV, callback, callbackArg, &req);
@@ -605,8 +577,7 @@ s32 IOS_IoctlvAsync(s32 fd, s32 type, s32 inCount, s32 outCount,
     return ret;
 }
 
-s32 IOS_Ioctlv(s32 fd, s32 type, s32 inCount, s32 outCount,
-               IPCIOVector* vectors) {
+s32 IOS_Ioctlv(s32 fd, s32 type, s32 inCount, s32 outCount, IPCIOVector* vectors) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_IOCTLV, NULL, NULL, &req);
     if (ret == IPC_RESULT_OK) {
@@ -619,8 +590,7 @@ s32 IOS_Ioctlv(s32 fd, s32 type, s32 inCount, s32 outCount,
     return ret;
 }
 
-s32 IOS_IoctlvReboot(s32 fd, s32 type, s32 inCount, s32 outCount,
-                     IPCIOVector* vectors) {
+s32 IOS_IoctlvReboot(s32 fd, s32 type, s32 inCount, s32 outCount, IPCIOVector* vectors) {
     IPCRequestEx* req;
     s32 ret = __ios_Ipc1(fd, IPC_REQ_IOCTLV, NULL, NULL, &req);
     if (ret == IPC_RESULT_OK) {

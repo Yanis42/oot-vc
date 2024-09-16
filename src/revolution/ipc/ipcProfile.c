@@ -1,5 +1,5 @@
-#include "revolution/ipc.h"
 #include "macros.h"
+#include "revolution/ipc.h"
 
 #define IPC_REQUEST_MAX 32
 
@@ -32,9 +32,7 @@ void IPCiProfQueueReq(IPCRequestEx* req, s32 fd) {
     AddReqInfo(req, fd);
 }
 
-void IPCiProfAck(void) {
-    IpcNumUnIssuedReqs--;
-}
+void IPCiProfAck(void) { IpcNumUnIssuedReqs--; }
 
 void IPCiProfReply(IPCRequestEx* req, s32 fd) {
     IpcNumPendingReqs--;

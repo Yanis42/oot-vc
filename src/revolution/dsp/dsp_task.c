@@ -40,7 +40,7 @@ DSPTask* __DSP_tmp_task;
 DSPTask* __DSP_rude_task;
 bool __DSP_rude_task_pending;
 
-void __DSPHandler(s16 intr, OSContext* ctx) {
+void __DSPHandler(__OSInterrupt intr, OSContext* ctx) {
 #pragma unused(intr)
 
     OSContext tmpCtx;

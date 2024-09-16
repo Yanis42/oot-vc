@@ -405,7 +405,7 @@ bool EXIDeselect(EXIChannel chan) {
     return true;
 }
 
-static void EXIIntrruptHandler(s16 intr, OSContext* ctx) {
+static void EXIIntrruptHandler(__OSInterrupt intr, OSContext* ctx) {
     EXIData* exi;
     EXIChannel chan;
     EXICallback callback;
@@ -426,7 +426,7 @@ static void EXIIntrruptHandler(s16 intr, OSContext* ctx) {
     }
 }
 
-static void TCIntrruptHandler(s16 intr, OSContext* ctx) {
+static void TCIntrruptHandler(__OSInterrupt intr, OSContext* ctx) {
     EXIData* exi;
     EXIChannel chan;
     EXICallback callback;
@@ -450,7 +450,7 @@ static void TCIntrruptHandler(s16 intr, OSContext* ctx) {
     }
 }
 
-static void EXTIntrruptHandler(s16 intr, OSContext* ctx) {
+static void EXTIntrruptHandler(__OSInterrupt intr, OSContext* ctx) {
     EXIChannel chan;
     EXIData* exi;
     EXICallback callback;

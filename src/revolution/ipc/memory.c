@@ -10,16 +10,16 @@ typedef enum {
 };
 
 typedef struct IPCHeapChunk {
-    u32 magic;                 // at 0x0
-    u32 size;                  // at 0x4
+    u32 magic; // at 0x0
+    u32 size; // at 0x4
     struct IPCHeapChunk* prev; // at 0x8
     struct IPCHeapChunk* next; // at 0xC
 } IPCHeapChunk;
 
 typedef struct IPCHeapDesc {
-    void* start;        // at 0x0
-    u32 WORD_0x4;       // at 0x4
-    u32 size;           // at 0x8
+    void* start; // at 0x0
+    u32 WORD_0x4; // at 0x4
+    u32 size; // at 0x8
     IPCHeapChunk* head; // at 0xC
 } IPCHeapDesc;
 
@@ -121,8 +121,7 @@ void* __iosAlloc(s32 handle, u32 size, u32 align) {
     // Find chunk best fit for specified size
     for (chunk = desc->head; chunk != NULL; chunk = chunk->next) {
         u8* chunkMem = (u8*)chunk + sizeof(IPCHeapChunk);
-        u32 chunkUnAlign =
-            (align - 1) & (align - ((u32)chunkMem & (align - 1)));
+        u32 chunkUnAlign = (align - 1) & (align - ((u32)chunkMem & (align - 1)));
 
         if (chunk->size == size && chunkUnAlign == 0) {
             best = chunk;
@@ -147,8 +146,7 @@ void* __iosAlloc(s32 handle, u32 size, u32 align) {
 
     // Split off extra size that won't be used by this allocation
     if (best->size > size + bestUnAlign + sizeof(IPCHeapChunk)) {
-        IPCHeapChunk* rest = (IPCHeapChunk*)((u8*)best + size + bestUnAlign +
-                                             sizeof(IPCHeapChunk));
+        IPCHeapChunk* rest = (IPCHeapChunk*)((u8*)best + size + bestUnAlign + sizeof(IPCHeapChunk));
 
         rest->magic = IPC_HEAP_CHUNK_FREE;
         rest->size = best->size - size - bestUnAlign - sizeof(IPCHeapChunk);
@@ -192,9 +190,7 @@ _exit:
     return block;
 }
 
-void* iosAllocAligned(s32 handle, u32 size, u32 align) {
-    return __iosAlloc(handle, size, align);
-}
+void* iosAllocAligned(s32 handle, u32 size, u32 align) { return __iosAlloc(handle, size, align); }
 
 s32 iosFree(s32 handle, void* block) {
     IPCHeapChunk* chunk;

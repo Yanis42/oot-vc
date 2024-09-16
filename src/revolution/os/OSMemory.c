@@ -24,7 +24,7 @@ static bool OnShutdown(bool final, u32 event) {
 }
 
 // Typo
-static void MEMIntrruptHandler(s16 intr, OSContext* ctx) {
+static void MEMIntrruptHandler(__OSInterrupt intr, OSContext* ctx) {
 #pragma unused(intr)
 
     u32 dsisr = MI_HW_REGS[MI_INTSR];

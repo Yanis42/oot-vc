@@ -110,7 +110,7 @@ void AIInit(void* stack) {
 
 void AIReset(void) { __AI_init_flag = false; }
 
-void __AIDHandler(s16 intr, OSContext* ctx) {
+void __AIDHandler(__OSInterrupt intr, OSContext* ctx) {
 #pragma unused(intr)
 
     OSContext tempCtx;

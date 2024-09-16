@@ -2,6 +2,7 @@
 #define _RVL_SDK_AI_H
 
 #include "revolution/os/OSContext.h"
+#include "revolution/os/OSInterrupt.h"
 #include "revolution/types.h"
 
 #ifdef __cplusplus
@@ -25,7 +26,7 @@ void AISetDSPSampleRate(u32 rate);
 u32 AIGetDSPSampleRate(void);
 void AIInit(void* stack);
 void AIReset(void);
-void __AIDHandler(s16 intr, struct OSContext* ctx);
+void __AIDHandler(__OSInterrupt intr, struct OSContext* ctx);
 
 #ifdef __cplusplus
 }
