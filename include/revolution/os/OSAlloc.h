@@ -15,8 +15,6 @@ s32 OSSetCurrentHeap(s32 handle);
 void* OSInitAlloc(void* start, void* end, s32 numHeaps);
 s32 OSCreateHeap(void* start, void* end);
 
-#define OSAlloc(size) OSAllocFromHeap(__OSCurrHeap, size)
-
 #ifdef __cplusplus
 }
 #endif
