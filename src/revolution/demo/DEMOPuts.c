@@ -39,21 +39,21 @@ OSFontHeader* DEMOInitROMFont(void) {
             if (DemoUseMEMHeap) {
                 FontData = MEMAllocFromAllocator(&DemoAllocator1, OS_FONT_SIZE_SJIS);
             } else {
-                FontData = OSAlloc(OS_FONT_SIZE_SJIS);
+                FontData = OSAllocFromHeap(__OSCurrHeap, OS_FONT_SIZE_SJIS);
             }
             break;
         case OS_FONT_ENCODE_ANSI:
             if (DemoUseMEMHeap) {
                 FontData = MEMAllocFromAllocator(&DemoAllocator1, OS_FONT_SIZE_ANSI);
             } else {
-                FontData = OSAlloc(OS_FONT_SIZE_ANSI);
+                FontData = OSAllocFromHeap(__OSCurrHeap, OS_FONT_SIZE_ANSI);
             }
             break;
         default:
             if (DemoUseMEMHeap) {
                 FontData = MEMAllocFromAllocator(&DemoAllocator1, OS_FONT_SIZE_UTF);
             } else {
-                FontData = OSAlloc(OS_FONT_SIZE_UTF);
+                FontData = OSAllocFromHeap(__OSCurrHeap, OS_FONT_SIZE_UTF);
             }
             break;
     }

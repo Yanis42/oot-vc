@@ -16,7 +16,6 @@ void* OSInitAlloc(void* start, void* end, s32 numHeaps);
 s32 OSCreateHeap(void* start, void* end);
 
 #define OSAlloc(size) OSAllocFromHeap(__OSCurrHeap, size)
-#define OSFree(ptr) OSFreeToHeap(__OSCurrHeap, ptr)
 
 #ifdef __cplusplus
 }
