@@ -3,6 +3,7 @@
 #include "emulator/xlHeap.h"
 #include "revolution/arc.h"
 #include "revolution/cnt.h"
+#include "revolution/mem.h"
 #include "stddef.h"
 
 MEMAllocator gCNTAllocator;

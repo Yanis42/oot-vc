@@ -10,45 +10,45 @@ static inline CNTResult contentConvertErrorCode(s32 error) {
 
     // clang-format off
     const s32 errorMap[] = {
-        0,     CNT_RESULT_OK,
-        -1001, CNT_RESULT_UNKNOWN,
-        -1002, CNT_RESULT_UNKNOWN,
-        -1003, CNT_RESULT_UNKNOWN,
-        -1004, CNT_RESULT_OPEN_ERR,
-        -1005, CNT_RESULT_UNKNOWN,
-        -1006, CNT_RESULT_UNKNOWN,
-        -1007, CNT_RESULT_UNKNOWN,
-        -1008, CNT_RESULT_OPEN_ERR,
-        -1009, CNT_RESULT_READ_ERR,
-        -1010, CNT_RESULT_UNKNOWN,
-        -1011, CNT_RESULT_UNKNOWN,
-        -1012, CNT_RESULT_UNKNOWN,
-        -1013, CNT_RESULT_UNKNOWN,
-        -1014, CNT_RESULT_UNKNOWN,
-        -1015, CNT_RESULT_UNKNOWN,
-        -1016, CNT_RESULT_MAXFD,
-        -1017, CNT_RESULT_INVALID,
-        -1018, CNT_RESULT_UNKNOWN,
-        -1019, CNT_RESULT_UNKNOWN,
-        -1020, CNT_RESULT_UNKNOWN,
-        -1021, CNT_RESULT_UNKNOWN,
-        -1022, CNT_RESULT_UNKNOWN,
-        -1023, CNT_RESULT_UNKNOWN,
-        -1024, CNT_RESULT_OUT_OF_MEMORY,
-        -1025, CNT_RESULT_UNKNOWN,
-        -1026, CNT_RESULT_UNKNOWN,
-        -1027, CNT_RESULT_UNKNOWN,
-        -1028, CNT_RESULT_UNKNOWN,
-        -1029, CNT_RESULT_UNKNOWN,
-        -1030, CNT_RESULT_NOT_ENOUGH_SPACE,
-        -1031, CNT_RESULT_UNKNOWN,
-        -1032, CNT_RESULT_UNKNOWN,
-        -1033, CNT_RESULT_UNKNOWN,
-        -1034, CNT_RESULT_UNKNOWN,
-        -1035, CNT_RESULT_UNKNOWN,
-        -1036, CNT_RESULT_UNKNOWN,
-        -1037, CNT_RESULT_UNKNOWN,
-        -1038, CNT_RESULT_UNKNOWN,
+        0,     0,
+        -1001, -5063,
+        -1002, -5063,
+        -1003, -5063,
+        -1004, -5002,
+        -1005, -5063,
+        -1006, -5063,
+        -1007, -5063,
+        -1008, -5002,
+        -1009, -5003,
+        -1010, -5063,
+        -1011, -5063,
+        -1012, -5063,
+        -1013, -5063,
+        -1014, -5063,
+        -1015, -5063,
+        -1016, -5000,
+        -1017, -5009,
+        -1018, -5063,
+        -1019, -5063,
+        -1020, -5063,
+        -1021, -5063,
+        -1022, -5063,
+        -1023, -5063,
+        -1024, -5008,
+        -1025, -5063,
+        -1026, -5010,
+        -1027, -5063,
+        -1028, -5063,
+        -1029, -5063,
+        -1030, -5063,
+        -1031, -5063,
+        -1032, -5063,
+        -1033, -5063,
+        -1034, -5063,
+        -1035, -5063,
+        -1036, -5063,
+        -1037, -5063,
+        -1038, -5063,
         IPC_RESULT_OK,                  NAND_RESULT_OK,
         IPC_RESULT_ACCESS,              NAND_RESULT_ACCESS,
         IPC_RESULT_CORRUPT,             NAND_RESULT_CORRUPT,
@@ -104,7 +104,7 @@ static inline CNTResult contentConvertErrorCode(s32 error) {
     }
 
     OSReport(warning, error);
-    return CNT_RESULT_UNKNOWN;
+    return -5063;
 }
 
 static char path[] = "/dev/es";
@@ -143,14 +143,14 @@ s32 contentInitHandleNAND(s32 contentNum, CNTHandleNAND* handle, MEMAllocator* m
     //     var_r28 = IOS_Ioctlv(lbl_8025CD48, 9, 1, 0, (IPCIOVector* ) &arg46);
     // }
     // if (var_r28 < 0) {
-    //     var_r3 = -0x138A;
+    //     var_r3 = -5002;
     // } else {
     //     temp_r3_2 = MEMAllocFromAllocator(temp_r31, 0x20U);
     //     if (temp_r3_2 == NULL) {
     //         var_r3 = -0x1389;
     //     } else if (ESP_ReadContentFile(var_r28, temp_r3_2, 0x20U) < 0) {
     //         fn_800B164C(temp_r31, temp_r3_2);
-    //         var_r3 = -0x138B;
+    //         var_r3 = -5003;
     //     } else {
     //         temp_r5 = temp_r3_2->files.offset;
     //         temp_r26 = (temp_r5 + 0x1F) & 0xFFFFFFE0;
@@ -163,7 +163,7 @@ s32 contentInitHandleNAND(s32 contentNum, CNTHandleNAND* handle, MEMAllocator* m
     //                 var_r3 = -0x1389;
     //             } else if (ESP_ReadContentFile(var_r28, temp_r3_3, temp_r26) < 0) {
     //                 fn_800B164C(temp_r31, temp_r3_3);
-    //                 var_r3 = -0x138B;
+    //                 var_r3 = -5003;
     //             } else {
     //                 ARCInitHandle(temp_r3_3, (ARCHandle* ) &arg8);
     //                 var_r3 = 0;
@@ -187,7 +187,7 @@ CNTResult contentOpenNAND(CNTHandleNAND* handle, const char* path, CNTFileInfoNA
     ARCFileInfo arcInfo;
 
     if (!ARCOpen(&handle->arcHandle, path, &arcInfo)) {
-        return CNT_RESULT_OPEN_ERR;
+        return -5002;
     }
 
     info->handle = handle;
@@ -195,14 +195,14 @@ CNTResult contentOpenNAND(CNTHandleNAND* handle, const char* path, CNTFileInfoNA
     info->length = arcInfo.size;
     info->position = 0;
 
-    return CNT_RESULT_OK;
+    return 0;
 }
 
 CNTResult contentFastOpenNAND(CNTHandleNAND* handle, s32 entrynum, CNTFileInfoNAND* info) {
     ARCFileInfo arcInfo;
 
     if (!ARCFastOpen(&handle->arcHandle, entrynum, &arcInfo)) {
-        return CNT_RESULT_OPEN_ERR;
+        return -5002;
     }
 
     info->handle = handle;
@@ -210,7 +210,7 @@ CNTResult contentFastOpenNAND(CNTHandleNAND* handle, s32 entrynum, CNTFileInfoNA
     info->length = arcInfo.size;
     info->position = 0;
 
-    return CNT_RESULT_OK;
+    return 0;
 }
 
 s32 contentConvertPathToEntrynumNAND(CNTHandleNAND* info, const char* path) {
@@ -233,31 +233,31 @@ CNTResult contentSeekNAND(CNTFileInfoNAND* info, u32 offset, s32 whence) {
             position = info->length + offset;
             break;
         default:
-            return CNT_RESULT_FATAL;
+            return -5127;
     }
 
     if (position > info->length) {
-        return CNT_RESULT_INVALID;
+        return -5009;
     }
 
     info->position = position;
 
-    return CNT_RESULT_OK;
+    return 0;
 }
 
 CNTResult contentReadNAND(CNTFileInfoNAND* info, void* dst, u32 len, s32 offset) {
     if (info->position + offset > info->length) {
-        return CNT_RESULT_INVALID;
+        return -5009;
     }
 
     if (ESP_SeekContentFile(info->handle->fd, info->offset + info->position + offset, IPC_SEEK_BEG) < 0) {
-        return CNT_RESULT_SEEK_ERR;
+        return -5004;
     }
 
     return contentConvertErrorCode(ESP_ReadContentFile(info->handle->fd, dst, len));
 }
 
-CNTResult contentCloseNAND(CNTFileInfoNAND* info) { return CNT_RESULT_OK; }
+CNTResult contentCloseNAND(CNTFileInfoNAND* info) { return 0; }
 
 CNTResult contentReleaseHandleNAND(CNTHandleNAND* handle) {
     s32 var_f1;
