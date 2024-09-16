@@ -234,6 +234,12 @@ revolution/NdevExi2AD/DebuggerDriver.c:
 revolution/NdevExi2AD/exi2.c:
 	.text       start:0x800828E4 end:0x80083070
 
+revolution/vcmv/code_80083070.cpp:
+	extab       start:0x800064E0 end:0x80006688
+	extabindex  start:0x800069A0 end:0x80006C1C
+	.text       start:0x80083070 end:0x800893A4
+	.ctors      start:0x8016A6E4 end:0x8016A6E8
+
 revolution/base/PPCArch.c:
 	.text       start:0x800893A4 end:0x80089508
 	.data       start:0x801766E0 end:0x80176718

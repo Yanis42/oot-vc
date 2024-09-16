@@ -186,11 +186,11 @@ def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
         "objects": objects,
     }
 
-def RevolutionLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
+def RevolutionLib(lib_name: str, objects: List[Object], cpp_exceptions: str = "off") -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_version": "GC/3.0a5",
-        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
+        "cflags": [*cflags_base, f"-Cpp_exceptions {cpp_exceptions}", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
         "host": False,
         "objects": objects,
     }
@@ -285,6 +285,13 @@ config.libs = [
             Object(LinkedFor("oot-j"), "revolution/NdevExi2AD/DebuggerDriver.c"),
             Object(LinkedFor("oot-j"), "revolution/NdevExi2AD/exi2.c"),
         ]
+    ),
+    RevolutionLib(
+        "vcmv",
+        [
+            Object(NotLinked, "revolution/vcmv/code_80083070.cpp"),
+        ],
+        cpp_exceptions="on"
     ),
     RevolutionLib(
         "base",
