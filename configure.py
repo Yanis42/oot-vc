@@ -199,7 +199,7 @@ def LibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_version": "GC/3.0a3",
-        "cflags": [*cflags_base, "-Cpp_exceptions on", "-O4,p", "-rostr", "-use_lmw_stmw on", "-lang c", "-fp_contract off"],
+        "cflags": [*cflags_base, "-Cpp_exceptions on", "-O4,p", "-ipa file", "-rostr", "-use_lmw_stmw on", "-lang c", "-fp_contract off"],
         "host": False,
         "objects": objects,
     }
@@ -638,7 +638,7 @@ config.libs = [
         ]
     ),
     MathLibC(
-        "math",
+        "libm",
         [
             Object(LinkedFor("oot-j"), "libc/math/e_acos.c"),
             Object(LinkedFor("oot-j"), "libc/math/e_asin.c"),

@@ -55,7 +55,7 @@
  * to produce the hexadecimal values shown.
  */
 
-#include "fdlibm.h"
+#include "math.h"
 #ifdef __STDC__
 static const double
 #else
