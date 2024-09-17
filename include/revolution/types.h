@@ -56,4 +56,7 @@ typedef void (*funcptr_t)(void);
 }
 #endif
 
+#include "stddef.h"
+#include "stdint.h"
+
 #endif
