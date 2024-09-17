@@ -20,6 +20,23 @@ extern int __float_huge[];
 #define __HI(x) (((s32*)&x)[0])
 #define __LO(x) (((s32*)&x)[1])
 
+double __ieee754_acos(double);
+double __ieee754_fmod(double, double);
+double __ieee754_log(double);
+double __ieee754_log10(double);
+double __ieee754_pow(double, double);
+double __ieee754_sqrt(double);
+double __ieee754_atan2(double, double);
+double __ieee754_asin(double);
+double __ieee754_exp(double);
+double copysign(double, double);
+double scalbn(double, int);
+double __kernel_sin(double, double, int);
+double __kernel_cos(double, double);
+double __kernel_tan(double, double, int);
+int __ieee754_rem_pio2(double, double*);
+double nan(const char* arg);
+
 f64 ldexp(f64 x, int exp);
 f64 pow(f64 x, f64 y);
 f64 ceil(f64 x);
