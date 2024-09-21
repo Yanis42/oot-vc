@@ -69,10 +69,12 @@ double y, x;
     hy = __HI(y);
     iy = hy & 0x7fffffff;
     ly = __LO(y);
-    if (((ix | ((lx | -lx) >> 31)) > 0x7ff00000) || ((iy | ((ly | -ly) >> 31)) > 0x7ff00000)) /* x or y is NaN */
+    if (((ix | ((lx | -lx) >> 31)) > 0x7ff00000) || ((iy | ((ly | -ly) >> 31)) > 0x7ff00000)) { /* x or y is NaN */
         return x + y;
-    if ((hx - 0x3ff00000 | lx) == 0)
+    }
+    if ((hx - 0x3ff00000 | lx) == 0) {
         return atan(y); /* x=1.0 */
+    }
     m = ((hy >> 31) & 1) | ((hx >> 30) & 2); /* 2*sign(x)+sign(y) */
 
     /* when y = 0 */
@@ -88,8 +90,9 @@ double y, x;
         }
     }
     /* when x = 0 */
-    if ((ix | lx) == 0)
+    if ((ix | lx) == 0) {
         return (hy < 0) ? -pi_o_2 - tiny : pi_o_2 + tiny;
+    }
 
     /* when x is INF */
     if (ix == 0x7ff00000) {
@@ -118,17 +121,19 @@ double y, x;
         }
     }
     /* when y is INF */
-    if (iy == 0x7ff00000)
+    if (iy == 0x7ff00000) {
         return (hy < 0) ? -pi_o_2 - tiny : pi_o_2 + tiny;
+    }
 
     /* compute y/x */
     k = (iy - ix) >> 20;
-    if (k > 60)
+    if (k > 60) {
         z = pi_o_2 + 0.5 * pi_lo; /* |y/x| >  2**60 */
-    else if (hx < 0 && k < -60)
+    } else if (hx < 0 && k < -60) {
         z = 0.0; /* |y|/x < -2**60 */
-    else
+    } else {
         z = atan(__fabs(y / x)); /* safe to do y/x */
+    }
     switch (m) {
         case 0:
             return z; /* atan(+,+) */

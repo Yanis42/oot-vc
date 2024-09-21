@@ -131,8 +131,9 @@ double __kernel_tan(double x, double y, int iy) {
             if (((ix | __LO(x)) | (iy + 1)) == 0) {
                 double ret = __fabs(x);
                 return one / ret;
-            } else
+            } else {
                 return (iy == 1) ? x : -one / x;
+            }
         }
     }
     if (ix >= 0x3FE59428) { /* |x|>=0.6744 */
@@ -161,10 +162,10 @@ double __kernel_tan(double x, double y, int iy) {
         v = (double)iy;
         return (double)(1 - ((hx >> 30) & 2)) * (v - 2.0 * (x - (w * w / (w + v) - r)));
     }
-    if (iy == 1)
+    if (iy == 1) {
         return w;
-    else { /* if allow error up to 2 ulp,
-                  simply return -1.0/(x+r) here */
+    } else { /* if allow error up to 2 ulp,
+                    simply return -1.0/(x+r) here */
         /*  compute -1.0/(x+r) accurately */
         double a, t;
         z = w;

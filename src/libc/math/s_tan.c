@@ -58,12 +58,14 @@ double x;
 
     /* |x| ~< pi/4 */
     ix &= 0x7fffffff;
-    if (ix <= 0x3fe921fb)
+    if (ix <= 0x3fe921fb) {
         return __kernel_tan(x, z, 1);
+    }
 
     /* tan(Inf or NaN) is NaN */
-    else if (ix >= 0x7ff00000)
+    else if (ix >= 0x7ff00000) {
         return x - x; /* NaN */
+    }
 
     /* argument reduction needed */
     else {

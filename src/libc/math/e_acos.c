@@ -72,16 +72,18 @@ double x;
         unsigned int lx;
         lx = __LO(x);
         if (((ix - 0x3ff00000) | lx) == 0) { /* |x|==1 */
-            if (hx > 0)
+            if (hx > 0) {
                 return 0.0; /* acos(1) = 0  */
-            else
+            } else {
                 return pi + 2.0 * pio2_lo; /* acos(-1)= pi */
+            }
         }
         return NAN; /* acos(|x|>1) is NaN */
     }
     if (ix < 0x3fe00000) { /* |x| < 0.5 */
-        if (ix <= 0x3c600000)
+        if (ix <= 0x3c600000) {
             return pio2_hi + pio2_lo; /*if|x|<2**-57*/
+        }
         z = x * x;
         p = z * (pS0 + z * (pS1 + z * (pS2 + z * (pS3 + z * (pS4 + z * pS5)))));
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));

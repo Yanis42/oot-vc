@@ -1,10 +1,10 @@
 #ifndef _MATH_H_
 #define _MATH_H_
 
+#include "fdlibm.h"
 #include "intrinsics.h"
 #include "macros.h"
 #include "revolution/types.h"
-#include "fdlibm.h"
 
 #define DONT_INLINE_SQRT
 
@@ -17,7 +17,7 @@ extern int __double_huge[];
 
 #define NAN (*(f32*)__float_nan)
 #define INFINITY (*(f32*)__float_huge)
-#define HUGE_VAL (*(double*) __double_huge)
+#define HUGE_VAL (*(double*)__double_huge)
 
 // f64 bit-twiddling macros
 #define __HI(x) (((s32*)&x)[0])

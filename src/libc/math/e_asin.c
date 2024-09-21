@@ -76,16 +76,19 @@ double x;
     hx = __HI(x);
     ix = hx & 0x7fffffff;
     if (ix >= 0x3ff00000) { /* |x|>= 1 */
-        if (((ix - 0x3ff00000) | __LO(x)) == 0)
+        if (((ix - 0x3ff00000) | __LO(x)) == 0) {
             /* asin(1)=+-pi/2 with inexact */
             return x * pio2_hi + x * pio2_lo;
+        }
         return NAN; /* asin(|x|>1) is NaN */
     } else if (ix < 0x3fe00000) { /* |x|<0.5 */
         if (ix < 0x3e400000) { /* if |x| < 2**-27 */
-            if (huge + x > one)
+            if (huge + x > one) {
                 return x; /* return x with inexact if x!=0*/
-        } else
+            }
+        } else {
             t = x * x;
+        }
         p = t * (pS0 + t * (pS1 + t * (pS2 + t * (pS3 + t * (pS4 + t * pS5)))));
         q = one + t * (qS1 + t * (qS2 + t * (qS3 + t * qS4)));
         w = p / q;
@@ -109,8 +112,9 @@ double x;
         q = pio4_hi - 2.0 * w;
         t = pio4_hi - (p - q);
     }
-    if (hx > 0)
+    if (hx > 0) {
         return t;
-    else
+    } else {
         return -t;
+    }
 }

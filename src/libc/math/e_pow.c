@@ -122,8 +122,9 @@ double x, y;
     iy = hy & 0x7fffffff;
 
     /* y==zero: x**0 = 1 */
-    if ((iy | ly) == 0)
+    if ((iy | ly) == 0) {
         return one;
+    }
 
     /* +-NaN return x+y */
     if (ix > 0x7ff00000 || ((ix == 0x7ff00000) && (lx != 0)) || iy > 0x7ff00000 || ((iy == 0x7ff00000) && (ly != 0))) {
@@ -140,18 +141,20 @@ double x, y;
      */
     yisint = 0;
     if (hx < 0) {
-        if (iy >= 0x43400000)
+        if (iy >= 0x43400000) {
             yisint = 2; /* even integer y */
-        else if (iy >= 0x3ff00000) {
+        } else if (iy >= 0x3ff00000) {
             k = (iy >> 20) - 0x3ff; /* exponent */
             if (k > 20) {
                 j = ly >> (52 - k);
-                if ((j << (52 - k)) == ly)
+                if ((j << (52 - k)) == ly) {
                     yisint = 2 - (j & 1);
+                }
             } else if (ly == 0) {
                 j = iy >> (20 - k);
-                if ((j << (20 - k)) == iy)
+                if ((j << (20 - k)) == iy) {
                     yisint = 2 - (j & 1);
+                }
             }
         }
     }
@@ -161,25 +164,29 @@ double x, y;
         if (iy == 0x7ff00000) {
 
             /* y is +-inf */
-            if (((ix - 0x3ff00000) | lx) == 0)
+            if (((ix - 0x3ff00000) | lx) == 0) {
                 return y - y; /* inf**+-1 is NaN */
-            else if (ix >= 0x3ff00000) /* (|x|>1)**+-inf = inf,0 */
+            } else if (ix >= 0x3ff00000) { /* (|x|>1)**+-inf = inf,0 */
                 return (hy >= 0) ? y : zero;
-            else /* (|x|<1)**-,+inf = inf,0 */
+            } else { /* (|x|<1)**-,+inf = inf,0 */
                 return (hy < 0) ? -y : zero;
+            }
         }
         if (iy == 0x3ff00000) {
             /* y is  +-1 */
-            if (hy < 0)
+            if (hy < 0) {
                 return one / x;
-            else
+            } else {
                 return x;
+            }
         }
-        if (hy == 0x40000000)
+        if (hy == 0x40000000) {
             return x * x; /* y is  2 */
+        }
         if (hy == 0x3fe00000) { /* y is  0.5 */
-            if (hx >= 0) /* x >= +0 */
+            if (hx >= 0) { /* x >= +0 */
                 return sqrt(x);
+            }
         }
     }
 
@@ -188,13 +195,15 @@ double x, y;
     if (lx == 0) {
         if (ix == 0x7ff00000 || ix == 0 || ix == 0x3ff00000) {
             z = ax; /*x is +-0,+-inf,+-1*/
-            if (hy < 0)
+            if (hy < 0) {
                 z = one / z; /* z = (1/|x|) */
+            }
             if (hx < 0) {
                 if (((ix - 0x3ff00000) | yisint) == 0) {
                     z = (z - z) / (z - z); /* (-1)**non-int is NaN */
-                } else if (yisint == 1)
+                } else if (yisint == 1) {
                     z = -z; /* (x<0)**odd = -(|x|**odd) */
+                }
             }
             return z;
         }
@@ -211,16 +220,20 @@ double x, y;
     /* |y| is big */
     if (iy > 0x41e00000) { /* if |y| > 2**31 */
         if (iy > 0x43f00000) { /* if |y| > 2**64, must o/uflow */
-            if (ix <= 0x3fefffff)
+            if (ix <= 0x3fefffff) {
                 return (hy < 0) ? big * big : tiny * tiny;
-            if (ix >= 0x3ff00000)
+            }
+            if (ix >= 0x3ff00000) {
                 return (hy > 0) ? big * big : tiny * tiny;
+            }
         }
         /* over/underflow if x is not close to one */
-        if (ix < 0x3fefffff)
+        if (ix < 0x3fefffff) {
             return (hy < 0) ? big * big : tiny * tiny;
-        if (ix > 0x3ff00000)
+        }
+        if (ix > 0x3ff00000) {
             return (hy > 0) ? big * big : tiny * tiny;
+        }
         /* now |1-x| is tiny <= 2**-20, suffice to compute
            log(x) by x-x^2/2+x^3/3-x^4/4 */
         t = x - 1; /* t has 20 trailing zeros */
@@ -243,11 +256,11 @@ double x, y;
         j = ix & 0x000fffff;
         /* determine interval */
         ix = j | 0x3ff00000; /* normalize ix */
-        if (j <= 0x3988E)
+        if (j <= 0x3988E) {
             k = 0; /* |x|<sqrt(3/2) */
-        else if (j < 0xBB67A)
+        } else if (j < 0xBB67A) {
             k = 1; /* |x|<sqrt(3)   */
-        else {
+        } else {
             k = 0;
             n += 1;
             ix -= 0x00100000;
@@ -290,8 +303,9 @@ double x, y;
     }
 
     s = one; /* s (sign of result -ve**odd) = -1 else = 1 */
-    if ((((hx >> 31) + 1) | (yisint - 1)) == 0)
+    if ((((hx >> 31) + 1) | (yisint - 1)) == 0) {
         s = -one; /* (-ve)**(odd int) */
+    }
 
     /* split up y into y1+y2 and compute (y1+y2)*(t1+t2) */
     y1 = y;
@@ -302,18 +316,20 @@ double x, y;
     j = __HI(z);
     i = __LO(z);
     if (j >= 0x40900000) { /* z >= 1024 */
-        if (((j - 0x40900000) | i) != 0) /* if z > 1024 */
+        if (((j - 0x40900000) | i) != 0) { /* if z > 1024 */
             return s * big * big; /* overflow */
-        else {
-            if (p_l + ovt > z - p_h)
+        } else {
+            if (p_l + ovt > z - p_h) {
                 return s * big * big; /* overflow */
+            }
         }
     } else if ((j & 0x7fffffff) >= 0x4090cc00) { /* z <= -1075 */
-        if (((j - 0xc090cc00) | i) != 0) /* z < -1075 */
+        if (((j - 0xc090cc00) | i) != 0) { /* z < -1075 */
             return s * tiny * tiny; /* underflow */
-        else {
-            if (p_l <= z - p_h)
+        } else {
+            if (p_l <= z - p_h) {
                 return s * tiny * tiny; /* underflow */
+            }
         }
     }
     /*
@@ -328,8 +344,9 @@ double x, y;
         t = zero;
         __HI(t) = (n & ~(0x000fffff >> k));
         n = ((n & 0x000fffff) | 0x00100000) >> (20 - k);
-        if (j < 0)
+        if (j < 0) {
             n = -n;
+        }
         p_h -= t;
     }
     t = p_l + p_h;
@@ -344,9 +361,10 @@ double x, y;
     z = one - (r - z);
     j = __HI(z);
     j += (n << 20);
-    if ((j >> 20) <= 0)
+    if ((j >> 20) <= 0) {
         z = scalbn(z, n); /* subnormal output */
-    else
+    } else {
         __HI(z) += (n << 20);
+    }
     return s * z;
 }

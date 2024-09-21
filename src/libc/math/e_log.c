@@ -97,8 +97,9 @@ double x;
 
     k = 0;
     if (hx < 0x00100000) { /* x < 2**-1022  */
-        if (((hx & 0x7fffffff) | lx) == 0)
+        if (((hx & 0x7fffffff) | lx) == 0) {
             return -two54 / zero; /* log(+-0)=-inf */
+        }
         if (hx < 0) {
             errno = EDOM;
             return (x - x) / zero;
@@ -107,8 +108,9 @@ double x;
         x *= two54; /* subnormal number, scale up x */
         hx = __HI(x); /* high word of x */
     }
-    if (hx >= 0x7ff00000)
+    if (hx >= 0x7ff00000) {
         return x + x;
+    }
     k += (hx >> 20) - 1023;
     hx &= 0x000fffff;
     i = (hx + 0x95f64) & 0x100000;
@@ -116,17 +118,18 @@ double x;
     k += (i >> 20);
     f = x - 1.0;
     if ((0x000fffff & (2 + hx)) < 3) { /* |f| < 2**-20 */
-        if (f == zero)
-            if (k == 0)
+        if (f == zero) {
+            if (k == 0) {
                 return zero;
-            else {
+            } else {
                 dk = (double)k;
                 return dk * ln2_hi + dk * ln2_lo;
             }
+        }
         R = f * f * (0.5 - 0.33333333333333333 * f);
-        if (k == 0)
+        if (k == 0) {
             return f - R;
-        else {
+        } else {
             dk = (double)k;
             return dk * ln2_hi - ((R - dk * ln2_lo) - f);
         }
@@ -143,14 +146,16 @@ double x;
     R = t2 + t1;
     if (i > 0) {
         hfsq = 0.5 * f * f;
-        if (k == 0)
+        if (k == 0) {
             return f - (hfsq - s * (hfsq + R));
-        else
+        } else {
             return dk * ln2_hi - ((hfsq - (s * (hfsq + R) + dk * ln2_lo)) - f);
+        }
     } else {
-        if (k == 0)
+        if (k == 0) {
             return f - s * (f - R);
-        else
+        } else {
             return dk * ln2_hi - ((s * (f - R) - dk * ln2_lo) - f);
+        }
     }
 }

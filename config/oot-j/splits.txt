@@ -854,6 +854,8 @@ libc/ansi_files.c:
 	extab       start:0x800067A8 end:0x800067B8
 	extabindex  start:0x80006D0C end:0x80006D24
 	.text       start:0x80155F54 end:0x80156064
+	.data       start:0x801A0188 end:0x801A02C8
+	.bss        start:0x80259E50 end:0x8025A150
 
 libc/ansi_fp.c:
 	extab       start:0x800067B8 end:0x800067F0
@@ -920,16 +922,20 @@ libc/qsort.c:
 
 libc/rand.c:
 	.text       start:0x8015B404 end:0x8015B42C
+	.sdata      start:0x8025CFB0 end:0x8025CFB8
 
 libc/scanf.c:
 	extab       start:0x800068D0 end:0x800068E8
 	extabindex  start:0x80006EC8 end:0x80006EEC
 	.text       start:0x8015B42C end:0x8015C998
+	.rodata     start:0x8016EAE0 end:0x8016EB08
+	.data       start:0x801A0878 end:0x801A0998
 
 libc/signal.c:
 	extab       start:0x800068E8 end:0x800068F0
 	extabindex  start:0x80006EEC end:0x80006EF8
 	.text       start:0x8015C998 end:0x8015CA48
+	.bss        start:0x8025A150 end:0x8025A170
 
 libc/string.c:
 	extab       start:0x800068F0 end:0x80006908

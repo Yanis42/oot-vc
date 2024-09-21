@@ -131,9 +131,9 @@
 
 #ifdef __STDC__
 static const int init_jk[] = {2, 3, 4, 6};
-/* initial value for jk */ /*- cc 020130 -*/
+/* initial value for jk */
 #else
-static int init_jk[] = {2, 3, 4, 6}; /*- cc 020130 -*/
+static int init_jk[] = {2, 3, 4, 6};
 #endif
 
 #ifdef __STDC__
@@ -161,15 +161,15 @@ static double
     twon24 = 5.96046447753906250000e-08; /* 0x3E700000, 0x00000000 */
 
 #ifdef __STDC__
-int __kernel_rem_pio2(double* x, double* y, int e0, int nx, int prec, const int* ipio2) /*- cc 020130 -*/
+int __kernel_rem_pio2(double* x, double* y, int e0, int nx, int prec, const int* ipio2)
 #else
-int __kernel_rem_pio2(x, y, e0, nx, prec, ipio2) /*- cc 020130 -*/
+int __kernel_rem_pio2(x, y, e0, nx, prec, ipio2)
 double x[], y[];
 int e0, nx, prec;
-int ipio2[]; /*- cc 020130 -*/
+int ipio2[];
 #endif
 {
-    int jz, jx, jv, jp, jk, carry, n, iq[20], i, j, k, m, q0, ih; /*- cc 020130 -*/
+    int jz, jx, jv, jp, jk, carry, n, iq[20], i, j, k, m, q0, ih;
     double z, fw, f[20], fq[20], q[20];
 
     /* initialize jk*/
@@ -179,20 +179,23 @@ int ipio2[]; /*- cc 020130 -*/
     /* determine jx,jv,q0, note that 3>q0 */
     jx = nx - 1;
     jv = (e0 - 3) / 24;
-    if (jv < 0)
+    if (jv < 0) {
         jv = 0;
+    }
     q0 = e0 - 24 * (jv + 1);
 
     /* set up f[0] to f[jx+jk] where f[jx+jk] = ipio2[jv+jk] */
     j = jv - jx;
     m = jx + jk;
-    for (i = 0; i <= m; i++, j++)
+    for (i = 0; i <= m; i++, j++) {
         f[i] = (j < 0) ? zero : (double)ipio2[j];
+    }
 
     /* compute q[0],q[1],...q[jk] */
     for (i = 0; i <= jk; i++) {
-        for (j = 0, fw = 0.0; j <= jx; j++)
+        for (j = 0, fw = 0.0; j <= jx; j++) {
             fw += x[j] * f[jx + i - j];
+        }
         q[i] = fw;
     }
 
@@ -200,15 +203,15 @@ int ipio2[]; /*- cc 020130 -*/
 recompute:
     /* distill q[] into iq[] reversingly */
     for (i = 0, j = jz, z = q[jz]; j > 0; i++, j--) {
-        fw = (double)((int)(twon24 * z)); /*- cc 020130 -*/
-        iq[i] = (int)(z - two24 * fw); /*- cc 020130 -*/
+        fw = (double)((int)(twon24 * z));
+        iq[i] = (int)(z - two24 * fw);
         z = q[j - 1] + fw;
     }
 
     /* compute n */
     z = scalbn(z, q0); /* actual value of z */
     z -= 8.0 * floor(z * 0.125); /* trim off integer >= 8 */
-    n = (int)z; /*- cc 020130 -*/
+    n = (int)z;
     z -= (double)n;
     ih = 0;
     if (q0 > 0) { /* need iq[jz-1] to determine n */
@@ -216,10 +219,11 @@ recompute:
         n += i;
         iq[jz - 1] -= i << (24 - q0);
         ih = iq[jz - 1] >> (23 - q0);
-    } else if (q0 == 0)
+    } else if (q0 == 0) {
         ih = iq[jz - 1] >> 23;
-    else if (z >= 0.5)
+    } else if (z >= 0.5) {
         ih = 2;
+    }
 
     if (ih > 0) { /* q > 0.5 */
         n += 1;
@@ -231,8 +235,9 @@ recompute:
                     carry = 1;
                     iq[i] = 0x1000000 - j;
                 }
-            } else
+            } else {
                 iq[i] = 0xffffff - j;
+            }
         }
         if (q0 > 0) { /* rare case: chance is 1 in 12 */
             switch (q0) {
@@ -246,24 +251,27 @@ recompute:
         }
         if (ih == 2) {
             z = one - z;
-            if (carry != 0)
+            if (carry != 0) {
                 z -= scalbn(one, q0);
+            }
         }
     }
 
     /* check if recomputation is needed */
     if (z == zero) {
         j = 0;
-        for (i = jz - 1; i >= jk; i--)
+        for (i = jz - 1; i >= jk; i--) {
             j |= iq[i];
+        }
         if (j == 0) { /* need recomputation */
             for (k = 1; iq[jk - k] == 0; k++)
                 ; /* k = no. of terms needed */
 
             for (i = jz + 1; i <= jz + k; i++) { /* add q[jz+1] to q[jz+k] */
                 f[jx + i] = (double)ipio2[jv + i];
-                for (j = 0, fw = 0.0; j <= jx; j++)
+                for (j = 0, fw = 0.0; j <= jx; j++) {
                     fw += x[j] * f[jx + i - j];
+                }
                 q[i] = fw;
             }
             jz += k;
@@ -282,13 +290,14 @@ recompute:
     } else { /* break z into 24-bit if necessary */
         z = scalbn(z, -q0);
         if (z >= two24) {
-            fw = (double)((int)(twon24 * z)); /*- cc 020130 -*/
-            iq[jz] = (int)(z - two24 * fw); /*- cc 020130 -*/
+            fw = (double)((int)(twon24 * z));
+            iq[jz] = (int)(z - two24 * fw);
             jz += 1;
             q0 += 24;
-            iq[jz] = (int)fw; /*- cc 020130 -*/
-        } else
-            iq[jz] = (int)z; /*- cc 020130 -*/
+            iq[jz] = (int)fw;
+        } else {
+            iq[jz] = (int)z;
+        }
     }
 
     /* convert integer "bit" chunk to floating-point value */
@@ -300,8 +309,9 @@ recompute:
 
     /* compute PIo2[0,...,jp]*q[jz,...,0] */
     for (i = jz; i >= 0; i--) {
-        for (fw = 0.0, k = 0; k <= jp && k <= jz - i; k++)
+        for (fw = 0.0, k = 0; k <= jp && k <= jz - i; k++) {
             fw += PIo2[k] * q[i + k];
+        }
         fq[jz - i] = fw;
     }
 
@@ -309,19 +319,22 @@ recompute:
     switch (prec) {
         case 0:
             fw = 0.0;
-            for (i = jz; i >= 0; i--)
+            for (i = jz; i >= 0; i--) {
                 fw += fq[i];
+            }
             y[0] = (ih == 0) ? fw : -fw;
             break;
         case 1:
         case 2:
             fw = 0.0;
-            for (i = jz; i >= 0; i--)
+            for (i = jz; i >= 0; i--) {
                 fw += fq[i];
+            }
             y[0] = (ih == 0) ? fw : -fw;
             fw = fq[0] - fw;
-            for (i = 1; i <= jz; i++)
+            for (i = 1; i <= jz; i++) {
                 fw += fq[i];
+            }
             y[1] = (ih == 0) ? fw : -fw;
             break;
         case 3: /* painful */
@@ -335,8 +348,9 @@ recompute:
                 fq[i] += fq[i - 1] - fw;
                 fq[i - 1] = fw;
             }
-            for (fw = 0.0, i = jz; i >= 2; i--)
+            for (fw = 0.0, i = jz; i >= 2; i--) {
                 fw += fq[i];
+            }
             if (ih == 0) {
                 y[0] = fq[0];
                 y[1] = fq[1];

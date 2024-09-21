@@ -43,8 +43,9 @@ int* eptr;
     ix = 0x7fffffff & hx;
     lx = __LO(x);
     *eptr = 0;
-    if (ix >= 0x7ff00000 || ((ix | lx) == 0))
+    if (ix >= 0x7ff00000 || ((ix | lx) == 0)) {
         return x; /* 0,inf,nan */
+    }
     if (ix < 0x00100000) { /* subnormal */
         x *= two54;
         hx = __HI(x);

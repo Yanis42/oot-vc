@@ -117,15 +117,18 @@ double x;
     /* filter out non-finite argument */
     if (hx >= 0x40862E42) { /* if |x|>=709.78... */
         if (hx >= 0x7ff00000) {
-            if (((hx & 0xfffff) | __LO(x)) != 0)
+            if (((hx & 0xfffff) | __LO(x)) != 0) {
                 return x + x; /* NaN */
-            else
+            } else {
                 return (xsb == 0) ? x : 0.0; /* ieee_exp(+-inf)={inf,0} */
+            }
         }
-        if (x > o_threshold)
+        if (x > o_threshold) {
             return huge * huge; /* overflow */
-        if (x < u_threshold)
+        }
+        if (x < u_threshold) {
             return twom1000 * twom1000; /* underflow */
+        }
     }
     /* argument reduction */
     if (hx > 0x3fd62e42) { /* if  |x| > 0.5 ln2 */
@@ -141,17 +144,20 @@ double x;
         }
         x = hi - lo;
     } else if (hx < 0x3e300000) { /* when |x|<2**-28 */
-        if (huge + x > one)
+        if (huge + x > one) {
             return one + x; /* trigger inexact */
-    } else
+        }
+    } else {
         k = 0;
+    }
     /* x is now in primary range */
     t = x * x;
     c = x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
-    if (k == 0)
+    if (k == 0) {
         return one - ((x * c) / (c - 2.0) - x);
-    else
+    } else {
         y = one - ((lo - (x * c) / (2.0 - c)) - hi);
+    }
     if (k >= -1021) {
         __HI(y) += (k << 20); /* add k to y's exponent */
         return y;

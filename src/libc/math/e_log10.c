@@ -86,8 +86,9 @@ double x;
         x *= two54; /* subnormal number, scale up x */
         hx = __HI(x); /* high word of x */
     }
-    if (hx >= 0x7ff00000)
+    if (hx >= 0x7ff00000) {
         return x + x;
+    }
     k += (hx >> 20) - 1023;
     i = ((unsigned)k & 0x80000000) >> 31;
     hx = (hx & 0x000fffff) | ((0x3ff - i) << 20);
