@@ -1,7 +1,7 @@
 # See config.example.yml for documentation.
 name: wii-vc
 object: orig/mm-u/content1.app
-hash: f73ffd7ac942edec9d06807506448f043651c3a5
+hash: 85389116e4ae15448ce8d0ea77c37a920043903c
 symbols: config/mm-u/symbols.txt
 splits: config/mm-u/splits.txt
 
