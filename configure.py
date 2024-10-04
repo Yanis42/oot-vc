@@ -184,7 +184,7 @@ if config.non_matching:
 def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
-        "mw_version": "GC/3.0a5",
+        "mw_version": "GC/3.0a5", # TODO: 3.0a5.2 for MM
         "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-enc SJIS"],
         "host": False,
         "objects": objects,
