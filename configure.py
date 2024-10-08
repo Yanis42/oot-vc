@@ -182,9 +182,17 @@ if config.non_matching:
 ### Helper functions
 
 def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
+    emulator_compilers = {
+        "oot-j": "GC/3.0a5",
+        "oot-u": "GC/3.0a5",
+        "oot-e": "GC/3.0a5",
+        "mm-j": "GC/3.0a5.2",
+        "mm-u": "GC/3.0a5.2",
+    }
+
     return {
         "lib": lib_name,
-        "mw_version": "GC/3.0a5", # TODO: 3.0a5.2 for MM
+        "mw_versions": emulator_compilers,
         "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-enc SJIS"],
         "host": False,
         "objects": objects,

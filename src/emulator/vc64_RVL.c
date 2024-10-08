@@ -17,9 +17,11 @@ System* gpSystem;
 static bool simulatorParseArguments(void);
 
 void fn_80007020(void) {
+#if VERSION < MM_J
     SYSTEM_FRAME(gpSystem)->nMode = 0;
     SYSTEM_FRAME(gpSystem)->nModeVtx = -1;
     frameDrawReset(SYSTEM_FRAME(gpSystem), 0x5FFED);
+#endif
 
     GXSetZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
     GXSetColorUpdate(GX_ENABLE);
@@ -36,6 +38,25 @@ void fn_80007020(void) {
     }
 }
 
+#if VERSION == MM_J
+
+bool simulatorCopyControllerMap(u32* mapDataOutput, u32* mapDataInput) {
+    int i;
+
+    for (i = 0; i < 22; i++) {
+        mapDataOutput[i] = mapDataInput[i];
+    }
+
+    return true;
+}
+
+bool fn_80007280() {
+    OSGetTick();
+    return true;
+}
+
+#else
+
 bool simulatorDVDShowError(s32 nStatus, void* anData, s32 nSizeRead, u32 nOffset) { return true; }
 
 bool simulatorDVDOpen(char* szNameFile, DVDFileInfo* pFileInfo) { return false; }
@@ -46,6 +67,8 @@ bool simulatorDVDRead(DVDFileInfo* pFileInfo, void* anData, s32 nSizeRead, s32 n
 
 bool simulatorShowLoad(s32 unknown, char* szNameFile, f32 rProgress) { return true; }
 
+#endif
+
 static bool simulatorParseArguments(void) {
     char* szText;
     char* szValue;
@@ -55,7 +78,12 @@ static bool simulatorParseArguments(void) {
         gaszArgument[iArgument] = NULL;
     }
 
+#if VERSION == MM_J
+    iArgument = 0;
+#else
     iArgument = 1;
+#endif
+
     while (iArgument < xlCoreGetArgumentCount()) {
         xlCoreGetArgument(iArgument, &szText);
         iArgument += 1;
@@ -68,6 +96,36 @@ static bool simulatorParseArguments(void) {
             }
 
             switch (szText[1]) {
+#if VERSION == MM_J
+                case 'V':
+                case 'v':
+                    gaszArgument[SAT_VIBRATION] = szValue;
+                    break;
+                case 'P':
+                case 'p':
+                    gaszArgument[SAT_PROGRESSIVE] = szValue;
+                    break;
+                case 'R':
+                case 'r':
+                    gaszArgument[SAT_RESET] = szValue;
+                    break;
+                case 'X':
+                case 'x':
+                    gaszArgument[SAT_XTRA] = szValue;
+                    break;
+                case 'C':
+                case 'c':
+                    gaszArgument[SAT_MEMORYCARD] = szValue;
+                    break;
+                case 'M':
+                case 'm':
+                    gaszArgument[SAT_MOVIE] = szValue;
+                    break;
+                case 'G':
+                case 'g':
+                    gaszArgument[SAT_CONTROLLER] = szValue;
+                    break;
+#else
                 case 'L':
                 case 'l':
                     gaszArgument[SAT_UNK9] = szValue;
@@ -104,6 +162,7 @@ static bool simulatorParseArguments(void) {
                 case 'x':
                     gaszArgument[SAT_XTRA] = szValue;
                     break;
+#endif
             }
         } else {
             gaszArgument[SAT_NAME] = szText;
@@ -134,15 +193,27 @@ static inline bool simulatorRun(SystemMode* peMode) {
     return true;
 }
 
+extern s32 lbl_801FF7C0;
+extern s32 lbl_80200620;
+extern s32 lbl_80200624;
+extern s32 lbl_80200630;
+
 bool xlMain(void) {
     SystemMode eMode;
     s32 nSize0;
     s32 nSize1;
     GXColor color;
+#if VERSION == MM_J
+    char acNameROM[45];
+#else
     char acNameROM[32];
+#endif
 
     simulatorParseArguments();
 
+#if VERSION == MM_J
+    lbl_80200624 = 0;
+#else
     if (!xlHeapGetFree(&nSize0)) {
         return false;
     }
@@ -151,6 +222,7 @@ bool xlMain(void) {
         OSReport("\n\nERROR: This program MUST be run on a system with 24MB (or less) memory!\n");
         OSPanic("vc64_RVL.c", 1352, "       Please reduce memory-size to 24MB (using 'setsmemsize 0x1800000')\n\n");
     }
+#endif
 
 #ifdef __MWERKS__
     asm {
@@ -163,6 +235,21 @@ bool xlMain(void) {
     }
 #endif
 
+#if VERSION == MM_J
+    color.r = color.g = color.b = 0;
+    color.a = 255;
+
+    lbl_80200630 = 0;
+    lbl_80200620 = 0;
+    lbl_801FF7C0 = 1;
+
+    GXSetCopyClear(color, 0xFFFFFF);
+    VISetBlack(1);
+    VIFlush();
+    VIWaitForRetrace();
+    fn_80087394();
+    fn_80007020();
+#else
     VISetBlack(1);
     VIFlush();
     VIWaitForRetrace();
@@ -171,6 +258,7 @@ bool xlMain(void) {
     color.a = 255;
 
     GXSetCopyClear(color, 0xFFFFFF);
+#endif
 
     if (!xlHeapGetFree(&nSize0)) {
         return false;
