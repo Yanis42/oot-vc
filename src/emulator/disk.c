@@ -5,7 +5,11 @@
 #include "macros.h"
 
 _XL_OBJECTTYPE gClassDD = {
+#if IS_OOT
     "DD",
+#elif IS_MM
+    "DISK",
+#endif
     sizeof(Disk),
     NULL,
     (EventFunc)diskEvent,
@@ -27,7 +31,7 @@ bool diskPutROM16(Disk* pDisk, u32 nAddress, s16* pData) {
 #endif
 }
 
-bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) { 
+bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) {
 #if IS_OOT
     return false;
 #elif IS_MM
@@ -138,6 +142,9 @@ bool diskGetBlock(void* pObject, CpuBlock* pBlock) {
 bool diskEvent(Disk* pDisk, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 2:
+#if IS_MM
+            pDisk->pHost = pArgument;
+#endif
             break;
         case 0x1002:
             switch (((CpuDevice*)pArgument)->nType) {
@@ -148,25 +155,25 @@ bool diskEvent(Disk* pDisk, s32 nEvent, void* pArgument) {
                     }
 #endif
 
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)diskPutDrive8,
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pDisk)), pArgument, (Put8Func)diskPutDrive8,
                                          (Put16Func)diskPutDrive16, (Put32Func)diskPutDrive32,
                                          (Put64Func)diskPutDrive64)) {
                         return false;
                     }
 
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)diskGetDrive8,
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pDisk)), pArgument, (Get8Func)diskGetDrive8,
                                          (Get16Func)diskGetDrive16, (Get32Func)diskGetDrive32,
                                          (Get64Func)diskGetDrive64)) {
                         return false;
                     }
                     break;
                 case 1:
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)diskPutROM8,
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pDisk)), pArgument, (Put8Func)diskPutROM8,
                                          (Put16Func)diskPutROM16, (Put32Func)diskPutROM32, (Put64Func)diskPutROM64)) {
                         return false;
                     }
 
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)diskGetROM8,
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pDisk)), pArgument, (Get8Func)diskGetROM8,
                                          (Get16Func)diskGetROM16, (Get32Func)diskGetROM32, (Get64Func)diskGetROM64)) {
                         return false;
                     }
@@ -178,8 +185,10 @@ bool diskEvent(Disk* pDisk, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

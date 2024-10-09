@@ -30,6 +30,7 @@
 #include "stdlib.h"
 #include "string.h"
 
+#undef SYSTEM_PTR
 #if IS_OOT
 #define SYSTEM_PTR (gpSystem)
 #elif IS_MM

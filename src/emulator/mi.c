@@ -4,6 +4,15 @@
 
 // Note: mips.c in oot-gc
 
+#if IS_MM
+_XL_OBJECTTYPE gClassMI = {
+    "MIPS",
+    sizeof(MI),
+    NULL,
+    (EventFunc)miEvent,
+};
+#endif
+
 bool miSetInterrupt(MI* pMI, MIInterruptType eType) {
     s32 nInterrupt = pMI->nInterrupt;
 
@@ -107,7 +116,7 @@ bool miPut32(MI* pMI, u32 nAddress, s32* pData) {
                 pMI->nMode |= 0x100;
             }
             if (nData & 0x800) {
-                xlObjectEvent(gpSystem, 0x1001, (void*)0xA);
+                xlObjectEvent(SYSTEM_PTR(pMI), 0x1001, (void*)0xA);
             }
             if (nData & 0x1000) {
                 pMI->nMode &= ~0x200;
@@ -201,13 +210,16 @@ bool miEvent(MI* pMI, s32 nEvent, void* pArgument) {
             pMI->nMode = 0;
             pMI->nMask = 0;
             pMI->nInterrupt = 0;
+#if IS_MM
+            pMI->pHost = pArgument;
+#endif
             break;
         case 0x1002:
-            if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)miPut8, (Put16Func)miPut16,
+            if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pMI)), pArgument, (Put8Func)miPut8, (Put16Func)miPut16,
                                  (Put32Func)miPut32, (Put64Func)miPut64)) {
                 return false;
             }
-            if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)miGet8, (Get16Func)miGet16,
+            if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pMI)), pArgument, (Get8Func)miGet8, (Get16Func)miGet16,
                                  (Get32Func)miGet32, (Get64Func)miGet64)) {
                 return false;
             }
@@ -216,8 +228,10 @@ bool miEvent(MI* pMI, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;
@@ -226,9 +240,11 @@ bool miEvent(MI* pMI, s32 nEvent, void* pArgument) {
     return true;
 }
 
+#if IS_OOT
 _XL_OBJECTTYPE gClassMI = {
     "MI",
     sizeof(MI),
     NULL,
     (EventFunc)miEvent,
 };
+#endif

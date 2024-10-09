@@ -14,6 +14,12 @@ extern "C" {
 #define IS_MM (VERSION == MM_J || VERSION == MM_U)
 #define IS_OOT (!IS_MM)
 
+#if IS_OOT
+#define SYSTEM_PTR(...) (gpSystem)
+#elif IS_MM
+#define SYSTEM_PTR(pObject) ((System*)(pObject->pHost))
+#endif
+
 #define ALIGN_PREV(X, N) ((X) & ~((N) - 1))
 #define ALIGN_NEXT(X, N) ALIGN_PREV(((X) + (N) - 1), N)
 

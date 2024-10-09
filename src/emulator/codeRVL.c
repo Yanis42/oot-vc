@@ -12,13 +12,9 @@ _XL_OBJECTTYPE gClassCode = {
 static void* gpBufferFunction;
 static u32* ganDataCode;
 
-bool fn_80007844(void) {
-    return true;
-}
+bool fn_80007844(void) { return true; }
 
-bool fn_8000784C(void) {
-    return true;
-}
+bool fn_8000784C(void) { return true; }
 #endif
 
 bool codeEvent(Code* pCode, s32 nEvent, void* pArgument) {

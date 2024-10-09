@@ -4,6 +4,7 @@
 // Note: mips.h in oot-gc
 
 #include "emulator/xlObject.h"
+#include "macros.h"
 #include "revolution/types.h"
 
 #ifdef __cplusplus
@@ -20,11 +21,20 @@ typedef enum MIInterruptType {
     MIT_DP = 5,
 } MIInterruptType;
 
+#if IS_OOT
 typedef struct MI {
     /* 0x0 */ s32 nInterrupt;
     /* 0x4 */ s32 nMask;
     /* 0x8 */ s32 nMode;
 } MI; // size = 0xC
+#elif IS_MM
+typedef struct MI {
+    /* 0x0 */ s32 nMask;
+    /* 0x4 */ s32 nMode;
+    /* 0x8 */ void* pHost;
+    /* 0xC */ s32 nInterrupt;
+} MI; // size = 0x10
+#endif
 
 bool miSetInterrupt(MI* pMI, MIInterruptType eType);
 bool miResetInterrupt(MI* pMI, MIInterruptType eType);

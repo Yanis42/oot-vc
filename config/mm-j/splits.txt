@@ -40,6 +40,8 @@ emulator/pif.c:
 
 emulator/ram.c:
 	.text       start:0x800504E0 end:0x80050AFC
+	.data       start:0x801511C8 end:0x801513E8
+	.sdata      start:0x801FFF38 end:0x801FFF40
 
 emulator/rom.c:
 	.text       start:0x80050AFC end:0x80052CC8
@@ -49,26 +51,36 @@ emulator/rdp.c:
 
 emulator/rdb.c:
 	.text       start:0x80054510 end:0x80054AE4
+	.data       start:0x80151668 end:0x801516D8
+	.sdata      start:0x801FFF50 end:0x801FFF58
 
 emulator/rsp.c:
 	.text       start:0x80054AE4 end:0x80071A74
 
 emulator/mi.c:
 	.text       start:0x80071A74 end:0x80071FA8
+	.data       start:0x80151E58 end:0x80151ED0
+	.sdata      start:0x801FFF90 end:0x801FFF98
 
 emulator/disk.c:
 	.text       start:0x80071FA8 end:0x8007223C
+	.data       start:0x80151ED0 end:0x80151EE0
+	.sdata      start:0x801FFF98 end:0x801FFFA0
 
 emulator/flash.c:
 	.text       start:0x8007223C end:0x80072974
+	.data       start:0x80151EE0 end:0x80151EF0
+	.sdata      start:0x801FFFA0 end:0x801FFFB0
 
 emulator/sram.c:
 	.text       start:0x80072974 end:0x80072D80
+	.data       start:0x80151EF0 end:0x80151F00
+	.sdata      start:0x801FFFB0 end:0x801FFFC0
 
 emulator/ai.c:
 	.text       start:0x80072D80 end:0x800730FC
 
-emulator/audio.c:
+emulator/soundRVL.c:
 	.text       start:0x800730FC end:0x800741DC
 
 emulator/vi.c:

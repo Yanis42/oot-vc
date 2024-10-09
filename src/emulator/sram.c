@@ -4,6 +4,7 @@
 #include "emulator/store.h"
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
+#include "macros.h"
 
 static bool sramPut8(Sram* pSRAM, u32 nAddress, s8* pData) {
     fn_80061BC0(pSRAM->pStore, (u8*)pData, nAddress & 0x7FFF, sizeof(s8));
@@ -45,6 +46,7 @@ static bool sramGet64(Sram* pSRAM, u32 nAddress, s64* pData) {
     return true;
 }
 
+#if IS_OOT
 static bool sramGetBlock(Sram* pSRAM, CpuBlock* pBlock) {
     void* pRAM;
 
@@ -68,6 +70,29 @@ static bool sramGetBlock(Sram* pSRAM, CpuBlock* pBlock) {
 
     return true;
 }
+#elif IS_MM
+bool fn_80072B34(Sram* pSRAM, s32 nAddress0, s32 nAddress1, u32 nSize) {
+    void* pBuffer;
+
+    if (ramGetBuffer(SYSTEM_RAM(gpSystem), &pBuffer, nAddress0, &nSize) == 0) {
+        return false;
+    }
+
+    fn_80061B88(pSRAM->pStore, pBuffer, nAddress1 & 0x7FFF, nSize);
+    return true;
+}
+
+bool fn_80072BAC(Sram* pSRAM, s32 nAddress0, s32 nAddress1, u32 nSize) {
+    void* pBuffer;
+
+    if (ramGetBuffer(SYSTEM_RAM(gpSystem), &pBuffer, nAddress0, &nSize) == 0) {
+        return false;
+    }
+
+    fn_80061BC0(pSRAM->pStore, pBuffer, nAddress1 & 0x7FFF, nSize);
+    return true;
+}
+#endif
 
 static inline bool sramEvent_UnknownInline(Sram* pSRAM, void* pArgument) {
     if (pSRAM->pStore != NULL && !storeFreeObject((void**)&pSRAM->pStore)) {
@@ -91,9 +116,11 @@ bool sramEvent(Sram* pSRAM, s32 nEvent, void* pArgument) {
             }
             break;
         case 0x1002:
+#if IS_OOT
             if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), (CpuDevice*)pArgument, (GetBlockFunc)sramGetBlock)) {
                 return false;
             }
+#endif
             if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)sramPut8, (Put16Func)sramPut16,
                                  (Put32Func)sramPut32, (Put64Func)sramPut64)) {
                 return false;
@@ -107,8 +134,10 @@ bool sramEvent(Sram* pSRAM, s32 nEvent, void* pArgument) {
         case 1:
         case 3:
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

@@ -4,11 +4,21 @@
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlHeap.h"
 
+#if IS_MM
+_XL_OBJECTTYPE gClassRAM = {
+    "RAM",
+    sizeof(Ram),
+    NULL,
+    (EventFunc)ramEvent,
+};
+#endif
+
 static bool ramPutControl8(Ram* pRAM, u32 nAddress, s8* pData) { return false; }
 
 static bool ramPutControl16(Ram* pRAM, u32 nAddress, s16* pData) { return false; }
 
 static bool ramPutControl32(Ram* pRAM, u32 nAddress, s32* pData) {
+#if IS_OOT
     switch (nAddress & 0x3F) {
         case RDRAM_CONFIG:
             pRAM->RDRAM_CONFIG_REG = *pData;
@@ -43,6 +53,23 @@ static bool ramPutControl32(Ram* pRAM, u32 nAddress, s32* pData) {
         default:
             return false;
     }
+#elif IS_MM
+    switch (nAddress & 0x3F) {
+        case RDRAM_CONFIG:
+        case RDRAM_DEVICE_ID:
+        case RDRAM_DELAY:
+        case RDRAM_MODE:
+        case RDRAM_REF_INTERVAL:
+        case RDRAM_REF_NOW:
+        case RDRAM_RAS_INTERVAL:
+        case RDRAM_MIN_INTERVAL:
+        case RDRAM_ADDR_SELECT:
+        case RDRAM_DEVICE_MANUF:
+            break;
+        default:
+            return false;
+    }
+#endif
 
     return true;
 }
@@ -54,6 +81,7 @@ static bool ramGetControl8(Ram* pRAM, u32 nAddress, s8* pData) { return false; }
 static bool ramGetControl16(Ram* pRAM, u32 nAddress, s16* pData) { return false; }
 
 static bool ramGetControl32(Ram* pRAM, u32 nAddress, s32* pData) {
+#if IS_OOT
     *pData = 0;
 
     switch (nAddress & 0x3F) {
@@ -90,6 +118,23 @@ static bool ramGetControl32(Ram* pRAM, u32 nAddress, s32* pData) {
         default:
             return false;
     }
+#elif IS_MM
+    switch (nAddress & 0x3F) {
+        case RDRAM_CONFIG:
+        case RDRAM_DEVICE_ID:
+        case RDRAM_DELAY:
+        case RDRAM_MODE:
+        case RDRAM_REF_INTERVAL:
+        case RDRAM_REF_NOW:
+        case RDRAM_RAS_INTERVAL:
+        case RDRAM_MIN_INTERVAL:
+        case RDRAM_ADDR_SELECT:
+        case RDRAM_DEVICE_MANUF:
+            break;
+        default:
+            return false;
+    }
+#endif
 
     return true;
 }
@@ -101,6 +146,7 @@ static bool ramPutRI8(Ram* pRAM, u32 nAddress, s8* pData) { return false; }
 static bool ramPutRI16(Ram* pRAM, u32 nAddress, s16* pData) { return false; }
 
 static bool ramPutRI32(Ram* pRAM, u32 nAddress, s32* pData) {
+#if IS_OOT
     switch (nAddress & 0x1F) {
         case RI_MODE:
             pRAM->RI_MODE_REG = *pData & 0xF;
@@ -123,6 +169,21 @@ static bool ramPutRI32(Ram* pRAM, u32 nAddress, s32* pData) {
         default:
             return false;
     }
+#elif IS_MM
+    switch (nAddress & 0x1F) {
+        case RI_MODE:
+        case RI_CONFIG:
+        case RI_CURRENT_LOAD:
+        case RI_RERROR:
+        case RI_WERROR:
+        case RI_SELECT:
+        case RI_REFRESH:
+        case RI_LATENCY:
+            break;
+        default:
+            return false;
+    }
+#endif
 
     return true;
 }
@@ -134,6 +195,7 @@ static bool ramGetRI8(Ram* pRAM, u32 nAddress, s8* pData) { return false; }
 static bool ramGetRI16(Ram* pRAM, u32 nAddress, s16* pData) { return false; }
 
 static bool ramGetRI32(Ram* pRAM, u32 nAddress, s32* pData) {
+#if IS_OOT
     switch (nAddress & 0x1F) {
         case RI_MODE:
             *pData = pRAM->RI_MODE_REG & 0xF;
@@ -159,6 +221,21 @@ static bool ramGetRI32(Ram* pRAM, u32 nAddress, s32* pData) {
         default:
             return false;
     }
+#elif IS_MM
+    switch (nAddress & 0x1F) {
+        case RI_MODE:
+        case RI_CONFIG:
+        case RI_CURRENT_LOAD:
+        case RI_WERROR:
+        case RI_SELECT:
+        case RI_REFRESH:
+        case RI_LATENCY:
+        case RI_RERROR:
+            break;
+        default:
+            return false;
+    }
+#endif
 
     return true;
 }
@@ -253,6 +330,7 @@ static bool ramGet64(Ram* pRAM, u32 nAddress, s64* pData) {
     return true;
 }
 
+#if IS_OOT
 static bool ramGetBlock(Ram* pRAM, CpuBlock* pBlock) {
     if (pBlock->pfUnknown != NULL) {
         if (!pBlock->pfUnknown(pBlock, 1)) {
@@ -262,6 +340,7 @@ static bool ramGetBlock(Ram* pRAM, CpuBlock* pBlock) {
 
     return true;
 }
+#endif
 
 bool ramGetBuffer(Ram* pRAM, void** ppRAM, u32 nOffset, u32* pnSize) {
     s32 nSize;
@@ -281,7 +360,12 @@ bool ramGetBuffer(Ram* pRAM, void** ppRAM, u32 nOffset, u32* pnSize) {
         }
     }
 
+#if IS_OOT
     *((u8**)ppRAM) = (u8*)pRAM->pBuffer + nOffset;
+#elif IS_MM
+    nOffset &= (pRAM->nSize - 1);
+    *((u8**)ppRAM) = (u8*)pRAM->pBuffer + nOffset;
+#endif
     return true;
 }
 
@@ -324,43 +408,48 @@ bool ramEvent(Ram* pRAM, s32 nEvent, void* pArgument) {
         case 2:
             pRAM->nSize = 0;
             pRAM->pBuffer = NULL;
+#if IS_MM
+            pRAM->pHost = pArgument;
+#endif
             break;
         case 0x1002:
             switch (((CpuDevice*)pArgument)->nType & 0xFF) {
                 case 0:
+#if IS_OOT
                     if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), pArgument, (GetBlockFunc)ramGetBlock)) {
                         return false;
                     }
+#endif
 
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)ramPut8, (Put16Func)ramPut16,
-                                         (Put32Func)ramPut32, (Put64Func)ramPut64)) {
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Put8Func)ramPut8,
+                                         (Put16Func)ramPut16, (Put32Func)ramPut32, (Put64Func)ramPut64)) {
                         return false;
                     }
 
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)ramGet8, (Get16Func)ramGet16,
-                                         (Get32Func)ramGet32, (Get64Func)ramGet64)) {
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Get8Func)ramGet8,
+                                         (Get16Func)ramGet16, (Get32Func)ramGet32, (Get64Func)ramGet64)) {
                         return false;
                     }
                     break;
                 case 1:
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)ramPutRI8, (Put16Func)ramPutRI16,
-                                         (Put32Func)ramPutRI32, (Put64Func)ramPutRI64)) {
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Put8Func)ramPutRI8,
+                                         (Put16Func)ramPutRI16, (Put32Func)ramPutRI32, (Put64Func)ramPutRI64)) {
                         return false;
                     }
 
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)ramGetRI8, (Get16Func)ramGetRI16,
-                                         (Get32Func)ramGetRI32, (Get64Func)ramGetRI64)) {
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Get8Func)ramGetRI8,
+                                         (Get16Func)ramGetRI16, (Get32Func)ramGetRI32, (Get64Func)ramGetRI64)) {
                         return false;
                     }
                     break;
                 case 2:
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)ramPutControl8,
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Put8Func)ramPutControl8,
                                          (Put16Func)ramPutControl16, (Put32Func)ramPutControl32,
                                          (Put64Func)ramPutControl64)) {
                         return false;
                     }
 
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)ramGetControl8,
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRAM)), pArgument, (Get8Func)ramGetControl8,
                                          (Get16Func)ramGetControl16, (Get32Func)ramGetControl32,
                                          (Get64Func)ramGetControl64)) {
                         return false;
@@ -372,8 +461,10 @@ bool ramEvent(Ram* pRAM, s32 nEvent, void* pArgument) {
         case 1:
         case 3:
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;
@@ -382,9 +473,11 @@ bool ramEvent(Ram* pRAM, s32 nEvent, void* pArgument) {
     return true;
 }
 
+#if IS_OOT
 _XL_OBJECTTYPE gClassRAM = {
     "RAM",
     sizeof(Ram),
     NULL,
     (EventFunc)ramEvent,
 };
+#endif

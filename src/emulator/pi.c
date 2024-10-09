@@ -34,6 +34,7 @@ bool piDMA_Complete(CpuBlock* pBlock, bool bUnknown) {
     return true;
 }
 
+#if IS_OOT
 static inline bool piGetNewBlock(PI* pPI, CpuBlock** ppBlock) {
     s32 i;
 
@@ -49,6 +50,7 @@ static inline bool piGetNewBlock(PI* pPI, CpuBlock** ppBlock) {
     *ppBlock = NULL;
     return false;
 }
+#endif
 
 bool piPut8(PI* pPI, u32 nAddress, s8* pData) { return false; }
 
@@ -73,6 +75,7 @@ bool piPut32(PI* pPI, u32 nAddress, s32* pData) {
             pPI->nSizeGet = *pData & 0xFFFFFF;
             nSize = (pPI->nSizeGet + 1) & ~1;
 
+#if IS_OOT
             if (!piGetNewBlock(pPI, &pNewBlock)) {
                 return false;
             }
@@ -85,11 +88,13 @@ bool piPut32(PI* pPI, u32 nAddress, s32* pData) {
             if (!fn_8000A6A4(gpSystem, pNewBlock)) {
                 return false;
             }
+#endif
             break;
         case 0x0C:
             pPI->nSizePut = *pData & 0xFFFFFF;
             nSize = (pPI->nSizePut + 1) & ~1;
 
+#if IS_OOT
             if (!piGetNewBlock(pPI, &pNewBlock)) {
                 return false;
             }
@@ -102,6 +107,7 @@ bool piPut32(PI* pPI, u32 nAddress, s32* pData) {
             if (!fn_8000A6A4(gpSystem, pNewBlock)) {
                 return false;
             }
+#endif
             break;
         case 0x10:
             if (*pData & 1) {

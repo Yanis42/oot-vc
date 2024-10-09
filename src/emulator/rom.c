@@ -648,6 +648,7 @@ static bool romGet64(Rom* pROM, u32 nAddress, s64* pData) {
     return true;
 }
 
+#if IS_OOT
 static bool romGetBlock(Rom* pROM, CpuBlock* pBlock) {
     void* buf;
 
@@ -667,6 +668,7 @@ static bool romGetBlock(Rom* pROM, CpuBlock* pBlock) {
 
     return true;
 }
+#endif
 
 static bool romPutDebug8(Rom* pROM, u32 nAddress, s8* pData) { return true; }
 static bool romPutDebug16(Rom* pROM, u32 nAddress, s16* pData) { return true; }
@@ -797,6 +799,7 @@ bool romUpdate(Rom* pROM) {
             }
         }
 
+#if IS_OOT
         nStatus = DVDGetCommandBlockStatus(&pROM->fileInfo.block);
         if (nStatus != 1) {
             if (!simulatorDVDShowError(nStatus, pROM->load.anData, pROM->load.nSizeRead,
@@ -811,6 +814,7 @@ bool romUpdate(Rom* pROM) {
                 }
             }
         }
+#endif
     }
 
     if (!romLoadUpdate(pROM)) {
@@ -965,9 +969,12 @@ bool romEvent(Rom* pROM, s32 nEvent, void* pArgument) {
         case 0x1002:
             switch (((CpuDevice*)pArgument)->nType) {
                 case 0:
+#if IS_OOT
                     if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), pArgument, (GetBlockFunc)romGetBlock)) {
                         return false;
                     }
+#endif
+
                     if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)romPut8, (Put16Func)romPut16,
                                          (Put32Func)romPut32, (Put64Func)romPut64)) {
                         return false;
@@ -995,8 +1002,10 @@ bool romEvent(Rom* pROM, s32 nEvent, void* pArgument) {
         case 1:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

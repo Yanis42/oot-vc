@@ -6,6 +6,78 @@
 #include "emulator/xlHeap.h"
 #include "macros.h"
 
+#if IS_MM
+_XL_OBJECTTYPE gClassFlash = {
+    "FLASH",
+    sizeof(Flash),
+    NULL,
+    (EventFunc)flashEvent,
+};
+
+bool flashCopyFLASH(Flash* pFLASH, s32 nOffsetRAM, s32 nOffsetFLASH, s32 nSize) {
+    void* pTarget;
+
+    if (!ramGetBuffer(SYSTEM_RAM(gpSystem), &pTarget, nOffsetRAM, (u32*)&nSize)) {
+        return false;
+    }
+
+    //! TODO: ``((s32*)pTarget)[0]`` fake?
+    ((s32*)pTarget)[0] = pFLASH->flashStatus;
+    switch (pFLASH->flashCommand & 0xFF000000) {
+        case 0xE1000000:
+            ((s32*)pTarget)[0] = pFLASH->flashStatus;
+            ((s32*)pTarget)[1] = 0xC2001E;
+            break;
+        case 0xF0000000:
+            if (!simulatorReadFLASH((nOffsetFLASH * 2) & 0x01FFFFFE, pTarget, nSize)) {
+                return false;
+            }
+            break;
+        case 0x0:
+        case 0x3C000000:
+        case 0x4B000000:
+        case 0x78000000:
+        case 0xA5000000:
+        case 0xB4000000:
+        case 0xD2000000:
+        default:
+            break;
+    }
+
+    return true;
+}
+
+// ``nOffsetFLASH`` is assumed based on the function above
+bool flashTransferFLASH(Flash* pFLASH, s32 nOffsetRAM, s32 nOffsetFLASH, s32 nSize) {
+    void* pTarget;
+    s32 i;
+
+    if (!ramGetBuffer(SYSTEM_RAM(gpSystem), &pTarget, nOffsetRAM, (u32*)&nSize)) {
+        return false;
+    }
+
+    switch (pFLASH->flashCommand & 0xFF000000) {
+        case 0xB4000000:
+            for (i = 0; i < nSize; i++) {
+                pFLASH->flashBuffer[i] = ((char*)pTarget)[i];
+            }
+            break;
+        case 0x0:
+        case 0x3C000000:
+        case 0x4B000000:
+        case 0x78000000:
+        case 0xA5000000:
+        case 0xD2000000:
+        case 0xE1000000:
+        case 0xF0000000:
+        default:
+            break;
+    }
+
+    return true;
+}
+#endif
+
 static bool flashPut8(Flash* pFLASH, u32 nAddress, s8* pData) { return true; }
 
 static bool flashPut16(Flash* pFLASH, u32 nAddress, s16* pData) { return true; }
@@ -16,6 +88,7 @@ static bool flashPut32(Flash* pFLASH, u32 nAddress, s32* pData) {
     u32 nSize;
     s32 i;
 
+#if IS_OOT
     if (*pData == 0) {
         pFLASH->flashStatus = 0;
     }
@@ -78,6 +151,49 @@ static bool flashPut32(Flash* pFLASH, u32 nAddress, s32* pData) {
         default:
             return false;
     }
+#elif IS_MM
+    switch (*pData & 0xFF000000) {
+        case 0xE1000000:
+            pFLASH->flashStatus = 0x11118001;
+            break;
+        case 0x0:
+        case 0xB4000000:
+        case 0x3C000000:
+        case 0x4B000000:
+        case 0xD2000000:
+        default:
+            break;
+        case 0x78000000:
+            pFLASH->flashStatus = 0x11118008;
+            for (i = 0; i < ARRAY_COUNT(buffer); i++) {
+                buffer[i] = 0;
+            }
+            if ((pFLASH->flashCommand & 0xFF000000) == 0x3C000000) {
+                for (i = 0; i < 1024; i++) {
+                    if (!simulatorWriteFLASH(i << 7, (u8*)buffer, ARRAY_COUNT(buffer))) {
+                        return false;
+                    }
+                }
+            } else {
+                if ((pFLASH->flashCommand & 0xFF000000) == 0x4B000000) {
+                    if (!simulatorWriteFLASH((pFLASH->flashCommand << 7) & 0x7FFFFF80, (u8*)buffer,
+                                             ARRAY_COUNT(buffer))) {
+                        return false;
+                    }
+                }
+            }
+            break;
+        case 0xA5000000:
+            pFLASH->flashStatus = 0x11118004;
+            if (!simulatorWriteFLASH((*pData << 7) & 0x7FFFFF80, (u8*)pFLASH->flashBuffer, 128)) {
+                return false;
+            }
+            break;
+        case 0xF0000000:
+            pFLASH->flashStatus = 0x11118004;
+            break;
+    }
+#endif
 
     pFLASH->flashCommand = *pData;
     return true;
@@ -90,17 +206,36 @@ static bool flashGet8(Flash* pFLASH, u32 nAddress, s8* pData) { return true; }
 static bool flashGet16(Flash* pFLASH, u32 nAddress, s16* pData) { return true; }
 
 static bool flashGet32(Flash* pFLASH, u32 nAddress, s32* pData) {
+#if IS_OOT
     if (nAddress == 0x08000000) {
         *pData = pFLASH->flashStatus;
     } else {
         *pData = (nAddress & 0xFFFF) | ((nAddress << 16) & ~0xFFFF);
     }
+#elif IS_MM
+    switch (pFLASH->flashCommand & 0xFF000000) {
+        case 0x0:
+        case 0x3C000000:
+        case 0x4B000000:
+        case 0x78000000:
+        case 0xA5000000:
+        case 0xB4000000:
+        case 0xD2000000:
+        case 0xE1000000:
+        case 0xF0000000:
+            *pData = pFLASH->flashStatus;
+            break;
+        default:
+            break;
+    }
+#endif
 
     return true;
 }
 
 static bool flashGet64(Flash* pFLASH, u32 nAddress, s64* pData) { return true; }
 
+#if IS_OOT
 static bool flashGetBlock(Flash* pFLASH, CpuBlock* pBlock) {
     void* pRAM;
 
@@ -125,6 +260,7 @@ static bool flashGetBlock(Flash* pFLASH, CpuBlock* pBlock) {
 
     return true;
 }
+#endif
 
 bool fn_80045260(Flash* pFLASH, s32 arg1, void* arg2) {
     if (pFLASH == NULL) {
@@ -179,25 +315,38 @@ static inline bool flashEvent_UnknownInline(Flash* pFLASH, void* pArgument) {
 bool flashEvent(Flash* pFLASH, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 2:
+#if IS_MM
+            pFLASH->pHost = pArgument;
+#endif
             pFLASH->flashCommand = 0;
             pFLASH->pStore = NULL;
+#if IS_MM
+            xlHeapTake((void**)&pFLASH->flashBuffer, 0x40000000 | 0x80);
+#endif
 
             if (!flashEvent_UnknownInline(pFLASH, pArgument)) {
                 return false;
             }
 
+#if IS_OOT
             pFLASH->unk_18 = 0;
             pFLASH->nOffsetRAM = -1;
+#endif
             break;
         case 3:
+#if IS_MM
+            xlHeapFree((void**)&pFLASH->flashBuffer);
+#endif
             if (pFLASH->pStore != NULL && !storeFreeObject((void**)&pFLASH->pStore)) {
                 return false;
             }
             break;
         case 0x1002:
+#if IS_OOT
             if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), pArgument, (GetBlockFunc)flashGetBlock)) {
                 return false;
             }
+#endif
             if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)flashPut8, (Put16Func)flashPut16,
                                  (Put32Func)flashPut32, (Put64Func)flashPut64)) {
                 return false;
@@ -210,8 +359,10 @@ bool flashEvent(Flash* pFLASH, s32 nEvent, void* pArgument) {
         case 1:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;
@@ -220,9 +371,11 @@ bool flashEvent(Flash* pFLASH, s32 nEvent, void* pArgument) {
     return true;
 }
 
+#if IS_OOT
 _XL_OBJECTTYPE gClassFlash = {
     "FLASH",
     sizeof(Flash),
     NULL,
     (EventFunc)flashEvent,
 };
+#endif

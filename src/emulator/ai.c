@@ -97,6 +97,7 @@ bool aiGet32(AI* pAI, u32 nAddress, s32* pData) {
 
 bool aiGet64(AI* pAI, u32 nAddress, s64* pData) { return false; }
 
+#if IS_OOT
 bool aiEnable(AI* pAI, bool bEnable) {
     pAI->bEnable = bEnable ? true : false;
 
@@ -106,6 +107,7 @@ bool aiEnable(AI* pAI, bool bEnable) {
 
     return true;
 }
+#endif
 
 bool aiEvent(AI* pAI, s32 nEvent, void* pArgument) {
     switch (nEvent) {
@@ -132,8 +134,10 @@ bool aiEvent(AI* pAI, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

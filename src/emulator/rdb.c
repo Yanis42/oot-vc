@@ -2,6 +2,15 @@
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 
+#if IS_MM
+_XL_OBJECTTYPE gClassRdb = {
+    "RDB",
+    sizeof(Rdb),
+    NULL,
+    (EventFunc)rdbEvent,
+};
+#endif
+
 // This function only clears the string buffer, but it may have done something
 // with the string in debug mode.
 static inline void rdbHandleString(Rdb* pRDB) {
@@ -78,7 +87,7 @@ static bool rdbPut32(Rdb* pRDB, u32 nAddress, s32* pData) {
                         default:
                             return false;
                     }
-                    xlObjectEvent(gpSystem, 0x1000, (void*)4);
+                    xlObjectEvent(SYSTEM_PTR(pRDB), 0x1000, (void*)4);
                     break;
                 case 2:
                     return false;
@@ -129,7 +138,7 @@ static bool rdbPut32(Rdb* pRDB, u32 nAddress, s32* pData) {
         case 0x8:
             break;
         case 0xC:
-            xlObjectEvent(gpSystem, 0x1001, (void*)4);
+            xlObjectEvent(SYSTEM_PTR(pRDB), 0x1001, (void*)4);
             break;
         default:
             return false;
@@ -162,14 +171,17 @@ static bool rdbGet64(Rdb* pRDB, u32 nAddress, s64* pData) { return false; }
 bool rdbEvent(Rdb* pRDB, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 2:
+#if IS_MM
+            pRDB->pHost = pArgument;
+#endif
             pRDB->nIndexString = 0;
             break;
         case 0x1002:
-            if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)rdbPut8, (Put16Func)rdbPut16,
+            if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRDB)), pArgument, (Put8Func)rdbPut8, (Put16Func)rdbPut16,
                                  (Put32Func)rdbPut32, (Put64Func)rdbPut64)) {
                 return false;
             }
-            if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)rdbGet8, (Get16Func)rdbGet16,
+            if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRDB)), pArgument, (Get8Func)rdbGet8, (Get16Func)rdbGet16,
                                  (Get32Func)rdbGet32, (Get64Func)rdbGet64)) {
                 return false;
             }
@@ -178,8 +190,10 @@ bool rdbEvent(Rdb* pRDB, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;
@@ -188,9 +202,11 @@ bool rdbEvent(Rdb* pRDB, s32 nEvent, void* pArgument) {
     return true;
 }
 
+#if IS_OOT
 _XL_OBJECTTYPE gClassRdb = {
     "RDB",
     sizeof(Rdb),
     NULL,
     (EventFunc)rdbEvent,
 };
+#endif

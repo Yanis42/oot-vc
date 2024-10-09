@@ -3,11 +3,11 @@
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlCoreRVL.h"
 #include "emulator/xlHeap.h"
+#include "macros.h"
 #include "math.h"
 #include "revolution/mem.h"
 #include "revolution/vi.h"
 #include "revolution/wpad.h"
-#include "macros.h"
 
 //! TODO: document
 bool fn_800607C4(void*, s32);

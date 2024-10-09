@@ -1,6 +1,6 @@
 #include "emulator/xlPostRVL.h"
-#include "emulator/system.h"
 #include "emulator/frame.h"
+#include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 #include "macros.h"
 
@@ -41,10 +41,12 @@ void fn_80087394(void) {
     if (temp_r31->unk_18 != 0) {
         fn_800A4EDC(0x43300000);
         temp_r4 = temp_r31->unk_04;
-        fn_800ADF8C(temp_r4, lbl_80201704, lbl_80201704, (f32)temp_r4, (f32)temp_r31->unk_06, lbl_80201704, lbl_80201700);
+        fn_800ADF8C(temp_r4, lbl_80201704, lbl_80201704, (f32)temp_r4, (f32)temp_r31->unk_06, lbl_80201704,
+                    lbl_80201700);
     } else {
         temp_r3 = temp_r31->unk_04;
-        fn_800ADFC8(temp_r3, lbl_80201704, lbl_80201704, (f32)temp_r3, (f32)temp_r31->unk_06, lbl_80201704, lbl_80201700);
+        fn_800ADFC8(temp_r3, lbl_80201704, lbl_80201704, (f32)temp_r3, (f32)temp_r31->unk_06, lbl_80201704,
+                    lbl_80201700);
     }
 
     fn_800A9EE8();
