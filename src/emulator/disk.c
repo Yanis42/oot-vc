@@ -2,6 +2,7 @@
 #include "emulator/cpu.h"
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
+#include "macros.h"
 
 _XL_OBJECTTYPE gClassDD = {
     "DD",
@@ -10,13 +11,37 @@ _XL_OBJECTTYPE gClassDD = {
     (EventFunc)diskEvent,
 };
 
-bool diskPutROM8(Disk* pDisk, u32 nAddress, s8* pData) { return false; }
+bool diskPutROM8(Disk* pDisk, u32 nAddress, s8* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
-bool diskPutROM16(Disk* pDisk, u32 nAddress, s16* pData) { return false; }
+bool diskPutROM16(Disk* pDisk, u32 nAddress, s16* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
-bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) { return false; }
+bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) { 
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
-bool diskPutROM64(Disk* pDisk, u32 nAddress, s64* pData) { return false; }
+bool diskPutROM64(Disk* pDisk, u32 nAddress, s64* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
 bool diskGetROM8(Disk* pDisk, u32 nAddress, s8* pData) {
     *pData = 0;
@@ -38,9 +63,21 @@ bool diskGetROM64(Disk* pDisk, u32 nAddress, s64* pData) {
     return true;
 }
 
-bool diskPutDrive8(Disk* pDisk, u32 nAddress, s8* pData) { return false; }
+bool diskPutDrive8(Disk* pDisk, u32 nAddress, s8* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
-bool diskPutDrive16(Disk* pDisk, u32 nAddress, s16* pData) { return false; }
+bool diskPutDrive16(Disk* pDisk, u32 nAddress, s16* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
 bool diskPutDrive32(Disk* pDisk, u32 nAddress, s32* pData) {
     nAddress &= 0x00FFFFFF;
@@ -56,7 +93,13 @@ bool diskPutDrive32(Disk* pDisk, u32 nAddress, s32* pData) {
     return true;
 }
 
-bool diskPutDrive64(Disk* pDisk, u32 nAddress, s64* pData) { return false; }
+bool diskPutDrive64(Disk* pDisk, u32 nAddress, s64* pData) {
+#if IS_OOT
+    return false;
+#elif IS_MM
+    return true;
+#endif
+}
 
 bool diskGetDrive8(Disk* pDisk, u32 nAddress, s8* pData) { return true; }
 
@@ -80,6 +123,7 @@ bool diskGetDrive32(Disk* pDisk, u32 nAddress, s32* pData) {
 
 bool diskGetDrive64(Disk* pDisk, u32 nAddress, s64* pData) { return true; }
 
+#if IS_OOT
 bool diskGetBlock(void* pObject, CpuBlock* pBlock) {
     if (pBlock->pfUnknown != NULL) {
         if (!pBlock->pfUnknown(pBlock, 1)) {
@@ -89,6 +133,7 @@ bool diskGetBlock(void* pObject, CpuBlock* pBlock) {
 
     return true;
 }
+#endif
 
 bool diskEvent(Disk* pDisk, s32 nEvent, void* pArgument) {
     switch (nEvent) {
@@ -97,9 +142,11 @@ bool diskEvent(Disk* pDisk, s32 nEvent, void* pArgument) {
         case 0x1002:
             switch (((CpuDevice*)pArgument)->nType) {
                 case 0:
+#if IS_OOT
                     if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), pArgument, (GetBlockFunc)diskGetBlock)) {
                         return false;
                     }
+#endif
 
                     if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)diskPutDrive8,
                                          (Put16Func)diskPutDrive16, (Put32Func)diskPutDrive32,

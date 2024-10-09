@@ -11,6 +11,8 @@ extern "C" {
 #define OOT_E 3
 #define MM_J 4
 #define MM_U 5
+#define IS_MM (VERSION == MM_J || VERSION == MM_U)
+#define IS_OOT (!IS_MM)
 
 #define ALIGN_PREV(X, N) ((X) & ~((N) - 1))
 #define ALIGN_NEXT(X, N) ALIGN_PREV(((X) + (N) - 1), N)

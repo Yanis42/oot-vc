@@ -7,6 +7,7 @@
 #include "revolution/mem.h"
 #include "revolution/vi.h"
 #include "revolution/wpad.h"
+#include "macros.h"
 
 //! TODO: document
 bool fn_800607C4(void*, s32);
@@ -40,9 +41,11 @@ static VIRetraceCallback sControllerVICallback;
 void* fn_80061FB0(u32 nSize) {
     void* pBuffer = MEMAllocFromAllocator(&gControllerAllocator, nSize);
 
+#if IS_OOT
     if (pBuffer == NULL) {
         xlExit();
     }
+#endif
 
     return pBuffer;
 }

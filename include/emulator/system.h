@@ -265,16 +265,20 @@ typedef struct SystemException {
 } SystemException; // size = 0x14
 
 typedef struct System {
-    /* 0x00 */ bool bException;
-    /* 0x04 */ SystemMode eMode;
-    /* 0x08 */ SystemObjectType storageDevice;
-    /* 0x0C */ SystemRomType eTypeROM;
-    /* 0x10 */ void* apObject[SOT_COUNT];
-    /* 0x6C */ s32 unk_6C;
-    /* 0x70 */ u64 nAddressBreak;
-    /* 0x78 */ s32 unk_78[19];
-    /* 0xC4 */ void* pSound;
-    /* 0xC8 */ u8 anException[16];
+    /* OoT MM */
+    /* 0x00 0x00 */ bool bException;
+    /* 0x04 0x04 */ SystemMode eMode;
+    /* 0x08 0x08 */ SystemObjectType storageDevice;
+    /* 0x0C 0x0C */ SystemRomType eTypeROM;
+#if IS_MM
+    /*  N/A 0x10 */ u8 pad[0x18];
+#endif
+    /* 0x10 0x28 */ void* apObject[SOT_COUNT];
+    /* 0x6C 0x */ s32 unk_6C;
+    /* 0x70 0x */ u64 nAddressBreak;
+    /* 0x78 0x */ s32 unk_78[19];
+    /* 0xC4 0x */ void* pSound;
+    /* 0xC8 0x */ u8 anException[16];
 } System; // size = 0xD8
 
 typedef struct SystemRomConfig {

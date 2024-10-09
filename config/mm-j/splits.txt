@@ -17,8 +17,106 @@ emulator/vc64_RVL.c:
 	.text       start:0x800070C0 end:0x80007844
 	.data       start:0x8014D9C0 end:0x8014DA98
 
+emulator/codeRVL.c:
+	.text       start:0x80007844 end:0x800078A8
+	.data       start:0x8014DAC8 end:0x8014DAD8
+	.sdata      start:0x801FF7D0 end:0x801FF7D8
+	.sbss       start:0x80200640 end:0x80200648
+
 emulator/cpu.c:
 	.text       start:0x80017568 end:0x8004F740
+
+emulator/pif.c:
+	.text       start:0x8004F740 end:0x800504E0
+
+emulator/ram.c:
+	.text       start:0x800504E0 end:0x80050AFC
+
+emulator/rom.c:
+	.text       start:0x80050AFC end:0x80052CC8
+
+emulator/rdp.c:
+	.text       start:0x80052CC8 end:0x80054510
+
+emulator/rdb.c:
+	.text       start:0x80054510 end:0x80054AE4
+
+emulator/rsp.c:
+	.text       start:0x80054AE4 end:0x80071A74
+
+emulator/mi.c:
+	.text       start:0x80071A74 end:0x80071FA8
+
+emulator/disk.c:
+	.text       start:0x80071FA8 end:0x8007223C
+
+emulator/flash.c:
+	.text       start:0x8007223C end:0x80072974
+
+emulator/sram.c:
+	.text       start:0x80072974 end:0x80072D80
+
+emulator/ai.c:
+	.text       start:0x80072D80 end:0x800730FC
+
+emulator/audio.c:
+	.text       start:0x800730FC end:0x800741DC
+
+emulator/vi.c:
+	.text       start:0x800741DC end:0x8007474C
+
+emulator/serial.c:
+	.text       start:0x8007474C end:0x80074A20
+
+emulator/library.c:
+	.text       start:0x80074A20 end:0x80079604
+
+emulator/pi.c:
+	.text       start:0x80079604 end:0x80079BB4
+
+emulator/eeprom.c:
+	.text       start:0x80079BB4 end:0x8007DD48
+
+emulator/store.c:
+	.text       start:0x8007DD48 end:0x8007E798
+
+emulator/errordisplay.c:
+	.text       start:0x8007E798 end:0x8007F90C
+
+emulator/banner.c:
+	.text       start:0x8007F90C end:0x80080A3C
+
+emulator/controller.c:
+	.text       start:0x80080A3C end:0x800821FC
+
+emulator/helpRVL.c:
+	.text       start:0x800821FC end:0x80086B2C
+
+emulator/stringtable.c:
+	.text       start:0x80086B2C end:0x80086C10
+
+emulator/xlCoreRVL.c:
+	.text       start:0x80086C10 end:0x80087394
+
+emulator/xlPostRVL.c:
+	.text       start:0x80087394 end:0x8008760C
+
+emulator/xlFileRVL.c:
+	.text       start:0x8008760C end:0x80087A9C
+
+emulator/xlText.c:
+	.text       start:0x80087A9C end:0x80087CD8
+
+emulator/xlList.c:
+	.text       start:0x80087CD8 end:0x80088098
+	.bss        start:0x80191FF8 end:0x80192008
+
+emulator/xlHeap.c:
+	.text       start:0x80088098 end:0x8008979C
+
+emulator/xlObject.c:
+	.text       start:0x8008979C end:0x80089B58
+	.sbss       start:0x802008C8 end:0x802008D0
 
 runtime/__init_cpp_exceptions.cpp:
 	.text       start:0x80132F90 end:0x80133000

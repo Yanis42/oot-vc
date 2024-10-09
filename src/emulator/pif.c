@@ -6,6 +6,7 @@
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlHeap.h"
+#include "macros.h"
 
 _XL_OBJECTTYPE gClassPIF = {
     "PIF",
@@ -449,6 +450,7 @@ bool pifGetData(Pif* pPIF, u8* acData) {
     return true;
 }
 
+#if IS_OOT
 bool pifSetControllerType(Pif* pPIF, s32 channel, ControllerType type) {
     if (!simulatorDetectController(SYSTEM_CONTROLLER(gpSystem), channel)) {
         type = CT_NONE;
@@ -481,6 +483,7 @@ bool pifSetControllerType(Pif* pPIF, s32 channel, ControllerType type) {
 
     return true;
 }
+#endif
 
 bool pifEvent(Pif* pPIF, s32 nEvent, void* pArgument) {
     s32 i;
@@ -494,19 +497,22 @@ bool pifEvent(Pif* pPIF, s32 nEvent, void* pArgument) {
             if (!xlHeapTake(&pPIF->pRAM, 0x40)) {
                 return false;
             }
-
+#if IS_OOT
             for (i = 0; i < ARRAY_COUNT(pPIF->controllerType); i++) {
                 if (!pifSetControllerType(pPIF, i, CT_NONE)) {
                     return false;
                 }
             }
+#endif
             break;
         case 3:
+#if IS_OOT
             for (i = 0; i < ARRAY_COUNT(pPIF->controllerType); i++) {
                 if (!pifSetControllerType(pPIF, i, CT_NONE)) {
                     return false;
                 }
             }
+#endif
 
             xlHeapFree(&pPIF->pROM);
             xlHeapFree(&pPIF->pRAM);
@@ -526,8 +532,10 @@ bool pifEvent(Pif* pPIF, s32 nEvent, void* pArgument) {
         case 1:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

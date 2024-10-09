@@ -270,7 +270,7 @@ config.libs = [
             Object(NotLinked, "emulator/_buildtev.c"),
             Object(NotLinked, "emulator/frame.c"),
             Object(NotLinked, "emulator/library.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/codeRVL.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/codeRVL.c"),
             Object(NotLinked, "emulator/helpRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/soundRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/video.c"),
