@@ -30,6 +30,21 @@
 #include "stdlib.h"
 #include "string.h"
 
+#if IS_OOT
+#define SYSTEM_PTR (gpSystem)
+#elif IS_MM
+#define SYSTEM_PTR (pSystem)
+#endif
+
+#if IS_MM
+_XL_OBJECTTYPE gClassSystem = {
+    "SYSTEM (N64)",
+    sizeof(System),
+    NULL,
+    (EventFunc)systemEvent,
+}; // size = 0x10
+#endif
+
 // clang-format off
 static u32 contMap[][GCN_BTN_COUNT] = {
     // Controller Configuration No. 1
@@ -150,6 +165,7 @@ static u32 contMap[][GCN_BTN_COUNT] = {
 };
 // clang-format on
 
+#if IS_OOT
 static SystemDevice gaSystemDevice[] = {
     {
         SOT_HELP,
@@ -304,6 +320,7 @@ u32 lbl_8016FEA0[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
 };
+#endif
 
 static SystemRomConfig gSystemRomConfigurationList;
 
@@ -343,6 +360,7 @@ bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, vo
     return true;
 }
 
+#if IS_OOT
 bool systemCreateStorageDevice(System* pSystem, void* pArgument) {
     SystemDevice* pDevice;
     SystemDeviceInfo* pInfo;
@@ -413,6 +431,7 @@ bool systemCreateStorageDevice(System* pSystem, void* pArgument) {
 
     return true;
 }
+#endif
 
 static bool systemSetupGameRAM(System* pSystem) {
     char* szExtra;
@@ -468,9 +487,16 @@ static bool systemSetupGameRAM(System* pSystem) {
     return true;
 }
 
+#if IS_OOT
 static inline void systemSetControllerConfiguration(SystemRomConfig* pRomConfig, s32 controllerConfig1,
                                                     s32 controllerConfig2, bool bSetControllerConfig,
-                                                    bool bSetRumbleConfig) {
+                                                    bool bSetRumbleConfig)
+#elif IS_MM
+static inline void systemSetControllerConfiguration(System* pSystem, SystemRomConfig* pRomConfig, s32 controllerConfig1,
+                                                    s32 controllerConfig2, bool bSetControllerConfig,
+                                                    bool bSetRumbleConfig)
+#endif
+{
     s32 iConfigList;
 
     if (bSetRumbleConfig) {
@@ -478,7 +504,8 @@ static inline void systemSetControllerConfiguration(SystemRomConfig* pRomConfig,
     }
 
     for (iConfigList = 0; iConfigList < 4; iConfigList++) {
-        simulatorCopyControllerMap(SYSTEM_CONTROLLER(gpSystem), (u32*)pRomConfig->controllerConfiguration[iConfigList],
+        simulatorCopyControllerMap(SYSTEM_CONTROLLER(SYSTEM_PTR),
+                                   (u32*)pRomConfig->controllerConfiguration[iConfigList],
                                    contMap[((controllerConfig1 >> (iConfigList * 8)) & 0x7F)]);
         pRomConfig->rumbleConfiguration |= (1 << (iConfigList * 8)) & (controllerConfig1 >> 7);
     }
@@ -499,6 +526,7 @@ static inline void systemSetupGameALL_Inline(void) {
     }
 }
 
+#if IS_OOT
 static bool systemSetupGameALL(System* pSystem) {
     char* szArgument;
     s32* pBuffer2;
@@ -1101,7 +1129,7 @@ static bool systemSetupGameALL(System* pSystem) {
             break;
         case NTEJ:
         case NTEP:
-        case 'NTEA':
+        case NTEA:
             pArgument = 0x8000;
             gSystemRomConfigurationList.storageDevice = SOT_PIF;
             storageDevice = SOT_SRAM;
@@ -1247,6 +1275,204 @@ static bool systemSetupGameALL(System* pSystem) {
 
     return true;
 }
+#elif IS_MM
+extern s32 lbl_801FF810;
+extern s32 lbl_801FF814;
+extern s32 lbl_80201508;
+extern s32 lbl_802006B0;
+extern s32 lbl_8014E550;
+
+static bool systemSetupGameALL(System* pSystem) {
+    s32* pBuffer2;
+    s32* pBuffer;
+
+    s32 nSizeSound;
+    s32 iController;
+    s32 nSize;
+    u32* anMode;
+    s32 i;
+    u64 nTimeRetrace;
+    char acCode[5];
+    Cpu* pCPU;
+    Rom* pROM;
+    Pif* pPIF;
+    s32 defaultConfiguration;
+
+    s32 var_r25;
+    s32 var_r24;
+    u32 var_r23;
+
+    pCPU = SYSTEM_CPU(gpSystem);
+    pROM = SYSTEM_ROM(gpSystem);
+    pPIF = SYSTEM_PIF(gpSystem);
+
+    if (!ramGetBuffer(SYSTEM_RAM(pSystem), (void**)&anMode, 0x300, NULL)) {
+        return false;
+    }
+
+    anMode[0] = gpSystem->eTypeROM == NZSP ? 0 : 1;
+    anMode[1] = 0;
+    anMode[2] = 0xB0000000;
+    anMode[3] = 0;
+    anMode[4] = 0x17D7;
+    anMode[5] = 1;
+
+    nTimeRetrace = OSSecondsToTicks(1.0f / 60.0f);
+
+    if (!ramGetSize(SYSTEM_RAM(pSystem), &nSize)) {
+        return false;
+    }
+
+    anMode[6] = nSize;
+    systemGetInitialConfiguration(pSystem, pROM, 0);
+
+    pSystem->unk_94 = 1;
+
+    if (gSystemRomConfigurationList.storageDevice & 1) {
+        var_r25 = 0xC;
+        var_r24 = 0x8000;
+    } else if (gSystemRomConfigurationList.storageDevice & 2) {
+        var_r25 = 0xD;
+        var_r24 = 0x40000;
+    } else if (gSystemRomConfigurationList.storageDevice & 4) {
+        var_r25 = 0xE;
+        var_r24 = 0x200;
+    } else if (gSystemRomConfigurationList.storageDevice & 8) {
+        var_r25 = 0xE;
+        var_r24 = 0x800;
+    }
+
+    if ((var_r25 != -1) && (some_systemSetupGameRAM(pSystem, var_r25, var_r24, pSystem->unk_94) == 0)) {
+        return false;
+    }
+
+    if (gpSystem->eTypeROM == NZSJ || gpSystem->eTypeROM == NZSE || gpSystem->eTypeROM == NZSP) {
+        pSystem->storageDevice = 5;
+
+        lbl_801FF810 = 2;
+        lbl_801FF814 = lbl_80201508;
+
+        if (!ramGetBuffer(SYSTEM_RAM(gpSystem), (void**)&pBuffer2, 0x300, NULL)) {
+            return false;
+        }
+        var_r23 = 0x17D9;
+        pBuffer2[4] = 0x17D9;
+
+        if (lbl_802006B0 & 1) {
+            if (!cpuSetCodeHack(pCPU, 0x801C6FC0, 0x95630000, -1)) {
+                return false;
+            }
+        } else if (gpSystem->eTypeROM == NZSJ) {
+            if (!cpuSetCodeHack(pCPU, 0x80173FF0, 0x95630000, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE86C, 0x860C0000, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE870, 0x860D0004, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE8F4, 0x86180000, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE908, 0x86190004, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE91C, 0x86080002, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE934, 0x8609FFFA, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE948, 0x860AFFFE, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE97C, 0x844EFFFA, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BE990, 0x844FFFFE, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BEA08, 0x860A0006, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BEA1C, 0x860B000A, -1)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BFB14, 0x0C025414, 0)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BFB2C, 0x0C02335C, 0)) {
+                return false;
+            }
+            if (!cpuSetCodeHack(pCPU, 0x800BFB34, 0x8FB9004C, 0x24190000)) {
+                return false;
+            }
+        }
+
+        pCPU->nCompileFlag |= 0x1010;
+        fn_800818F0(gpSystem->apObject[20], 1);
+    } else if (!romGetCode(pROM, (s32*)acCode)) {
+        return false;
+    }
+
+    if (!ramGetBuffer(SYSTEM_RAM(gpSystem), (void**)&pBuffer2, 0x300, NULL)) {
+        return false;
+    }
+
+    pBuffer2[4] = var_r23;
+
+    if (var_r23 == 0x17D7) {
+        if (!ramGetBuffer(SYSTEM_RAM(gpSystem), (void**)&pBuffer, 0, 0)) {
+            return false;
+        }
+        if (!xlHeapCopy(pBuffer, &lbl_8014E550, 0x300)) {
+            return false;
+        }
+        if (!fn_80054D6C(SYSTEM_RSP(gpSystem), &pBuffer, 0, 4)) {
+            return false;
+        }
+        pBuffer[0] = 0x17D7;
+        if (!fn_80054D54(SYSTEM_RSP(gpSystem), &pBuffer, 0, 4)) {
+            return false;
+        }
+        pBuffer[0] = -1;
+    } else if (var_r23 == 0x17D8) {
+        if (ramGetBuffer(SYSTEM_RAM(gpSystem), (void**)&pBuffer, 0, 0) == 0) {
+            return false;
+        }
+        pBuffer[0x59] = 0x01EC6021;
+        pBuffer[0xAE] = 0x8941680C;
+        if (fn_80054D6C(SYSTEM_RSP(gpSystem), &pBuffer, 0, 4) == 0) {
+            return false;
+        }
+        pBuffer[0] = 0x17D8;
+        if (fn_80054D54(SYSTEM_RSP(gpSystem), &pBuffer, 0, 4) == 0) {
+            return false;
+        }
+        pBuffer[0] = -1;
+    } else if (var_r23 == 0x17D9) {
+        if (ramGetBuffer(SYSTEM_RAM(gpSystem), (void**)&pBuffer, 0, 0) == 0) {
+            return false;
+        }
+        pBuffer[0xBA] = 0xC86E2000;
+        pBuffer[0xBEC7D] = 0xAD090010;
+        pBuffer[0xBF870] = 0xAD170014;
+    }
+
+    pCPU->nTimeRetrace = nTimeRetrace;
+    systemSetControllerConfiguration(pSystem, &gSystemRomConfigurationList,
+                                     gSystemRomConfigurationList.currentControllerConfig,
+                                     gSystemRomConfigurationList.currentControllerConfig, false, true);
+
+    for (iController = 0; iController < 4; iController++) {
+        fn_80007118(gSystemRomConfigurationList.controllerConfiguration[iController], iController);
+        //     simulatorSetControllerMap(SYSTEM_CONTROLLER(pSystem), iController,
+        //                               (u32*)&gSystemRomConfigurationList.controllerConfiguration[iController]);
+    }
+    return true;
+}
+#endif
 
 static bool systemGetException(System* pSystem, SystemInterruptType eType, SystemException* pException) {
     pException->nMask = 0;
@@ -1344,57 +1570,94 @@ static bool systemGetException(System* pSystem, SystemInterruptType eType, Syste
 }
 
 static bool systemGet8(System* pSystem, u32 nAddress, s8* pData) {
+#if IS_OOT
     s64 pnPC;
     *pData = 0;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    *pData = 0;
+    return true;
+#endif
 }
 
 static bool systemGet16(System* pSystem, u32 nAddress, s16* pData) {
+#if IS_OOT
     s64 pnPC;
     *pData = 0;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    *pData = 0;
+    return true;
+#endif
 }
 
 static bool systemGet32(System* pSystem, u32 nAddress, s32* pData) {
+#if IS_OOT
     s64 pnPC;
     *pData = 0;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    *pData = 0;
+    return true;
+#endif
 }
 
 static bool systemGet64(System* pSystem, u32 nAddress, s64* pData) {
+#if IS_OOT
     s64 pnPC;
     *pData = 0;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    *pData = 0;
+    return true;
+#endif
 }
 
 static bool systemPut8(System* pSystem, u32 nAddress, s8* pData) {
+#if IS_OOT
     s64 pnPC;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    return true;
+#endif
 }
 
 static bool systemPut16(System* pSystem, u32 nAddress, s16* pData) {
+#if IS_OOT
     s64 pnPC;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    return true;
+#endif
 }
 
 static bool systemPut32(System* pSystem, u32 nAddress, s32* pData) {
+#if IS_OOT
     s64 pnPC;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    return true;
+#endif
 }
 
 static bool systemPut64(System* pSystem, u32 nAddress, s64* pData) {
+#if IS_OOT
     s64 pnPC;
     cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
     return false;
+#elif IS_MM
+    return true;
+#endif
 }
 
+#if IS_OOT
 static bool systemGetBlock(System* pSystem, CpuBlock* pBlock) {
     void* pBuffer;
 
@@ -1440,10 +1703,11 @@ static bool fn_8000A504(CpuBlock* pBlock, bool bUnknown) {
         if (nAddress < 0x04000000) {
             nAddressEnd = (nAddress + pBlock->nSize) - 1;
 
+#if IS_OOT
             if (!rspInvalidateCache(SYSTEM_RSP(gpSystem), nAddress, nAddressEnd)) {
                 return false;
             }
-
+#endif
             if (!frameInvalidateCache(SYSTEM_FRAME(gpSystem), nAddress, nAddressEnd)) {
                 return false;
             }
@@ -1459,18 +1723,59 @@ static bool fn_8000A504(CpuBlock* pBlock, bool bUnknown) {
             }
         }
 
+#if IS_OOT
         if (pBlock->pNext->pfUnknown != NULL) {
             pBlock->pNext->pfUnknown(pBlock->pNext, bUnknown);
         }
-
         if (!fn_8000A504_UnknownInline(gpSystem, &pBlock)) {
             return false;
         }
+#endif
     }
 
     return true;
 }
+#elif IS_MM
+static bool fn_8000A504(void) {
+    u32 nAddressOffset[32];
+    u32 nAddress;
+    u32* pnAddress;
+    u32 nAddressEnd;
+    s32 nCount;
+    s32 i;
 
+    nAddress = gpSystem->cpuBlock.nAddress0;
+    nAddressEnd = (nAddress + gpSystem->cpuBlock.nSize) - 1;
+
+    if (!frameInvalidateCache(SYSTEM_FRAME(gpSystem), nAddress, nAddressEnd)) {
+        return false;
+    }
+
+    if (!rspInvalidateCache(SYSTEM_RSP(gpSystem), nAddress, nAddressEnd)) {
+        return false;
+    }
+
+    if (!cpuGetOffsetAddress(SYSTEM_CPU(gpSystem), nAddressOffset, &nCount, gpSystem->cpuBlock.nAddress0,
+                             gpSystem->cpuBlock.nSize)) {
+        return false;
+    }
+
+    for (i = 0, pnAddress = nAddressOffset; i < nCount; pnAddress++, i++) {
+        if (!cpuInvalidateCache(SYSTEM_CPU(gpSystem), *pnAddress, (*pnAddress + gpSystem->cpuBlock.nSize) - 1)) {
+            return false;
+        }
+    }
+
+    gpSystem->cpuBlock.nSize = 0;
+    if (gpSystem->cpuBlock.pfUnknown != NULL && !gpSystem->cpuBlock.pfUnknown()) {
+        return false;
+    }
+
+    return true;
+}
+#endif
+
+#if IS_OOT
 static inline bool systemGetNewBlock(System* pSystem, CpuBlock** ppBlock) {
     s32 i;
 
@@ -1505,6 +1810,37 @@ bool fn_8000A6A4(System* pSystem, CpuBlock* pBlock) {
 
     return true;
 }
+#elif IS_MM
+bool fn_800166D0(System* pSystem, s32 nAddress0, s32 nAddress1, u32 nSize, UnknownBlockCallback pfUnknown) {
+    void* spC;
+    s32 sp8;
+
+    sp8 = nSize;
+    pSystem->cpuBlock.nSize = nSize;
+    pSystem->cpuBlock.nAddress1 = nAddress1;
+    pSystem->cpuBlock.pfUnknown = pfUnknown;
+    pSystem->cpuBlock.nAddress0 = nAddress0 & 0x007FFFFF;
+
+    if (!ramGetBuffer(SYSTEM_RAM(pSystem), &spC, nAddress0, (u32*)&sp8)) {
+        return false;
+    }
+
+    if (pfUnknown == NULL) {
+        if (!romCopy(SYSTEM_ROM(pSystem), spC, nAddress1, sp8, NULL)) {
+            return false;
+        }
+        if (!fn_8000A504()) {
+            return false;
+        }
+    } else {
+        if (!romCopy(SYSTEM_ROM(pSystem), spC, nAddress1, sp8, fn_8000A504)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+#endif
 
 bool systemSetMode(System* pSystem, SystemMode eMode) {
     if (xlObjectTest(pSystem, &gClassSystem)) {
@@ -1541,6 +1877,7 @@ bool fn_8000A830(System* pSystem, s32 nEvent, void* pArgument) {
     return true;
 }
 
+#if IS_OOT
 bool fn_8000A8A8(System* pSystem) {
     fn_8000A830(pSystem, 0x1004, NULL);
     VISetBlack(true);
@@ -1550,6 +1887,7 @@ bool fn_8000A8A8(System* pSystem) {
     OSRestart(0x1234);
     return true;
 }
+#endif
 
 static inline bool systemSetRamMode(System* pSystem) {
     s32 nSize;
@@ -1580,20 +1918,40 @@ static inline bool systemSetRamMode(System* pSystem) {
 bool systemReset(System* pSystem) {
     s64 nPC;
     s32 nOffsetRAM;
-    int eObject; // SystemObjectType
+#if IS_OOT
+    int eObject;
+#elif IS_MM
+    SystemObjectType eObject;
+#endif
     CpuBlock block;
 
     pSystem->nAddressBreak = -1;
 
-    if (romGetImage(SYSTEM_ROM(gpSystem), NULL)) {
+    if (romGetImage(SYSTEM_ROM(SYSTEM_PTR), NULL)) {
+#if IS_OOT
         if (!systemSetupGameRAM(pSystem)) {
             return false;
         }
+#elif IS_MM
+        s32 nTypeROM;
 
-        if (!romGetPC(SYSTEM_ROM(gpSystem), (u64*)&nPC)) {
+        romGetCode(SYSTEM_ROM(pSystem), &nTypeROM);
+        pSystem->eTypeROM = nTypeROM;
+
+        if (!fn_80015340(pSystem)) {
             return false;
         }
 
+        if (!ramWipe(SYSTEM_RAM(pSystem))) {
+            return false;
+        }
+#endif
+
+        if (!romGetPC(SYSTEM_ROM(SYSTEM_PTR), (u64*)&nPC)) {
+            return false;
+        }
+
+#if IS_OOT
         block.nSize = 0x100000;
         block.pfUnknown = NULL;
         block.nAddress0 = 0x10001000;
@@ -1602,16 +1960,23 @@ bool systemReset(System* pSystem) {
         if (!fn_8000A6A4(pSystem, &block)) {
             return false;
         }
+#elif IS_MM
+        if (!fn_800166D0(pSystem, nPC & 0x00FFFFFF, 0x1000, 0x100000, NULL)) {
+            return false;
+        }
+#endif
 
-        if (!cpuReset(SYSTEM_CPU(gpSystem))) {
+        if (!cpuReset(SYSTEM_CPU(SYSTEM_PTR))) {
             return false;
         }
 
+#if IS_OOT
         if (!systemSetRamMode(pSystem)) {
             return false;
         }
+#endif
 
-        cpuSetXPC(SYSTEM_CPU(gpSystem), nPC, 0, 0);
+        cpuSetXPC(SYSTEM_CPU(SYSTEM_PTR), nPC, 0, 0);
 
         if (!systemSetupGameALL(pSystem)) {
             return false;
@@ -1619,7 +1984,11 @@ bool systemReset(System* pSystem) {
 
         for (eObject = 0; eObject < SOT_COUNT; eObject++) {
             if (pSystem->apObject[eObject] != NULL) {
-                xlObjectEvent(pSystem->apObject[eObject], 0x1003, NULL);
+                if (!xlObjectEvent(pSystem->apObject[eObject], 0x1003, NULL)) {
+#if IS_MM
+                    return false;
+#endif
+                }
             }
         }
     }
@@ -1639,7 +2008,7 @@ static inline bool systemTestClassObject(System* pSystem) {
 }
 
 bool systemExecute(System* pSystem, s32 nCount) {
-    if (!cpuExecute(SYSTEM_CPU(gpSystem), nCount, pSystem->nAddressBreak)) {
+    if (!cpuExecute(SYSTEM_CPU(SYSTEM_PTR), nCount, pSystem->nAddressBreak)) {
         if (!systemTestClassObject(pSystem)) {
             return false;
         }
@@ -1647,7 +2016,7 @@ bool systemExecute(System* pSystem, s32 nCount) {
         return false;
     }
 
-    if (pSystem->nAddressBreak == SYSTEM_CPU(gpSystem)->nPC) {
+    if (pSystem->nAddressBreak == SYSTEM_CPU(SYSTEM_PTR)->nPC) {
         if (!systemTestClassObject(pSystem)) {
             return false;
         }
@@ -1681,8 +2050,9 @@ bool systemCheckInterrupts(System* pSystem) {
                 bUsed = false;
 
                 if (exception.eCode == CEC_INTERRUPT) {
-                    if (cpuTestInterrupt(SYSTEM_CPU(gpSystem), exception.nMask) &&
-                        (exception.eTypeMips == MIT_NONE || miSetInterrupt(SYSTEM_MI(gpSystem), exception.eTypeMips))) {
+                    if (cpuTestInterrupt(SYSTEM_CPU(SYSTEM_PTR), exception.nMask) &&
+                        (exception.eTypeMips == MIT_NONE ||
+                         miSetInterrupt(SYSTEM_MI(SYSTEM_PTR), exception.eTypeMips))) {
                         bUsed = true;
                     }
                 } else {
@@ -1703,12 +2073,12 @@ bool systemCheckInterrupts(System* pSystem) {
     }
 
     if (nMaskFinal != 0) {
-        if (!cpuException(SYSTEM_CPU(gpSystem), CEC_INTERRUPT, nMaskFinal)) {
+        if (!cpuException(SYSTEM_CPU(SYSTEM_PTR), CEC_INTERRUPT, nMaskFinal)) {
             return false;
         }
     } else {
         if ((eCodeFinal != CEC_NONE)) {
-            if (!cpuException(SYSTEM_CPU(gpSystem), eCodeFinal, 0)) {
+            if (!cpuException(SYSTEM_CPU(SYSTEM_PTR), eCodeFinal, 0)) {
                 return false;
             }
         }
@@ -1753,6 +2123,7 @@ static inline bool systemFreeDevices(System* pSystem) {
     return true;
 }
 
+#if IS_OOT
 bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
     Cpu* pCPU;
     SystemException exception;
@@ -1819,10 +2190,242 @@ bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
 
     return true;
 }
+#elif IS_MM
+extern _XL_OBJECTTYPE gClassSerial;
 
+bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
+    Cpu* pCPU;
+    SystemException exception;
+    SystemObjectType eObject;
+    SystemObjectType storageDevice;
+
+    switch (nEvent) {
+        case 2:
+            pSystem->eMode = SM_STOPPED;
+            pSystem->storageDevice = SOT_NONE;
+            pSystem->nAddressBreak = -1;
+            pSystem->cpuBlock.nSize = 0;
+
+            for (eObject = 0; eObject < SOT_COUNT; eObject++) {
+                pSystem->apObject[eObject] = NULL;
+            }
+
+            systemClearExceptions(pSystem);
+
+            for (eObject = 0; eObject < SOT_COUNT; eObject++) {
+                switch (eObject) {
+                    case SOT_FRAME:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_FRAME], NULL, &gClassFrame)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_CPU:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_CPU], pSystem, &gClassCPU)) {
+                            return false;
+                        }
+                        pCPU = SYSTEM_CPU(pSystem);
+                        if (!cpuMapObject(pCPU, pSystem, 0, 0xFFFFFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_PIF:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_PIF], pSystem, &gClassPIF)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_PIF], 0x1FC00000, 0x1FC007FF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_RAM:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_RAM], pSystem, &gClassRAM)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RAM], 0x00000000, 0x03EFFFFF, 0x100)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RAM], 0x03F00000, 0x03FFFFFF, 2)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RAM], 0x04700000, 0x047FFFFF, 1)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_ROM:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_ROM], pSystem, &gClassROM)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_ROM], 0x10000000, 0x1FBFFFFF, 0)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_ROM], 0x1FF00000, 0x1FF0FFFF, 1)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_RSP:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_RSP], pSystem, &gClassRSP)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RSP], 0x04000000, 0x040FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_RDP:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_RDP], pSystem, &gClassRDP)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RDP], 0x04100000, 0x041FFFFF, 0)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RDP], 0x04200000, 0x042FFFFF, 1)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_MI:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_MI], pSystem, &gClassMI)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_MI], 0x04300000, 0x043FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_DISK:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_DISK], pSystem, &gClassDD)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_DISK], 0x05000000, 0x05FFFFFF, 0)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_DISK], 0x06000000, 0x06FFFFFF, 1)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_AI:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_AI], pSystem, &gClassAI)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_AI], 0x04500000, 0x045FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_FLASH:
+                        pSystem->apObject[SOT_FLASH] = NULL;
+                        break;
+                    case SOT_SRAM:
+                        pSystem->apObject[SOT_SRAM] = NULL;
+                        break;
+                    case SOT_PAK:
+                        pSystem->apObject[SOT_PAK] = NULL;
+                        break;
+                    case SOT_AUDIO:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_AUDIO], pSystem, &gClassAudio)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_VI:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_VI], pSystem, &gClassVI)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_VI], 0x04400000, 0x044FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_SI:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_SI], pSystem, &gClassSI)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_SI], 0x04800000, 0x048FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_LIBRARY:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_LIBRARY], pSystem, &gClassLibrary)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_PI:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_PI], pSystem, &gClassPI)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_PI], 0x04600000, 0x046FFFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_RDB:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_RDB], pSystem, &gClassRdb)) {
+                            return false;
+                        }
+                        if (!cpuMapObject(pCPU, pSystem->apObject[SOT_RDB], 0x04900000, 0x0490FFFF, 0)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_CONTROLLER:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_CONTROLLER], pSystem, &gClassController)) {
+                            return false;
+                        }
+                        break;
+                    case SOT_HELP:
+                        if (!xlObjectMake(&pSystem->apObject[SOT_HELP], pSystem, &gClassHelpMenu)) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+            }
+            break;
+        case 3:
+            for (storageDevice = 2; storageDevice < SOT_COUNT; storageDevice++) {
+                if (!xlObjectFree(&pSystem->apObject[storageDevice])) {
+                    return false;
+                }
+            }
+            break;
+        case 0x1001:
+            if (!systemGetException(pSystem, (SystemInterruptType)(s32)pArgument, &exception)) {
+                return false;
+            }
+            if (exception.eTypeMips != MIT_NONE) {
+                miResetInterrupt(SYSTEM_MI(pSystem), exception.eTypeMips);
+            }
+            break;
+        case 0x1000:
+            if (((SystemInterruptType)(s32)pArgument > SIT_NONE) && ((SystemInterruptType)(s32)pArgument < SIT_COUNT)) {
+                pSystem->bException = true;
+                pSystem->anException[(SystemInterruptType)(s32)pArgument]++;
+                break;
+            }
+            return false;
+        case 0x1002:
+            if (!cpuSetDevicePut(SYSTEM_CPU(pSystem), pArgument, (Put8Func)systemPut8, (Put16Func)systemPut16,
+                                 (Put32Func)systemPut32, (Put64Func)systemPut64)) {
+                return false;
+            }
+            if (!cpuSetDeviceGet(SYSTEM_CPU(pSystem), pArgument, (Get8Func)systemGet8, (Get16Func)systemGet16,
+                                 (Get32Func)systemGet32, (Get64Func)systemGet64)) {
+                return false;
+            }
+            break;
+        case 0:
+        case 1:
+        case 5:
+        case 6:
+        case 7:
+            break;
+        case 0x1003:
+            break;
+        default:
+            return false;
+    }
+
+    return true;
+}
+#endif
+
+#if IS_OOT
 _XL_OBJECTTYPE gClassSystem = {
     "SYSTEM",
     sizeof(System),
     NULL,
     (EventFunc)systemEvent,
 }; // size = 0x10
+#endif

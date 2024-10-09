@@ -21,5 +21,24 @@ mw_comment_version: 14
 # - lbl_801E3380
 # - DemoAllocator2
 
-# block_relocations:
+block_relocations:
 # system.c
+- source: 0x80015DC4
+- source: 0x80015DCC
+- source: 0x80015E00
+- source: 0x80015E08
+- source: 0x80015E28
+- source: 0x80015E30
+- source: 0x80015E58
+- source: 0x80015E7C
+- source: 0x80015EA4
+- source: 0x80015ECC
+- source: 0x80015EF4
+- source: 0x80015F1C
+- source: 0x80015F44
+- source: 0x80015F6C
+- source: 0x80015F90
+- source: 0x80015FB4
+- source: 0x80015FDC
+- source: 0x80016000
+- source: 0x80016028

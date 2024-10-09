@@ -196,14 +196,19 @@ typedef enum SystemRomType {
 
 typedef enum SystemObjectType {
     SOT_NONE = -1,
-    SOT_CPU = 0,
-    SOT_PIF = 1,
-    SOT_RAM = 2,
-    SOT_ROM = 3,
-    SOT_RSP = 4,
-    SOT_RDP = 5,
-    SOT_MI = 6,
-    SOT_DISK = 7,
+#if IS_MM
+    SOT_HELP = 0,
+    SOT_FRAME = 1,
+#endif
+    SOT_CPU,
+    SOT_PIF,
+    SOT_RAM,
+    SOT_ROM,
+    SOT_RSP,
+    SOT_RDP,
+    SOT_MI,
+    SOT_DISK,
+#if IS_OOT
     SOT_AI = 8,
     SOT_VI = 9,
     SOT_SI = 10,
@@ -219,7 +224,20 @@ typedef enum SystemObjectType {
     SOT_AUDIO = 20,
     SOT_VIDEO = 21,
     SOT_CONTROLLER = 22,
-    SOT_COUNT = 23,
+#elif IS_MM
+    SOT_PI = 10,
+    SOT_AI = 11,
+    SOT_SRAM = 12,
+    SOT_FLASH = 13,
+    SOT_PAK = 14,
+    SOT_AUDIO = 15,
+    SOT_VI = 16,
+    SOT_SI = 17,
+    SOT_LIBRARY = 18,
+    SOT_RDB = 19,
+    SOT_CONTROLLER = 20,
+#endif
+    SOT_COUNT,
 } SystemObjectType;
 
 typedef enum SystemInterruptType {
@@ -257,34 +275,44 @@ typedef struct SystemDevice {
 } SystemDevice; // size = 0x30
 
 typedef struct SystemException {
-    /* 0x00 */ char* szType;
-    /* 0x04 */ u32 nMask;
-    /* 0x08 */ CpuExceptionCode eCode;
-    /* 0x10 */ MIInterruptType eTypeMips;
-    /* 0x0C */ SystemInterruptType eType;
-} SystemException; // size = 0x14
+    /*  OoT  MM  */
+    /* 0x00 0x00 */ char* szType;
+    /* 0x04 0x04 */ u32 nMask;
+    /* 0x08 0x08 */ CpuExceptionCode eCode;
+#if IS_MM
+    /*  N/A 0x10 */ s32 unk_10;
+#endif
+    /* 0x0C 0x14 */ MIInterruptType eTypeMips;
+    /* 0x10 0x18 */ SystemInterruptType eType;
+} SystemException; // size = 0x14 ; 0x1C
 
 typedef struct System {
-    /* OoT MM */
+    /*  OoT  MM  */
     /* 0x00 0x00 */ bool bException;
     /* 0x04 0x04 */ SystemMode eMode;
-    /* 0x08 0x08 */ SystemObjectType storageDevice;
-    /* 0x0C 0x0C */ SystemRomType eTypeROM;
 #if IS_MM
-    /*  N/A 0x10 */ u8 pad[0x18];
+    /*  N/A 0x08 */ CpuBlock cpuBlock;
 #endif
-    /* 0x10 0x28 */ void* apObject[SOT_COUNT];
-    /* 0x6C 0x */ s32 unk_6C;
-    /* 0x70 0x */ u64 nAddressBreak;
-    /* 0x78 0x */ s32 unk_78[19];
-    /* 0xC4 0x */ void* pSound;
-    /* 0xC8 0x */ u8 anException[16];
-} System; // size = 0xD8
+    /* 0x08 0x18 */ SystemObjectType storageDevice;
+    /* 0x0C 0x1C */ SystemRomType eTypeROM;
+    /* 0x10 0x20 */ void* apObject[SOT_COUNT];
+    /* 0x6C 0x74 */ s32 unk_6C;
+    /* 0x70 0x78 */ u64 nAddressBreak;
+#if IS_OOT
+    /* 0x78  N/A */ s32 unk_78[19];
+#endif
+    /* 0xC4 0x80 */ void* pSound;
+    /* 0xC8 0x84 */ u8 anException[16];
+#if IS_MM
+    /*  N/A 0x94 */ s32 unk_94;
+#endif
+} System; // size = 0xD8 ; 0x98
 
 typedef struct SystemRomConfig {
-    /* 0x0000 */ s32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
-    /* 0x0140 */ s32 rumbleConfiguration;
-    /* 0x0144 */ SystemObjectType storageDevice;
+    /*   OoT    MM   */
+    /* 0x0000 0x0000 */ s32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
+    /* 0x0140 0x0160 */ s32 rumbleConfiguration;
+    /* 0x0144 0x0188 */ SystemObjectType storageDevice;
     /* 0x0148 */ s32 normalControllerConfig;
     /* 0x014C */ s32 currentControllerConfig;
 } SystemRomConfig; // size = 0x150

@@ -20,6 +20,8 @@ extern "C" {
 #define DEVICE_ADDRESS_OFFSET_BITS (32 - DEVICE_ADDRESS_INDEX_BITS)
 
 typedef struct CpuBlock CpuBlock;
+
+#if IS_OOT
 typedef bool (*UnknownBlockCallback)(CpuBlock* pBlock, bool bUnknown);
 
 struct CpuBlock {
@@ -29,6 +31,16 @@ struct CpuBlock {
     /* 0x0C */ u32 nAddress0;
     /* 0x10 */ u32 nAddress1;
 }; // size = 0x14
+#elif IS_MM
+typedef bool (*UnknownBlockCallback)(void);
+
+struct CpuBlock {
+    /* 0x00 */ u32 nSize;
+    /* 0x04 */ u32 nAddress0;
+    /* 0x08 */ u32 nAddress1;
+    /* 0x0C */ UnknownBlockCallback pfUnknown;
+}; // size = 0x10
+#endif
 
 typedef bool (*GetBlockFunc)(void* pObject, CpuBlock* pBlock);
 
@@ -275,6 +287,9 @@ struct Cpu {
     /* 0x00010 */ s64 nHi;
     /* 0x00018 */ s32 nCountAddress;
     /* 0x0001C */ s32 iDeviceDefault;
+#if IS_MM
+    u8 pad1[0x18];
+#endif
     /* 0x00020 */ u32 nPC;
     /* 0x00024 */ u32 nWaitPC;
     /* 0x00028 */ u32 nCallLast;
@@ -309,7 +324,7 @@ struct Cpu {
     /* 0x1209C */ CpuCodeHack aCodeHack[32];
     /* 0x1221C */ u32 nFlagRAM;
     /* 0x12220 */ u32 nFlagCODE;
-    /* 0x12224 */ u32 nCompileFlag;
+    /* 0x12224 */ u32 nCompileFlag; // 12188
     /* 0x12228 */ s32 unk_12228;
 
     //! TODO: fix match issue with OSAlarm
