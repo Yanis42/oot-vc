@@ -19,9 +19,11 @@ _XL_OBJECTTYPE gTypeFile = {
 static DVDReadCallback gpfRead;
 static DVDOpenCallback gpfOpen;
 
+#if IS_OOT
 bool xlFileSetOpen(DVDOpenCallback pfOpen) { return true; }
 
 bool xlFileSetRead(DVDReadCallback pfRead) { return true; }
+#endif
 
 static inline bool xlFileGetFile(tXL_FILE** ppFile, char* szFileName) {
     if (gpfOpen != NULL) {

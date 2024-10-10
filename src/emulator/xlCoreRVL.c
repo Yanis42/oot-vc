@@ -14,6 +14,12 @@ static s32 gnCountArgument;
 static char** gaszArgument;
 static void* DefaultFifo;
 static GXFifoObj* DefaultFifoObj;
+
+#if IS_MM
+static void* gArenaHi;
+static void* gArenaLo;
+#endif
+
 GXRenderModeObj* rmode;
 
 static inline u32 getFBTotalSize(f32 aspectRatio) {
@@ -60,6 +66,42 @@ static void xlCoreInitRenderMode(GXRenderModeObj* mode) {
     rmode = &rmodeobj;
 }
 
+#if IS_MM
+static inline void xlCoreInitMem(void) {
+    void* arenaLo;
+    void* arenaHi;
+    u32 fbSize;
+    u32 fbSize2;
+
+    gArenaLo = arenaLo = OSGetArenaLo();
+    gArenaHi = arenaHi = OSGetArenaHi();
+
+    if (fn_8007FC84()) {
+        fbSize2 = 0xBB800;
+    } else {
+        fbSize2 = 0x87600;
+    }
+
+    fbSize = (((u16)(rmode->fbWidth + 0xF) & 0xFFF0) * (fn_800AB2A0(rmode->xfbHeight, rmode->viTVmode) * 2) & 0x1FFFE);
+
+    if (fbSize < fbSize2) {
+        fbSize = fbSize2;
+    }
+
+    // arenaLo = OSGetArenaLo();
+    // arenaHi = OSGetArenaHi();
+
+    // arenaLo = OSInitAlloc(arenaLo, arenaHi, 1);
+    OSSetArenaLo(arenaLo);
+    xlHeapSetup();
+
+    // arenaLo = (void*)(((s32)arenaLo + 0x1F) & ~0x1F);
+    // arenaHi = (void*)((s32)arenaHi & ~0x1F);
+    // OSSetCurrentHeap(OSCreateHeap(arenaLo, arenaHi));
+    // OSSetArenaLo(arenaHi);
+}
+#endif
+
 static inline void __xlCoreInitGX(void) {
     GXSetViewport(0.0f, 0.0f, rmode->fbWidth, rmode->efbHeight, 0.0f, 1.0f);
     GXSetScissor(0, 0, rmode->fbWidth, rmode->efbHeight);
@@ -94,6 +136,7 @@ bool xlCoreInitGX(void) {
     return true;
 }
 
+#if IS_OOT
 bool xlCoreBeforeRender(void) {
     if (rmode->field_rendering != 0) {
         GXSetViewportJitter(0.0f, 0.0f, rmode->fbWidth, rmode->efbHeight, 0.0f, 1.0f, VIGetNextField());
@@ -107,6 +150,7 @@ bool xlCoreBeforeRender(void) {
 
     return true;
 }
+#endif
 
 s32 xlCoreGetArgumentCount(void) { return gnCountArgument; }
 
@@ -122,6 +166,7 @@ bool xlCoreGetArgument(s32 iArgument, char** pszArgument) {
 bool xlCoreHiResolution(void) { return true; }
 
 bool fn_8007FC84(void) {
+#if IS_OOT
     switch (VIGetTvFormat()) {
         case VI_PAL:
         case VI_MPAL:
@@ -132,19 +177,32 @@ bool fn_8007FC84(void) {
     }
 
     return false;
+#elif IS_MM
+    return VIGetTvFormat() == VI_PAL;
+#endif
 }
 
+#if IS_OOT
 void xlExit(void) { OSPanic("xlCoreRVL.c", 524, "xlExit"); }
+#endif
+
+extern void* lbl_80200858;
+extern void* lbl_8020085C;
+extern u32 lbl_80200654;
+extern u32 lbl_801FF7DC;
+void* lbl_8017B1E0[6];
 
 int main(int nCount, char** aszArgument) {
+    void* arenaLo;
+    void* arenaHi;
     s32 nSizeHeap;
     s32 nSize;
-
     f32 aspectRatio;
 
     gnCountArgument = nCount;
     gaszArgument = aszArgument;
 
+#if IS_OOT
     OSInit();
     DVDInit();
 
@@ -156,31 +214,67 @@ int main(int nCount, char** aszArgument) {
     VIInit();
     xlCoreInitRenderMode(NULL);
     VIConfigure(rmode);
+    OSInitFastCast();
+#elif MM_J
+    __PADDisableRecalibration(true);
+    OSInitFastCast();
+    fn_8007DBDC(0, 0);
+    OSInit();
+    DVDInit();
+    DVDSetAutoFatalMessaging(false);
+    NANDInit();
+    fn_8011007C();
+    fn_800A37DC();
+    xlCoreInitRenderMode(NULL);
 
-#ifdef __MWERKS__ // clang-format off
-    asm {
-        li      r3, 0x4
-        oris    r3, r3, 0x4
-        mtspr   GQR2, r3
-        li      r3, 0x5
-        oris    r3, r3, 0x5
-        mtspr   GQR3, r3
-        li      r3, 0x6
-        oris    r3, r3, 0x6
-        mtspr   GQR4, r3
-        li      r3, 0x7
-        oris    r3, r3, 0x7
-        mtspr   GQR5, r3
+    gArenaLo = arenaLo = OSGetArenaLo();
+    gArenaHi = arenaHi = OSGetArenaHi();
+
+    aspectRatio = (f32)rmode->xfbHeight / (f32)rmode->efbHeight;
+    nSizeHeap = fn_8007FC84() ? 0xBB800 : 0x87600;
+    nSize = getFBTotalSize(aspectRatio) * 2;
+
+    if (nSize < nSizeHeap) {
+        nSize = nSizeHeap;
     }
-#endif // clang-format on
+
+    OSSetArenaLo(arenaLo);
+
+    xlHeapSetup();
+
+    xlHeapTake(&lbl_8017B1E0[0], nSize | 0x70000000);
+    xlHeapTake(&lbl_8017B1E0[3], nSize | 0x70000000);
+    fn_800A42A4(rmode);
+
+    xlHeapTake(&DefaultFifo, 0x40000 | 0x30000000);
+    DefaultFifoObj = GXInit(DefaultFifo, 0x40000);
+    xlCoreInitGX();
+
+    VISetNextFrameBuffer(lbl_8017B1E0[lbl_80200654]);
+
+    if (lbl_80200654++ >= lbl_801FF7DC) {
+        lbl_80200654 = 0;
+    }
+
+    VIFlush();
+    VIWaitForRetrace();
+
+    if (rmode->viTVmode & 1) {
+        VIWaitForRetrace();
+    }
+
+    fn_800AB884(0);
+#endif
 
     if (!xlPostSetup()) {
         return false;
     }
 
+#if IS_OOT
     if (!xlHeapSetup()) {
         return false;
     }
+#endif
 
     if (!xlListSetup()) {
         return false;
@@ -190,6 +284,7 @@ int main(int nCount, char** aszArgument) {
         return false;
     }
 
+#if IS_OOT
     aspectRatio = (f32)rmode->xfbHeight / (f32)rmode->efbHeight;
     nSizeHeap = fn_8007FC84() ? 0xBB800 : 0x87600;
     nSize = getFBTotalSize(aspectRatio) * 2;
@@ -210,6 +305,10 @@ int main(int nCount, char** aszArgument) {
 
     __xlCoreInitGX();
     errorDisplayInit();
+#elif IS_MM
+    __PADDisableRecalibration(false);
+#endif
+
     xlMain();
 
     if (!xlObjectReset()) {
@@ -228,6 +327,25 @@ int main(int nCount, char** aszArgument) {
         return false;
     }
 
+#if IS_OOT
     OSPanic("xlCoreRVL.c", 603, "CORE DONE!");
+#elif IS_MM
+    OSPanic("xlCoreGCN.c", 653, "CORE DONE!");
+#endif
+
     return false;
 }
+
+#if IS_MM
+void xlCoreBeforeRender(void) {
+    if (rmode->field_rendering != 0) {
+        GXSetViewportJitter(0.0f, 0.0f, rmode->fbWidth, rmode->efbHeight, 0.0f, 1.0f, VIGetNextField());
+    } else {
+        GXSetViewport(0.0f, 0.0f, rmode->fbWidth, rmode->efbHeight, 0.0f, 1.0f);
+    }
+
+    GXInvalidateVtxCache();
+    GXInvalidateTexAll();
+    GXSetDrawSync(0);
+}
+#endif

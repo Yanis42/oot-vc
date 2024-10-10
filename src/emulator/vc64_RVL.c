@@ -35,7 +35,6 @@ u32 gnTickReset;
 bool gButtonDownToggle = false;
 bool gDVDResetToggle = false;
 
-extern s32* lbl_80200888;
 extern u32 lbl_80200654;
 extern u32 lbl_801FF7DC;
 #endif
@@ -285,12 +284,14 @@ bool xlMain(void) {
     char* szNameROM;
     char acNameROM[32];
     s32 sp10;
+    s32 sp28;
+    s32 sp2C;
 #endif
 
     simulatorParseArguments();
 
 #if IS_OOT
-    if (!xlHeapGetFree(&nSize0)) {
+    if (!xlHeapGetHeap1Free(&nSize0)) {
         return false;
     }
 
@@ -349,12 +350,12 @@ bool xlMain(void) {
     gnTickReset = OSGetTick();
 #endif
 
-    if (!xlHeapGetFree(&nSize0)) {
+    if (!xlHeapGetHeap1Free(&nSize0)) {
         return false;
     }
 
 #if IS_MM
-    if (!xlHeapGetFree(&nSize1)) {
+    if (!xlHeapGetHeap1Free(&nSize1)) {
         return false;
     }
 
@@ -406,18 +407,18 @@ bool xlMain(void) {
         return false;
     }
 
-    if (!xlHeapGetFree(&nSize1)) {
+    if (!xlHeapGetHeap1Free(&nSize1)) {
         return false;
     }
 
 #if IS_MM
-    if (fn_80089620(&sp10) == 0) {
+    if (!xlHeapGetHeap2Free(&sp10)) {
         return false;
     }
 
-    xlHeapGetFree(&nSize0);
-    fn_80089620(&nSize1);
-    OSReport("%ld - %ld memory used\nmemory free: %ld - %ld\n", lbl_80200888[0], lbl_80200888[1], nSize0, nSize1);
+    xlHeapGetHeap1Free(&sp28);
+    xlHeapGetHeap2Free(&sp2C);
+    OSReport("%ld - %ld memory used\nmemory free: %ld - %ld\n", gnSizeHeapOS[0], gnSizeHeapOS[1], sp28, sp2C);
 #endif
 
     if (!systemSetMode(gpSystem, SM_RUNNING)) {

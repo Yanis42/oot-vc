@@ -12,7 +12,11 @@ extern "C" {
 #endif
 
 bool xlCoreInitGX(void) NO_INLINE;
+#if IS_OOT
 bool xlCoreBeforeRender(void);
+#elif IS_MM
+void xlCoreBeforeRender(void);
+#endif
 bool xlCoreHiResolution(void);
 bool fn_8007FC84(void);
 bool xlCoreGetArgument(s32 iArgument, char** pszArgument);

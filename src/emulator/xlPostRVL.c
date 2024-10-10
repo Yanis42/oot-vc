@@ -4,12 +4,7 @@
 #include "emulator/vc64_RVL.h"
 #include "macros.h"
 
-#if IS_OOT
-bool xlPostSetup(void) { return true; }
-
-bool xlPostReset(void) { return true; }
-
-#elif IS_MM
+#if IS_MM
 
 typedef struct struct_8017B1E0 {
     /* 0x00 */ s32 unk_00;
@@ -31,29 +26,6 @@ extern struct_80200864* lbl_80200864;
 extern s32 lbl_80201700;
 extern s32 lbl_80201704;
 
-void fn_80087394(void) {
-    struct_80200864* temp_r31;
-    u16 temp_r3;
-    u16 temp_r4;
-
-    temp_r31 = lbl_80200864;
-
-    if (temp_r31->unk_18 != 0) {
-        fn_800A4EDC(0x43300000);
-        temp_r4 = temp_r31->unk_04;
-        fn_800ADF8C(temp_r4, lbl_80201704, lbl_80201704, (f32)temp_r4, (f32)temp_r31->unk_06, lbl_80201704,
-                    lbl_80201700);
-    } else {
-        temp_r3 = temp_r31->unk_04;
-        fn_800ADFC8(temp_r3, lbl_80201704, lbl_80201704, (f32)temp_r3, (f32)temp_r31->unk_06, lbl_80201704,
-                    lbl_80201700);
-    }
-
-    fn_800A9EE8();
-    fn_800AC600();
-    fn_800AA544(0);
-}
-
 void fn_8008745C(void) {
     SYSTEM_FRAME(gpSystem)->nMode = 0;
     SYSTEM_FRAME(gpSystem)->nModeVtx = -1;
@@ -71,7 +43,7 @@ void fn_8008745C(void) {
     lbl_80200654 = (lbl_80200654 + 1) % lbl_801FF7DC;
 }
 
-s32 fn_80087534(void) {
+bool fn_80087534(void) {
     u32 temp_r3;
 
     fn_80086DDC();
@@ -97,3 +69,7 @@ s32 fn_80087534(void) {
 bool xlPostText(const char* fmt, const char* file, s32 line, ...) { return true; }
 
 #endif
+
+bool xlPostSetup(void) { return true; }
+
+bool xlPostReset(void) { return true; }

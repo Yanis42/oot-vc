@@ -11,6 +11,11 @@ static u32* gpHeapBlockLast[HEAP_COUNT];
 static s32 gnHeapTakeCount[HEAP_COUNT];
 static s32 gnHeapFreeCount[HEAP_COUNT];
 static s32 gnHeapTakeCacheCount[HEAP_COUNT];
+
+#if IS_MM
+s32 gnSizeHeapOS[HEAP_COUNT];
+#endif
+
 u32* gnHeapOS[HEAP_COUNT];
 
 #define PADDING_MAGIC 0x1234ABCD
@@ -342,6 +347,10 @@ bool xlHeapTake(void** ppHeap, s32 nByteCount) {
         return false;
     }
 
+#if IS_MM
+    gnSizeHeapOS[iHeap] += nSize << 2;
+#endif
+
     iTry = 0;
     while (iTry++ < 8) {
         if (xlHeapBlockCacheGet(iHeap, nSize, &pBlock, &nBlockSize)) {
@@ -427,6 +436,10 @@ bool xlHeapFree(void** ppHeap) {
     }
 
     nBlockSize = BLOCK_SIZE(*pBlock);
+#if IS_MM
+    gnSizeHeapOS[iHeap] -= nBlockSize;
+#endif
+
     if (BLOCK_IS_FREE(*pBlock)) {
         return false;
     }
@@ -443,6 +456,10 @@ bool xlHeapFree(void** ppHeap) {
     if ((nBlockNextSize = BLOCK_SIZE(*pBlockNext)) != 0 && BLOCK_IS_FREE(*pBlockNext)) {
         xlHeapBlockCacheClear(iHeap, pBlockNext);
         nBlockSize += nBlockNextSize + 1;
+    } else {
+#if IS_MM
+        OSReport("you fucked up the cache\n");
+#endif
     }
 
     *pBlock = MAKE_BLOCK(nBlockSize, FLAG_FREE);
@@ -631,7 +648,11 @@ static bool __xlHeapGetFree(s32 iHeap, s32* pnFreeBytes) {
     return true;
 }
 
-bool xlHeapGetFree(s32* pnFreeBytes) { return __xlHeapGetFree(0, pnFreeBytes); }
+bool xlHeapGetHeap1Free(s32* pnFreeBytes) { return __xlHeapGetFree(0, pnFreeBytes); }
+
+#if IS_MM
+bool xlHeapGetHeap2Free(s32* pnFreeBytes) { return __xlHeapGetFree(1, pnFreeBytes); }
+#endif
 
 bool xlHeapSetup(void) {
     s32 gpHeap_align[2];

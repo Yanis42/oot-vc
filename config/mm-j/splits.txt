@@ -121,15 +121,23 @@ emulator/stringtable.c:
 
 emulator/xlCoreRVL.c:
 	.text       start:0x80086C10 end:0x8008745C
+	.sbss       start:0x80200864 end:0x80200878
 
 emulator/xlPostRVL.c:
-	.text       start:0x8008745C end:0x8008760C
+	.text       start:0x8008745C end:0x8008761C
 
 emulator/xlFileRVL.c:
-	.text       start:0x8008760C end:0x80087A9C
+	.text       start:0x8008761C end:0x80087A9C
+	.data       start:0x801562F0 end:0x80156300
+	.bss        start:0x80191FC0 end:0x80191FF8
+	.sdata      start:0x80200078 end:0x80200080
+	.sbss       start:0x80200878 end:0x80200880
 
 emulator/xlText.c:
-	.text       start:0x80087A9C end:0x80087CD8
+	.text       start:0x80087A9C end:0x80087B58
+
+emulator/xlFile.c:
+	.text       start:0x80087B58 end:0x80087CD8
 
 emulator/xlList.c:
 	.text       start:0x80087CD8 end:0x80088098
@@ -137,6 +145,9 @@ emulator/xlList.c:
 
 emulator/xlHeap.c:
 	.text       start:0x80088098 end:0x8008979C
+	.data       start:0x80156300 end:0x80156320
+	.bss        start:0x80192008 end:0x80192B08
+	.sbss       start:0x80200880 end:0x802008C8
 
 emulator/xlObject.c:
 	.text       start:0x8008979C end:0x80089B58

@@ -284,10 +284,10 @@ config.libs = [
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlCoreRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlPostRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlFileRVL.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlText.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlText.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlList.c", extra_cflags=["-ipa file"]),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlHeap.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlFile.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlHeap.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlFile.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlObject.c"),
         ]
     ),
