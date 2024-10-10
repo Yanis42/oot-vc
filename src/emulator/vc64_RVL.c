@@ -70,14 +70,26 @@ void fn_80007020(void) {
 }
 
 #if IS_OOT
-
 bool simulatorDVDShowError(s32 nStatus, void* anData, s32 nSizeRead, u32 nOffset) { return true; }
 
 bool simulatorDVDOpen(char* szNameFile, DVDFileInfo* pFileInfo) { return false; }
+#endif
 
 bool simulatorDVDRead(DVDFileInfo* pFileInfo, void* anData, s32 nSizeRead, s32 nOffset, DVDCallback callback) {
+#if IS_OOT
     return false;
+#elif IS_MM
+    fn_80083848();
+
+    if (callback != NULL) {
+        callback(nSizeRead, NULL);
+    }
+
+    return true;
+#endif
 }
+
+#if IS_OOT
 
 bool simulatorShowLoad(s32 unknown, char* szNameFile, f32 rProgress) { return true; }
 
@@ -277,8 +289,8 @@ bool xlMain(void) {
     // s32 iName;
     // char cName;
     GXColor color;
-    SystemMode eMode;
     s32 nSize0;
+    SystemMode eMode;
     s32 nSize1;
     s32 iName;
     char* szNameROM;

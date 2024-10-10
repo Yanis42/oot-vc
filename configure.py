@@ -261,7 +261,7 @@ config.libs = [
             Object(NotLinked, "emulator/cpu.c", asm_processor=True),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/pif.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/ram.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/rom.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/rom.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/rdb.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/pak.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/sram.c"),

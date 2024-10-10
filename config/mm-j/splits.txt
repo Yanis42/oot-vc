@@ -49,7 +49,9 @@ emulator/ram.c:
 emulator/rom.c:
 	.text       start:0x80050AFC end:0x80052CC8
 	.data       start:0x801513E8 end:0x801513F8
+	.bss        start:0x80180348 end:0x80180660
 	.sdata      start:0x801FFF40 end:0x801FFF48
+	.sbss       start:0x80200740 end:0x80200758
 
 emulator/rdp.c:
 	.text       start:0x80052CC8 end:0x80054510

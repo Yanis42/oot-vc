@@ -16,7 +16,7 @@ extern "C" {
 #if IS_OOT
 #define ROM_THREAD (DefaultThread)
 #elif IS_MM
-#define ROM_THREAD (lbl_80180348)
+#define ROM_THREAD (sRomThread)
 #endif
 
 typedef bool UnknownCallbackFunc(void);

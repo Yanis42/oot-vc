@@ -25,10 +25,14 @@ _XL_OBJECTTYPE gClassROM = {
 };
 
 #if IS_MM
-//! TODO: document this
-extern s32 lbl_80200740;
+static OSThread sRomThread;
 
-static s32 fn_80050AFC(void) { return lbl_80200740; }
+static tXL_FILE* spRomFile;
+static Rom* spRom; // saved rom state?
+static OSTime snOSTime;
+s32 lbl_80200740;
+
+s32 fn_80050AFC(void) { return lbl_80200740; }
 #endif
 
 static bool fn_80042064(void) {
@@ -418,24 +422,20 @@ static bool romCopyUpdate(Rom* pROM) {
 }
 
 #if IS_MM
-//! TODO: document these
-extern Rom* lbl_80200750;
-extern tXL_FILE* lbl_80200754;
-
 s32 fn_80051738(void* pBuffer, u32 nOffset, u32 nSize) {
     s32 nSizeBytes = nSize;
     Rom* pROM = (Rom*)pBuffer;
 
-    if (nOffset + nSize >= lbl_80200750->unk_218) {
-        nSizeBytes = lbl_80200750->unk_218 - nOffset;
+    if (nOffset + nSize >= spRom->unk_218) {
+        nSizeBytes = spRom->unk_218 - nOffset;
 
         if (nSizeBytes <= 0) {
             return 0;
         }
     }
 
-    xlFileSetPosition(lbl_80200754, nOffset);
-    xlFileGet(lbl_80200754, pROM, nSizeBytes);
+    xlFileSetPosition(spRomFile, nOffset);
+    xlFileGet(spRomFile, pROM, nSizeBytes);
     return nSizeBytes;
 }
 #endif
@@ -453,7 +453,7 @@ static bool fn_80042C98(Rom* pROM) {
 #if IS_OOT
 #define FILE_PTR (pFile)
 #elif IS_MM
-#define FILE_PTR (lbl_80200754)
+#define FILE_PTR (spRomFile)
 #endif
 
 #if IS_MM
@@ -464,7 +464,7 @@ static bool fn_80042C98(Rom* pROM) {
     pROM->pBuffer = pCacheRAM;
 
 #if IS_MM
-    lbl_80200750 = pROM;
+    spRom = pROM;
 #endif
 
     if (!xlFileOpen(&FILE_PTR, XLFT_BINARY, pROM->acNameFile)) {
@@ -523,11 +523,7 @@ static bool fn_80042C98(Rom* pROM) {
 }
 
 #if IS_MM
-//! TODO: document these
-extern OSThread lbl_80180348;
-extern s64 lbl_80200748;
-
-bool fn_800518EC(void) { return !OSIsThreadTerminated(&lbl_80180348); }
+bool fn_800518EC(void) { return !OSIsThreadTerminated(&sRomThread); }
 #endif
 
 static void* __ROMEntry(void* arg) {
@@ -541,7 +537,7 @@ s32 fn_80042E30(EDString* pSTString) {
 
 #if IS_MM
     if (SYSTEM_ROM(gpSystem)->unk_C != 0) {
-        if (OSGetTime() - lbl_80200748 < OSSecondsToTicks(4)) {
+        if (OSGetTime() - snOSTime < OSSecondsToTicks(4)) {
             return 0;
         }
     }
@@ -590,7 +586,7 @@ static bool romLoadFullOrPart(Rom* pROM) {
         }
 
 #if IS_MM
-        lbl_80200748 = OSGetTime();
+        snOSTime = OSGetTime();
 #endif
         if (OSCreateThread(&ROM_THREAD, (OSThreadFunc)__ROMEntry, pROM, (void*)((u8*)pBuffer + ROM_THREAD_SIZE),
                            ROM_THREAD_SIZE, OS_PRIORITY_MAX, 1)) {
@@ -1111,27 +1107,47 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
     return true;
 }
 #elif IS_MM
+static inline bool romSetImage_Inline(Rom* pROM, s32 nSize) {
+    s32 nHeapSize;
+
+    pROM->nSize = nSize / sizeof(int); // maybe some other 4 byte struct
+    nHeapSize = ROUND_UP(pROM->nSize, 0x2000);
+    pROM->nSizeCacheRAM = nHeapSize;
+    pROM->nCountBlockRAM = nHeapSize / 0x2000;
+
+    if (nHeapSize + 0x01B00000 < 0x03600000) {
+        if (!xlHeapTake(&pROM->pBuffer, nHeapSize | 0x70000000)) {
+            return false;
+        }
+
+        lbl_80200740 = 0;
+    } else if (!fn_8005F5F4(SYSTEM_HELP(gpSystem), &pROM->pBuffer, nHeapSize | 0x70000000, fn_80042064)) {
+        return false;
+    } else {
+        lbl_80200740 = 1;
+    }
+
+    pROM->pCacheRAM = pROM->pBuffer;
+    return true;
+}
+
 bool romSetImage(Rom* pROM, char* szNameFile) {
     tXL_FILE* pFile;
     s32 iName;
-    s32 nSize;
-    s32 nSize2;
-    s32 nHeapSize;
-    s32 iCode;
-    u32 anData[256];
+    u32 nSize;
 
     for (iName = 0; (szNameFile[iName] != '\0') && (iName < 0x200); iName++) {
         pROM->acNameFile[iName] = szNameFile[iName];
     }
     pROM->acNameFile[iName] = '\0';
 
-    xlFileGetSize(&nSize, pROM->acNameFile);
+    xlFileGetSize(&pROM->unk_218, pROM->acNameFile);
 
     if (!xlFileOpen(&pFile, XLFT_BINARY, szNameFile)) {
         return false;
     }
 
-    if (!xlFileGet(pFile, &nSize2, 4)) {
+    if (!xlFileGet(pFile, &nSize, 4)) {
         return false;
     }
 
@@ -1139,33 +1155,8 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
         return false;
     }
 
-    {
-        s32 fret;
-
-        pROM->nSize = (u32)(nSize2 >> 2);
-        nHeapSize = (nSize + 0x1FFF) & ~0x1FFF;
-        pROM->nCountBlockRAM = nHeapSize / 0x2000;
-        pROM->nSizeCacheRAM = nHeapSize;
-
-        if (nSize + 0x01B00000 < 0x03600000) {
-            if (!xlHeapTake(&pROM->pBuffer, nHeapSize | 0x70000000)) {
-                fret = 0;
-            } else {
-                lbl_80200740 = 0;
-            }
-            goto block_17;
-        } else if (!fn_8005F5F4(SYSTEM_HELP(gpSystem), pROM, nHeapSize | 0x70000000, (void*)fn_80042064)) {
-            fret = 0;
-        } else {
-            lbl_80200740 = 1;
-        block_17:
-            fret = 1;
-            pROM->pCacheRAM = pROM->pBuffer;
-        }
-
-        if (!fret) {
-            return false;
-        }
+    if (!romSetImage_Inline(pROM, nSize)) {
+        return false;
     }
 
     if (!romCopy(SYSTEM_ROM(gpSystem), pROM->acHeader, 0, 0x40, NULL)) {
