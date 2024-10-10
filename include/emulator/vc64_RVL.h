@@ -19,7 +19,7 @@ typedef enum SimulatorArgumentType {
     SAT_XTRA = 5,
     SAT_MEMORYCARD = 6,
     SAT_MOVIE = 7,
-#if VERSION < MM_J
+#if IS_OOT
     SAT_UNK8 = 8,
     SAT_UNK9 = 9,
     SAT_UNK10 = 10,

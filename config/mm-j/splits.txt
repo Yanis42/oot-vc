@@ -15,7 +15,10 @@ Sections:
 
 emulator/vc64_RVL.c:
 	.text       start:0x800070C0 end:0x80007844
-	.data       start:0x8014D9C0 end:0x8014DA98
+	.data       start:0x8014D9C0 end:0x8014DAC8
+	.bss        start:0x8017B1C0 end:0x8017B1E0
+	.sdata      start:0x801FF7C0 end:0x801FF7D0
+	.sbss       start:0x80200620 end:0x80200640
 
 emulator/codeRVL.c:
 	.text       start:0x80007844 end:0x800078A8
@@ -117,10 +120,10 @@ emulator/stringtable.c:
 	.text       start:0x80086B2C end:0x80086C10
 
 emulator/xlCoreRVL.c:
-	.text       start:0x80086C10 end:0x80087394
+	.text       start:0x80086C10 end:0x8008745C
 
 emulator/xlPostRVL.c:
-	.text       start:0x80087394 end:0x8008760C
+	.text       start:0x8008745C end:0x8008760C
 
 emulator/xlFileRVL.c:
 	.text       start:0x8008760C end:0x80087A9C
