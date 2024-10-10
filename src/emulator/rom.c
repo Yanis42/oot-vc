@@ -8,6 +8,7 @@
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
 #include "emulator/xlCoreRVL.h"
+#include "emulator/xlFile.h"
 #include "emulator/xlHeap.h"
 #include "macros.h"
 #include "revolution/os.h"
@@ -25,9 +26,9 @@ _XL_OBJECTTYPE gClassROM = {
 
 #if IS_MM
 //! TODO: document this
-extern s32* lbl_80200740;
+extern s32 lbl_80200740;
 
-static s32* fn_80050AFC(void) { return lbl_80200740; }
+static s32 fn_80050AFC(void) { return lbl_80200740; }
 #endif
 
 static bool fn_80042064(void) {
@@ -338,6 +339,8 @@ static inline bool romCheckOffsets(Rom* pROM) {
     return true;
 }
 
+static inline void romSetEndianness(Rom* pROM) { pROM->bFlip = pROM->acHeader[0] == 0x37 && pROM->acHeader[1] == 0x80; }
+
 static bool romCopyUpdate(Rom* pROM) {
     RomBlock* pBlock;
     s32 pad;
@@ -496,7 +499,7 @@ static bool fn_80042C98(Rom* pROM) {
 #if IS_MM
     xlHeapCopy(pROM->acHeader, pROM->pBuffer, 0x40);
 
-    pROM->bFlip = pROM->acHeader[0] == 0x37 && pROM->acHeader[1] == 0x80;
+    romSetEndianness(pROM);
     fn_80007FD8();
 #endif
 
@@ -536,12 +539,6 @@ s32 fn_80042E30(EDString* pSTString) {
     s32 ret;
     bool bThread;
 
-#if IS_OOT
-#define THREAD (DefaultThread)
-#elif IS_MM
-#define THREAD (lbl_80180348)
-#endif
-
 #if IS_MM
     if (SYSTEM_ROM(gpSystem)->unk_C != 0) {
         if (OSGetTime() - lbl_80200748 < OSSecondsToTicks(4)) {
@@ -550,7 +547,7 @@ s32 fn_80042E30(EDString* pSTString) {
     }
 #endif
 
-    bThread = OSIsThreadTerminated(&THREAD);
+    bThread = OSIsThreadTerminated(&ROM_THREAD);
     ret = 0;
 
     if (bThread) {
@@ -592,10 +589,44 @@ static bool romLoadFullOrPart(Rom* pROM) {
             return false;
         }
 
-        if (OSCreateThread(&DefaultThread, (OSThreadFunc)__ROMEntry, pROM, (void*)((u8*)pBuffer + ROM_THREAD_SIZE),
+#if IS_MM
+        lbl_80200748 = OSGetTime();
+#endif
+        if (OSCreateThread(&ROM_THREAD, (OSThreadFunc)__ROMEntry, pROM, (void*)((u8*)pBuffer + ROM_THREAD_SIZE),
                            ROM_THREAD_SIZE, OS_PRIORITY_MAX, 1)) {
-            OSResumeThread(&DefaultThread);
+#if IS_OOT
+            OSResumeThread(&ROM_THREAD);
             errorDisplayShow(pROM->unk_C ? ERROR_NO_CONTROLLER : ERROR_BLANK);
+#elif IS_MM
+            int var_r28 = pROM->unk_C ? 8 : 16;
+
+            if (pROM->unk_C != 0) {
+                if (!fn_8007F440(16)) {
+                    return false;
+                }
+
+                if (!fn_8007F440(9)) {
+                    return false;
+                }
+            } else if (!fn_8007F440(16)) {
+                return false;
+            }
+
+            OSResumeThread(&ROM_THREAD);
+            errorDisplayShow(var_r28);
+
+            if (pROM->unk_C != 0) {
+                if (!fn_8007F474(16)) {
+                    return false;
+                }
+
+                if (!fn_8007F474(9)) {
+                    return false;
+                }
+            } else if (!fn_8007F474(16)) {
+                return false;
+            }
+#endif
             pROM->unk_C = 0;
         }
 
@@ -1011,6 +1042,7 @@ bool romUpdate(Rom* pROM) {
     return true;
 }
 
+#if IS_OOT
 bool romSetImage(Rom* pROM, char* szNameFile) {
     tXL_FILE* pFile;
     s32 iName;
@@ -1047,7 +1079,7 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
         return false;
     }
 
-    if (!xlFileOpen(&pFile, 1, szNameFile)) {
+    if (!xlFileOpen(&pFile, XLFT_BINARY, szNameFile)) {
         return false;
     }
 
@@ -1059,7 +1091,6 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
         return false;
     }
 
-#if IS_OOT
     if (!xlFileSetPosition(pFile, pROM->offsetToRom + 0x1000)) {
         return false;
     }
@@ -1067,21 +1098,84 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
     if (!xlFileGet(pFile, &anData, sizeof(anData))) {
         return false;
     }
-#endif
 
     if (!xlFileClose(&pFile)) {
         return false;
     }
 
-#if IS_OOT
     for (pROM->nChecksum = 0, iCode = 0; iCode < ARRAY_COUNT(anData); iCode++) {
         pROM->nChecksum += anData[iCode];
     }
-#endif
 
-    pROM->bFlip = (pROM->acHeader[0] == 0x37 && pROM->acHeader[1] == 0x80);
+    romSetEndianness(pROM);
     return true;
 }
+#elif IS_MM
+bool romSetImage(Rom* pROM, char* szNameFile) {
+    tXL_FILE* pFile;
+    s32 iName;
+    s32 nSize;
+    s32 nSize2;
+    s32 nHeapSize;
+    s32 iCode;
+    u32 anData[256];
+
+    for (iName = 0; (szNameFile[iName] != '\0') && (iName < 0x200); iName++) {
+        pROM->acNameFile[iName] = szNameFile[iName];
+    }
+    pROM->acNameFile[iName] = '\0';
+
+    xlFileGetSize(&nSize, pROM->acNameFile);
+
+    if (!xlFileOpen(&pFile, XLFT_BINARY, szNameFile)) {
+        return false;
+    }
+
+    if (!xlFileGet(pFile, &nSize2, 4)) {
+        return false;
+    }
+
+    if (!xlFileClose(&pFile)) {
+        return false;
+    }
+
+    {
+        s32 fret;
+
+        pROM->nSize = (u32)(nSize2 >> 2);
+        nHeapSize = (nSize + 0x1FFF) & ~0x1FFF;
+        pROM->nCountBlockRAM = nHeapSize / 0x2000;
+        pROM->nSizeCacheRAM = nHeapSize;
+
+        if (nSize + 0x01B00000 < 0x03600000) {
+            if (!xlHeapTake(&pROM->pBuffer, nHeapSize | 0x70000000)) {
+                fret = 0;
+            } else {
+                lbl_80200740 = 0;
+            }
+            goto block_17;
+        } else if (!fn_8005F5F4(SYSTEM_HELP(gpSystem), pROM, nHeapSize | 0x70000000, (void*)fn_80042064)) {
+            fret = 0;
+        } else {
+            lbl_80200740 = 1;
+        block_17:
+            fret = 1;
+            pROM->pCacheRAM = pROM->pBuffer;
+        }
+
+        if (!fret) {
+            return false;
+        }
+    }
+
+    if (!romCopy(SYSTEM_ROM(gpSystem), pROM->acHeader, 0, 0x40, NULL)) {
+        return false;
+    }
+
+    return true;
+}
+
+#endif
 
 bool romGetImage(Rom* pROM, char* acNameFile) {
     if (pROM->acNameFile[0] == '\0') {
@@ -1099,6 +1193,7 @@ bool romGetImage(Rom* pROM, char* acNameFile) {
     return true;
 }
 
+#if IS_OOT
 bool romGetBuffer(Rom* pROM, void** pBuffer, u32 nAddress, s32* pData) {
     if (pROM->eModeLoad == RLM_FULL) {
         nAddress &= 0x07FFFFFF;
@@ -1121,6 +1216,7 @@ bool romGetBuffer(Rom* pROM, void** pBuffer, u32 nAddress, s32* pData) {
 
     return false;
 }
+#endif
 
 #if IS_MM
 s32 fn_80052A6C(Rom* pROM) {

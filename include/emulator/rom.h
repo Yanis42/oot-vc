@@ -13,6 +13,12 @@ extern "C" {
 
 #define ROM_THREAD_SIZE 0x2000
 
+#if IS_OOT
+#define ROM_THREAD (DefaultThread)
+#elif IS_MM
+#define ROM_THREAD (lbl_80180348)
+#endif
+
 typedef bool UnknownCallbackFunc(void);
 typedef bool ProgressCallbackFunc(f32 progressPercent);
 
