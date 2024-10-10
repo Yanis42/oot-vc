@@ -103,7 +103,12 @@ typedef struct Rom {
 
 s32 fn_80042E30(EDString* pSTString);
 bool romGetPC(Rom* pROM, u64* pnPC);
+
+#if IS_OOT
 bool romGetCode(Rom* pROM, s32* acCode);
+#elif IS_MM
+bool romGetCode(Rom* pROM, char* acCode);
+#endif
 
 //! NOTE: The debug informations indicates that `nSize` is unsigned, but the
 //! generated code seems to treat it as signed.

@@ -1,8 +1,8 @@
 #include "emulator/rom.h"
+#include "emulator/codeRVL.h"
 #include "emulator/cpu.h"
 #include "emulator/errordisplay.h"
 #include "emulator/frame.h"
-#include "emulator/codeRVL.h"
 #include "emulator/helpRVL.h"
 #include "emulator/ram.h"
 #include "emulator/system.h"
@@ -27,9 +27,7 @@ _XL_OBJECTTYPE gClassROM = {
 //! TODO: document this
 extern s32* lbl_80200740;
 
-static s32* fn_80050AFC(void) {
-    return lbl_80200740;
-}
+static s32* fn_80050AFC(void) { return lbl_80200740; }
 #endif
 
 static bool fn_80042064(void) {
@@ -526,9 +524,7 @@ static bool fn_80042C98(Rom* pROM) {
 extern OSThread lbl_80180348;
 extern s64 lbl_80200748;
 
-bool fn_800518EC(void) {
-    return !OSIsThreadTerminated(&lbl_80180348);
-}
+bool fn_800518EC(void) { return !OSIsThreadTerminated(&lbl_80180348); }
 #endif
 
 static void* __ROMEntry(void* arg) {
@@ -675,11 +671,42 @@ bool romGetPC(Rom* pROM, u64* pnPC) {
     }
 }
 
+#if IS_OOT
 bool romGetCode(Rom* pROM, s32* acCode) {
     *acCode = (pROM->acHeader[0x3B] << 0x18) | (pROM->acHeader[0x3C] << 0x10) | (pROM->acHeader[0x3D] << 0x8) |
               pROM->acHeader[0x3E];
     return true;
 }
+#elif IS_MM
+bool romGetCode(Rom* pROM, char* acCode) {
+    if (pROM->acHeader[0x3B] == '\0') {
+        acCode[0] = acCode[1] = acCode[2] = acCode[3] = ' ';
+    } else {
+        acCode[0] = pROM->acHeader[0x3B];
+        acCode[1] = pROM->acHeader[0x3C];
+        acCode[2] = pROM->acHeader[0x3D];
+        acCode[3] = pROM->acHeader[0x3E];
+    }
+
+    acCode[4] = '\0';
+    return true;
+}
+
+bool romTestCode(Rom* pROM, char* acCode) {
+    s32 iCode;
+    char acCodeCurrent[5];
+
+    romGetCode(pROM, acCodeCurrent);
+
+    for (iCode = 0; iCode < 4; iCode++) {
+        if (acCode[iCode] != acCodeCurrent[iCode]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+#endif
 
 static bool romPut8(Rom* pROM, u32 nAddress, s8* pData) { return true; }
 static bool romPut16(Rom* pROM, u32 nAddress, s16* pData) { return true; }
@@ -874,6 +901,76 @@ bool romCopy(Rom* pROM, void* pTarget, s32 nOffset, s32 nSize, UnknownCallbackFu
     return false;
 }
 
+bool romCopyImmediate(Rom* pROM, void* pTarget, s32 nOffsetROM, s32 nSize) {
+    void* pSource;
+    RomBlock* pBlock;
+    s32 nOffsetARAM;
+    s32 nSizeCopy;
+    s32 nOffsetBlock;
+    s32 nSizeCopyARAM;
+    s32 nSizeDMA;
+    s32 nOffset;
+    s32 nOffsetTarget;
+    s32 pad;
+    u8* pBuffer;
+    u8 anBuffer[608];
+    s32 iCache;
+
+    if (pROM->nSizeCacheRAM == 0) {
+        return false;
+    }
+
+    if (pROM->bLoad && !romCopyLoad(pROM)) {
+        return false;
+    }
+
+    nOffsetROM = nOffsetROM & 0x07FFFFFF;
+    pBuffer = (u8*)(((s32)anBuffer + 0x1F) & 0xFFFFFFE0);
+
+    if (nOffsetROM + nSize > pROM->nSize && (nSize = pROM->nSize - nOffsetROM) < 0) {
+        return true;
+    }
+
+    if (pROM->eModeLoad == RLM_PART) {
+        while (nSize != 0U) {
+            pBlock = &pROM->aBlock[nOffsetROM / 0x2000];
+            if (pBlock->nSize == 0) {
+                if (!romMakeFreeCache(pROM, &iCache, RCT_RAM)) {
+                    return false;
+                }
+
+                if (!romLoadBlock(pROM, nOffsetROM / 0x2000, iCache, NULL)) {
+                    return false;
+                }
+            }
+
+            nOffsetBlock = nOffsetROM % 0x2000;
+            if ((nSizeCopy = pBlock->nSize - nOffsetBlock) > nSize) {
+                nSizeCopy = nSize;
+            }
+
+            if (pBlock->iCache >= 0) {
+                pSource = &pROM->pCacheRAM[(pBlock->iCache * 0x2000)] + nOffsetBlock;
+                if (!xlHeapCopy(pTarget, pSource, nSizeCopy)) {
+                    return false;
+                }
+            }
+
+            pTarget = (u8*)pTarget + nSizeCopy;
+            nOffsetROM += nSizeCopy;
+            nSize -= nSizeCopy;
+        }
+        return true;
+    } else if (pROM->eModeLoad == RLM_FULL) {
+        if (!xlHeapCopy(pTarget, (u8*)pROM->pBuffer + nOffsetROM, nSize)) {
+            return false;
+        }
+        return true;
+    }
+
+    return false;
+}
+
 bool romUpdate(Rom* pROM) {
     s32 nStatus;
 
@@ -1024,6 +1121,22 @@ bool romGetBuffer(Rom* pROM, void** pBuffer, u32 nAddress, s32* pData) {
 
     return false;
 }
+
+#if IS_MM
+s32 fn_80052A6C(Rom* pROM) {
+    if (pROM->bLoad) {
+        //! TODO: romCopyLoad?
+        if (!romLoadFullOrPart(pROM)) {
+            return false;
+        }
+
+        pROM->bLoad = false;
+        return true;
+    }
+
+    return true;
+}
+#endif
 
 bool romEvent(Rom* pROM, s32 nEvent, void* pArgument) {
     switch (nEvent) {
