@@ -2,6 +2,7 @@
 #include "emulator/cpu.h"
 #include "emulator/errordisplay.h"
 #include "emulator/frame.h"
+#include "emulator/codeRVL.h"
 #include "emulator/helpRVL.h"
 #include "emulator/ram.h"
 #include "emulator/system.h"
@@ -21,6 +22,15 @@ _XL_OBJECTTYPE gClassROM = {
     NULL,
     (EventFunc)romEvent,
 };
+
+#if IS_MM
+//! TODO: document this
+extern s32* lbl_80200740;
+
+static s32* fn_80050AFC(void) {
+    return lbl_80200740;
+}
+#endif
 
 static bool fn_80042064(void) {
     SYSTEM_ROM(gpSystem)->bLoad = true;
@@ -282,8 +292,8 @@ static bool romLoadUpdate(Rom* pROM) {
         return true;
     }
 
-    iBlock0 = pROM->load.nOffset0 >> 0xD;
-    iBlock1 = pROM->load.nOffset1 >> 0xD;
+    iBlock0 = pROM->load.nOffset0 >> 13;
+    iBlock1 = pROM->load.nOffset1 >> 13;
 
     while (iBlock0 <= iBlock1) {
         if (pCPU->nRetrace != pCPU->nRetraceUsed) {
@@ -308,8 +318,8 @@ static bool romLoadUpdate(Rom* pROM) {
         pROM->load.nOffset0 = ++iBlock0 * 0x2000;
     }
 
-    pROM->load.nOffset1 = 0U;
-    pROM->load.nOffset0 = 0U;
+    pROM->load.nOffset1 = 0;
+    pROM->load.nOffset0 = 0;
     return true;
 }
 
@@ -406,6 +416,154 @@ static bool romCopyUpdate(Rom* pROM) {
     return true;
 }
 
+#if IS_MM
+//! TODO: document these
+extern Rom* lbl_80200750;
+extern tXL_FILE* lbl_80200754;
+
+s32 fn_80051738(void* pBuffer, u32 nOffset, u32 nSize) {
+    s32 nSizeBytes = nSize;
+    Rom* pROM = (Rom*)pBuffer;
+
+    if (nOffset + nSize >= lbl_80200750->unk_218) {
+        nSizeBytes = lbl_80200750->unk_218 - nOffset;
+
+        if (nSizeBytes <= 0) {
+            return 0;
+        }
+    }
+
+    xlFileSetPosition(lbl_80200754, nOffset);
+    xlFileGet(lbl_80200754, pROM, nSizeBytes);
+    return nSizeBytes;
+}
+#endif
+
+static bool fn_80042C98(Rom* pROM) {
+    tXL_FILE* pFile;
+
+    s32 iBuffer;
+    u32 nSizeBytes;
+    s32 nSize;
+    u8* pCacheRAM;
+    u32* pBuffer;
+    u32 nBuffer;
+
+#if IS_OOT
+#define FILE_PTR (pFile)
+#elif IS_MM
+#define FILE_PTR (lbl_80200754)
+#endif
+
+#if IS_MM
+    fn_80007844();
+#endif
+
+    pCacheRAM = pROM->pCacheRAM;
+    pROM->pBuffer = pCacheRAM;
+
+#if IS_MM
+    lbl_80200750 = pROM;
+#endif
+
+    if (!xlFileOpen(&FILE_PTR, XLFT_BINARY, pROM->acNameFile)) {
+        return false;
+    }
+
+#if IS_OOT
+    nSize = pROM->nSize;
+
+    while (nSize > 0) {
+        nSizeBytes = nSize;
+        if (nSize > 0x80000) {
+            nSizeBytes = 0x80000;
+        }
+
+        if (!xlFileGet(FILE_PTR, pCacheRAM, nSizeBytes)) {
+            return false;
+        }
+
+        nSize -= nSizeBytes;
+        pCacheRAM = &pCacheRAM[nSizeBytes];
+        simulatorShowLoad(1, pROM->acNameFile, (f32)(pROM->nSize - nSize) / (f32)pROM->nSize);
+    }
+#elif IS_MM
+    fn_8008338C(pCacheRAM, SYSTEM_FRAME(gpSystem)->unk_20B0, 0x80000, fn_80051738, 0);
+#endif
+
+    if (!xlFileClose(&FILE_PTR)) {
+        return false;
+    }
+
+#if IS_MM
+    xlHeapCopy(pROM->acHeader, pROM->pBuffer, 0x40);
+
+    pROM->bFlip = pROM->acHeader[0] == 0x37 && pROM->acHeader[1] == 0x80;
+    fn_80007FD8();
+#endif
+
+    pROM->eModeLoad = RLM_FULL;
+
+    if (pROM->bFlip) {
+        pBuffer = pROM->pBuffer;
+
+        for (iBuffer = 0; iBuffer < ((s32)(pROM->nSize + 3) >> 2); iBuffer++) {
+            nBuffer = pBuffer[iBuffer];
+            pBuffer[iBuffer] = (((nBuffer >> 8) & 0xFF0000) | ((nBuffer >> 8) & 0xFF) |
+                                (((nBuffer << 8) & 0xFF000000) | ((nBuffer << 8) & 0xFF00)));
+        }
+    }
+
+#if IS_MM
+    fn_8000784C();
+#endif
+
+    return true;
+}
+
+#if IS_MM
+//! TODO: document these
+extern OSThread lbl_80180348;
+extern s64 lbl_80200748;
+
+bool fn_800518EC(void) {
+    return !OSIsThreadTerminated(&lbl_80180348);
+}
+#endif
+
+static void* __ROMEntry(void* arg) {
+    fn_80042C98(SYSTEM_ROM(gpSystem));
+    return NULL;
+}
+
+s32 fn_80042E30(EDString* pSTString) {
+    s32 ret;
+    bool bThread;
+
+#if IS_OOT
+#define THREAD (DefaultThread)
+#elif IS_MM
+#define THREAD (lbl_80180348)
+#endif
+
+#if IS_MM
+    if (SYSTEM_ROM(gpSystem)->unk_C != 0) {
+        if (OSGetTime() - lbl_80200748 < OSSecondsToTicks(4)) {
+            return 0;
+        }
+    }
+#endif
+
+    bThread = OSIsThreadTerminated(&THREAD);
+    ret = 0;
+
+    if (bThread) {
+        ret = 2;
+    }
+
+    return ret;
+}
+
 static inline bool romLoadFullOrPartLoop(Rom* pROM) {
     s32 i;
     s32 iCache;
@@ -428,78 +586,6 @@ static inline bool romLoadFullOrPartLoop(Rom* pROM) {
     }
 
     return true;
-}
-
-static bool fn_80042C98(Rom* pROM) {
-    tXL_FILE* pFile;
-
-    s32 iBuffer;
-    u32 nSizeBytes;
-    s32 nSize;
-    u8* pCacheRAM;
-    u32* pBuffer;
-    u32 nBuffer;
-
-    pCacheRAM = pROM->pCacheRAM;
-    pROM->pBuffer = pCacheRAM;
-
-    if (!xlFileOpen(&pFile, XLFT_BINARY, pROM->acNameFile)) {
-        return false;
-    }
-
-    nSize = pROM->nSize;
-
-    while (nSize > 0) {
-        nSizeBytes = nSize;
-        if (nSize > 0x80000) {
-            nSizeBytes = 0x80000;
-        }
-
-        if (!xlFileGet(pFile, pCacheRAM, nSizeBytes)) {
-            return false;
-        }
-
-        nSize -= nSizeBytes;
-        pCacheRAM = &pCacheRAM[nSizeBytes];
-        simulatorShowLoad(1, pROM->acNameFile, (f32)(pROM->nSize - nSize) / (f32)pROM->nSize);
-    }
-
-    if (!xlFileClose(&pFile)) {
-        return false;
-    }
-
-    pROM->eModeLoad = RLM_FULL;
-
-    if (pROM->bFlip) {
-        pBuffer = pROM->pBuffer;
-
-        for (iBuffer = 0; iBuffer < ((s32)(pROM->nSize + 3) >> 2); iBuffer++) {
-            nBuffer = pBuffer[iBuffer];
-            pBuffer[iBuffer] = (((nBuffer >> 8) & 0xFF0000) | ((nBuffer >> 8) & 0xFF) |
-                                (((nBuffer << 8) & 0xFF000000) | ((nBuffer << 8) & 0xFF00)));
-        }
-    }
-
-    return true;
-}
-
-static void* __ROMEntry(void* arg) {
-    fn_80042C98(SYSTEM_ROM(gpSystem));
-    return NULL;
-}
-
-s32 fn_80042E30(EDString* pSTString) {
-    s32 ret;
-    bool bThread;
-
-    bThread = OSIsThreadTerminated(&DefaultThread);
-    ret = 0;
-
-    if (bThread) {
-        ret = 2;
-    }
-
-    return ret;
 }
 
 static bool romLoadFullOrPart(Rom* pROM) {
@@ -833,8 +919,8 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
     s32 iName;
     s32 nSize;
     s32 nHeapSize;
-    s32 i;
-    u32 pData[0x400 / sizeof(u32)];
+    s32 iCode;
+    u32 anData[256];
 
     for (iName = 0; (szNameFile[iName] != '\0') && (iName < 0x200); iName++) {
         pROM->acNameFile[iName] = szNameFile[iName];
@@ -876,23 +962,25 @@ bool romSetImage(Rom* pROM, char* szNameFile) {
         return false;
     }
 
+#if IS_OOT
     if (!xlFileSetPosition(pFile, pROM->offsetToRom + 0x1000)) {
         return false;
     }
 
-    if (!xlFileGet(pFile, &pData, sizeof(pData))) {
+    if (!xlFileGet(pFile, &anData, sizeof(anData))) {
         return false;
     }
+#endif
 
     if (!xlFileClose(&pFile)) {
         return false;
     }
 
-    pROM->unk_19ABC = 0;
-
-    for (i = 0; i < ARRAY_COUNT(pData); i++) {
-        pROM->unk_19ABC += pData[i];
+#if IS_OOT
+    for (pROM->nChecksum = 0, iCode = 0; iCode < ARRAY_COUNT(anData); iCode++) {
+        pROM->nChecksum += anData[iCode];
     }
+#endif
 
     pROM->bFlip = (pROM->acHeader[0] == 0x37 && pROM->acHeader[1] == 0x80);
     return true;
@@ -1002,9 +1090,11 @@ bool romEvent(Rom* pROM, s32 nEvent, void* pArgument) {
         case 1:
             break;
         case 0x1003:
-#if IS_OOT
         case 0x1004:
+#if IS_OOT
         case 0x1007:
+#elif IS_MM
+        case 0x1005:
 #endif
             break;
         default:

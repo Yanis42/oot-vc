@@ -6,6 +6,7 @@
 
 #if IS_MM
 
+//! TODO: document these
 typedef struct struct_8017B1E0 {
     /* 0x00 */ s32 unk_00;
     /* 0x04 */ void* unk_04[5];

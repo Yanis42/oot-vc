@@ -7,6 +7,7 @@
 #include "revolution/gx.h"
 #include "revolution/mtx.h"
 #include "revolution/types.h"
+#include "macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -314,6 +315,10 @@ typedef struct Frame {
     /* 0x01C58 */ s32 nBlocksMaxColor;
     /* 0x01C50 */ s32 nBlocksTexture;
     /* 0x01C5C */ s32 nBlocksMaxTexture;
+#if IS_MM
+    u8 MM_pad1[0x450];
+    s32 unk_20B0;
+#endif
     /* 0x01C60 */ u32 anPackPixel[48];
     /* 0x01D20 */ u32 anPackColor[320];
     /* 0x02220 */ u32 nAddressLoad;

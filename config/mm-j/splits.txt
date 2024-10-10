@@ -48,6 +48,8 @@ emulator/ram.c:
 
 emulator/rom.c:
 	.text       start:0x80050AFC end:0x80052CC8
+	.data       start:0x801513E8 end:0x801513F8
+	.sdata      start:0x801FFF40 end:0x801FFF48
 
 emulator/rdp.c:
 	.text       start:0x80052CC8 end:0x80054510

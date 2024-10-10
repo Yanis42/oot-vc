@@ -297,6 +297,9 @@ struct Cpu {
     /* 0x00030 */ s32 nReturnAddrLast;
     /* 0x00034 */ s32 survivalTimer;
     /* 0x00038 */ u32 nTickLast;
+#if IS_MM
+    u8 pad2[0xB24];
+#endif
     /* 0x0003C */ u32 nRetrace;
     /* 0x00040 */ u32 nRetraceUsed;
     /* 0x00044 */ CpuGpr aGPR[32];

@@ -5,6 +5,7 @@
 #include "emulator/xlFileRVL.h"
 #include "emulator/xlObject.h"
 #include "revolution/types.h"
+#include "macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,30 +60,46 @@ typedef struct RomLoadState {
 } RomLoadState; // size = 0x30
 
 typedef struct Rom {
-    /* 0x00000 */ void* pBuffer;
-    /* 0x00004 */ bool bFlip;
-    /* 0x00008 */ bool bLoad;
-    /* 0x0000C */ s32 unk_C;
-    /* 0x00010 */ char acNameFile[513];
-    /* 0x00214 */ u32 nSize;
-    /* 0x00218 */ s32 unk_218;
-    /* 0x0021C */ RomModeLoad eModeLoad;
-    /* 0x00220 */ RomBlock aBlock[6144];
-    /* 0x18220 */ u32 nTick;
-    /* 0x18224 */ u8* pCacheRAM;
-    /* 0x18228 */ u8 anBlockCachedRAM[4096]; // Bitfield, one bit per block
-    /* 0x19228 */ u8 anBlockCachedARAM[2046]; // Bitfield, one bit per block
-    /* 0x19A28 */ RomCopyState copy;
-    /* 0x19A3C */ RomLoadState load;
-    /* 0x19A6C */ s32 nCountBlockRAM;
-    /* 0x19A70 */ s32 nSizeCacheRAM;
-    /* 0x19A74 */ u8 acHeader[64];
-    /* 0x19AB4 */ u32* anOffsetBlock;
-    /* 0x19AB8 */ s32 nCountOffsetBlocks;
-    /* 0x19ABC */ s32 unk_19ABC; // game's segment `boot` checksum?
-    /* 0x19AC0 */ DVDFileInfo fileInfo;
-    /* 0x19AFC */ s32 offsetToRom;
-} Rom; // size = 0x19B00
+    /*   OoT      MM   */
+#if IS_MM
+    /* 0x00000 0x00000 */ void* pHost;
+#endif
+    /* 0x00000 0x00004 */ void* pBuffer;
+    /* 0x00004 0x00008 */ bool bFlip;
+    /* 0x00008 0x0000C */ bool bLoad;
+#if IS_OOT
+    /* 0x0000C   N/A   */ s32 unk_C;
+#endif
+    /* 0x00010 0x00010 */ char acNameFile[513];
+    /* 0x00214 0x00214 */ u32 nSize;
+    /* 0x00218 0x00218 */ s32 unk_218;
+    /* 0x0021C 0x0021C */ RomModeLoad eModeLoad;
+    /* 0x00220 0x00220 */ RomBlock aBlock[IS_MM ? 4096 : 6144];
+    /* 0x18220 0x10220 */ u32 nTick;
+    /* 0x18224 0x10224 */ u8* pCacheRAM;
+    /* 0x18228 0x10228 */ u8 anBlockCachedRAM[IS_MM ? 1024 : 4096]; // Bitfield, one bit per block
+    /* 0x19228 0x10628 */ u8 anBlockCachedARAM[2046]; // Bitfield, one bit per block
+    /* 0x19A28 0x10E28 */ RomCopyState copy;
+    /* 0x19A3C 0x10E3C */ RomLoadState load;
+#if IS_MM
+    /*   N/A   0x10E6C */ s32 unk_C;
+    /*   N/A   0x10E70 */ s32 unk_10E70;
+#endif
+    /* 0x19A6C 0x10E74 */ s32 nCountBlockRAM;
+    /* 0x19A70 0x10E78 */ s32 nSizeCacheRAM;
+    /* 0x19A74 0x10E7C */ u8 acHeader[64];
+    /* 0x19AB4 0x10EBC */ u32* anOffsetBlock;
+    /* 0x19AB8 0x10EC0 */ s32 nCountOffsetBlocks;
+#if IS_OOT
+    /* 0x19ABC 0x10EC4 */ u32 nChecksum;
+#endif
+    /* 0x19AC0 0x10EC8 */ DVDFileInfo fileInfo;
+#if IS_MM
+    /*   N/A   0x10F00 */ s32 unk_10F00;
+    /*   N/A   0x10F04 */ s32 unk_10F04;
+#endif
+    /* 0x19AFC 0x10F08 */ s32 offsetToRom;
+} Rom; // size = 0x19B00 ; 0x10F0C
 
 s32 fn_80042E30(EDString* pSTString);
 bool romGetPC(Rom* pROM, u64* pnPC);
