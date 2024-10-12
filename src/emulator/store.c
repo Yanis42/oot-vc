@@ -1,5 +1,6 @@
 #include "emulator/store.h"
 #include "emulator/banner.h"
+#include "emulator/controller.h"
 #include "emulator/flash.h"
 #include "emulator/pak.h"
 #include "emulator/sram.h"
@@ -25,12 +26,31 @@ _XL_OBJECTTYPE gClassStore = {
     (EventFunc)storeEvent,
 };
 
+#if IS_MM
+static inline Store* storeGetStoreObj(void) {
+    Store* pStore = NULL;
+    Flash* pFLASH = SYSTEM_FLASH(gpSystem);
+    Sram* pSRAM = SYSTEM_SRAM(gpSystem);
+    Pak* pPak = SYSTEM_PAK(gpSystem);
+
+    if (pFLASH != NULL) {
+        pStore = pFLASH->pStore;
+    } else if (pSRAM != NULL) {
+        pStore = pSRAM->pStore;
+    } else if (pPak != NULL) {
+        pStore = pPak->pRAM;
+    }
+
+    return pStore;
+}
+#endif
+
 static inline bool unknownInline(Store* pStore, u8 access) {
     if (pStore->unk_A4 == 0) {
         return true;
     }
 
-    if (!fn_800641CC(&pStore->nandFileInfo, pStore->szFileName, pStore->unk_00, 0xAA, access)) {
+    if (!fn_800641CC(&pStore->nandFileInfo, pStore->szFileName, pStore->nFileSize, 0xAA, access)) {
         pStore->unk_A4 = 0;
     }
 
@@ -58,8 +78,13 @@ bool fn_80061770(void** ppObject, char* szName, SystemRomType eTypeROM, void* pA
         return false;
     }
 
-    STORE_OBJ->unk_00 = (s32)pArgument;
+    STORE_OBJ->nFileSize = (s32)pArgument;
     STORE_OBJ->eTypeROM = eTypeROM;
+
+#if IS_MM
+    STORE_OBJ->unk_04 = gpSystem->unk_94;
+    STORE_OBJ->time = 0;
+#endif
 
     // example: "RAM_CZLJ"
     STORE_OBJ->szFileName[0] = szName[0];
@@ -81,7 +106,7 @@ bool fn_80061770(void** ppObject, char* szName, SystemRomType eTypeROM, void* pA
     STORE_OBJ->unk_B9 = 1;
     STORE_OBJ->unk_B8 = 0;
     STORE_OBJ->unk_BA = 1;
-    STORE_OBJ->unk_BC = (s32)pArgument;
+    STORE_OBJ->nSize2 = (s32)pArgument;
 
     fn_800618D4(*ppObject, (void*)STORE_OBJ->unk_A8, 0, (s32)pArgument);
     return true;
@@ -171,12 +196,12 @@ static bool fn_800618D4(Store* pStore, void* arg1, s32 arg2, s32 arg3) {
 }
 
 bool fn_80061B88(Store* pStore, void* pHeapTarget, s32 nOffset, s32 nByteCount) {
-    xlHeapCopy((s32*)pHeapTarget, (void*)(pStore->unk_A8 + nOffset), nByteCount);
+    xlHeapCopy((s32*)pHeapTarget, (void*)((u32)pStore->unk_A8 + nOffset), nByteCount);
     return true;
 }
 
 bool fn_80061BC0(Store* pStore, void* pHeapTarget, s32 nOffset, s32 nByteCount) {
-    xlHeapCopy((void*)(pStore->unk_A8 + nOffset), (s32*)pHeapTarget, nByteCount);
+    xlHeapCopy((void*)((u32)pStore->unk_A8 + nOffset), (s32*)pHeapTarget, nByteCount);
     pStore->unk_B8 = 1;
     return true;
 }
@@ -185,7 +210,7 @@ static void fn_80061C08(s32 nResult, NANDCommandBlock* block) {
     Store* pStore = (Store*)NANDGetUserData(block);
 
     if (nResult != 0) {
-        pStore->unk_BC = nResult;
+        pStore->eResult = nResult;
     }
 
     pStore->unk_B9 = 1;
@@ -193,13 +218,13 @@ static void fn_80061C08(s32 nResult, NANDCommandBlock* block) {
 
 static void fn_80061C4C(s32 nResult, NANDCommandBlock* block) {
     Store* pStore = (Store*)NANDGetUserData(block);
-    bool bSuccess;
+    s32 nCloseResult;
 
-    pStore->unk_BC = nResult;
-    bSuccess = NANDCloseAsync(&pStore->nandFileInfo, fn_80061C08, &pStore->nandCmdBlock);
+    pStore->eResult = nResult;
+    nCloseResult = NANDCloseAsync(&pStore->nandFileInfo, fn_80061C08, &pStore->nandCmdBlock);
 
-    if (bSuccess) {
-        pStore->unk_BC = bSuccess;
+    if (nCloseResult) {
+        pStore->eResult = nCloseResult;
         pStore->unk_B9 = 1;
     }
 }
@@ -208,9 +233,9 @@ static bool fn_80061CAC(Store* pStore) {
     pStore->unk_B9 = 0;
     pStore->unk_B8 = 0;
 
-    memcpy(pStore->unk_AC, (void*)pStore->unk_A8, pStore->unk_00);
-    DCFlushRange(pStore->unk_AC, pStore->unk_00);
-    NANDSetUserData(&pStore->nandCmdBlock, &pStore->unk_00);
+    memcpy(pStore->unk_AC, (void*)pStore->unk_A8, pStore->nFileSize);
+    DCFlushRange(pStore->unk_AC, pStore->nFileSize);
+    NANDSetUserData(&pStore->nandCmdBlock, pStore);
 
     while (true) {
         if (!unknownInline(pStore, 3)) {
@@ -221,8 +246,8 @@ static bool fn_80061CAC(Store* pStore) {
             return true;
         }
 
-        if (NANDWriteAsync(&pStore->nandFileInfo, pStore->unk_AC, pStore->unk_00, fn_80061C4C, &pStore->nandCmdBlock) >=
-            0) {
+        if (NANDWriteAsync(&pStore->nandFileInfo, pStore->unk_AC, pStore->nFileSize, fn_80061C4C,
+                           &pStore->nandCmdBlock) >= 0) {
             break;
         }
 
@@ -241,7 +266,7 @@ static inline void fn_80061DB8_Inline(Store* pStore) {
     unk_B9 = pStore->unk_B9;
     OSRestoreInterrupts(interrupts);
 
-    if (unk_B9 == 1 && pStore->unk_BC != pStore->unk_00) {
+    if (unk_B9 == 1 && pStore->nSize2 != pStore->nFileSize) {
         pStore->unk_B8 = 1;
     }
 
@@ -270,7 +295,7 @@ bool fn_80061DB8(void) {
             unk_B9 = pStore->unk_B9;
             OSRestoreInterrupts(interrupts);
 
-            if (unk_B9 == 1 && pStore->unk_BC != pStore->unk_00) {
+            if (unk_B9 == 1 && pStore->nSize2 != pStore->nFileSize) {
                 pStore->unk_B8 = 1;
             }
 
@@ -295,6 +320,123 @@ bool fn_80061DB8(void) {
 
     return true;
 }
+
+#if IS_MM
+static inline void test_inline(Store* pStore) {
+    bool interrupts;
+    u8 unk_B9;
+
+    pStore->time = 0;
+    pStore->unk_B4 = 0;
+
+    while (pStore->unk_B8 != 0) {
+        fn_8007E540(pStore);
+    }
+
+    do {
+        interrupts = OSDisableInterrupts();
+        unk_B9 = pStore->unk_B9;
+        OSRestoreInterrupts(interrupts);
+    } while (unk_B9 == 0);
+}
+
+bool fn_8007E428(Store* pStore) {
+    Store* var_r30;
+    s32 i;
+    Controller* pController;
+
+    pStore = storeGetStoreObj();
+    pController = SYSTEM_CONTROLLER(gpSystem);
+
+    if (pStore != NULL) {
+        test_inline(pStore);
+    }
+
+    for (i = 0; i < 4; i++) {
+        if (pController->MM_unk_04[i] != NULL) {
+            if (pController->MM_unk_04[i]->pStore != NULL) {
+                test_inline(pController->MM_unk_04[i]->pStore);
+            }
+        }
+    }
+
+    return true;
+}
+
+// fn_80061DB8?
+bool fn_8007E540(Store* pStore) {
+    s32 temp_r0;
+    s64 temp_r3;
+    s64 temp_ret;
+    s64 temp_r27;
+    s64 temp_r28;
+    u32 temp_r4;
+    u32 temp_r4_2;
+    s64 temp_r3_2;
+    s64 temp_ret_2;
+    u8 unk_B9;
+    bool interrupts;
+
+    if (pStore == NULL) {
+        return false;
+    }
+
+    interrupts = OSDisableInterrupts();
+    unk_B9 = pStore->unk_B9;
+    OSRestoreInterrupts(interrupts);
+
+    if (unk_B9 == 1 && pStore->nSize2 != pStore->nFileSize) {
+        pStore->unk_B8 = 1;
+        pStore->time = 0;
+        pStore->unk_B0 = 0;
+    }
+
+    if (pStore->unk_B8 != 0 && unk_B9 == 1) {
+        if (pStore->unk_04 != 0) {
+            temp_ret = OSGetTime();
+            temp_r3 = temp_ret;
+            temp_r4 = (u32)(u64)temp_ret;
+
+            temp_r27 = pStore->time;
+            temp_r28 = pStore->unk_B0;
+            // temp_ret_2 = fn_80132920((temp_r3 - temp_r28) - 1, temp_r4 - temp_r27, 0, *(u32* )0x800000F8 / 4000);
+            temp_r3_2 = OSTicksToMilliseconds(temp_ret);
+            temp_r4_2 = temp_r3_2;
+
+            if ((temp_r27 | temp_r28) != 0) {
+                if (temp_r3_2 < OSMillisecondsToTicks(4)) {
+                    return true;
+                }
+            }
+
+            pStore->time = temp_ret;
+            pStore->unk_B0 = temp_r3;
+        }
+
+        fn_80061CAC(pStore);
+    }
+
+    return true;
+}
+
+bool fn_8007E664(void) {
+    Store* pStore;
+    s32 i;
+    Controller* pController;
+
+    pStore = storeGetStoreObj();
+    pController = SYSTEM_CONTROLLER(gpSystem);
+    fn_8007E540(pStore);
+
+    for (i = 0; i < 4; i++) {
+        if (pController->MM_unk_04[i] != NULL) {
+            fn_8007E540(pController->MM_unk_04[i]->pStore);
+        }
+    }
+
+    return true;
+}
+#endif
 
 bool storeEvent(Store* pStore, s32 nEvent, void* pArgument) {
     switch (nEvent) {

@@ -316,7 +316,7 @@ bool flashEvent(Flash* pFLASH, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 2:
 #if IS_MM
-            pFLASH->pHost = pArgument;
+            pFLASH->nFlashSize = (u32)pArgument;
 #endif
             pFLASH->flashCommand = 0;
             pFLASH->pStore = NULL;

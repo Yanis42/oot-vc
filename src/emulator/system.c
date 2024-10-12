@@ -1413,7 +1413,7 @@ static bool systemSetupGameALL(System* pSystem) {
 
         pCPU->nCompileFlag |= 0x1010;
         fn_800818F0(gpSystem->apObject[20], 1);
-    } else if (!romGetCode(pROM, (s32*)acCode)) {
+    } else if (!romGetCode(pROM, acCode)) {
         return false;
     }
 
@@ -1680,8 +1680,8 @@ static bool systemGetBlock(System* pSystem, CpuBlock* pBlock) {
 static inline bool fn_8000A504_UnknownInline(System* pSystem, CpuBlock** pBlock) {
     s32 i;
 
-    for (i = 0; i < 4; i++) {
-        if (*pBlock == (CpuBlock*)(pSystem->unk_78 + (i * 5))) {
+    for (i = 0; i < ARRAY_COUNT(pSystem->aBlock); i++) {
+        if (*pBlock == &pSystem->aBlock[i]) {
             pSystem->storageDevice &= ~(1 << i);
             return true;
         }
@@ -1780,10 +1780,10 @@ static bool fn_8000A504(void) {
 static inline bool systemGetNewBlock(System* pSystem, CpuBlock** ppBlock) {
     s32 i;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < ARRAY_COUNT(pSystem->aBlock); i++) {
         if (!(pSystem->storageDevice & (1 << i))) {
             pSystem->storageDevice |= (1 << i);
-            *ppBlock = (CpuBlock*)(pSystem->unk_78 + (i * 5));
+            *ppBlock = &pSystem->aBlock[i];
             return true;
         }
     }
@@ -1936,7 +1936,7 @@ bool systemReset(System* pSystem) {
 #elif IS_MM
         s32 nTypeROM;
 
-        romGetCode(SYSTEM_ROM(pSystem), &nTypeROM);
+        romGetCode(SYSTEM_ROM(pSystem), (char*)&nTypeROM);
         pSystem->eTypeROM = nTypeROM;
 
         if (!fn_80015340(pSystem)) {

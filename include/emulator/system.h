@@ -286,27 +286,33 @@ typedef struct SystemException {
     /* 0x10 0x18 */ SystemInterruptType eType;
 } SystemException; // size = 0x14 ; 0x1C
 
-typedef struct System {
-    /*  OoT  MM  */
-    /* 0x00 0x00 */ bool bException;
-    /* 0x04 0x04 */ SystemMode eMode;
-#if IS_MM
-    /*  N/A 0x08 */ CpuBlock cpuBlock;
-#endif
-    /* 0x08 0x18 */ SystemObjectType storageDevice;
-    /* 0x0C 0x1C */ SystemRomType eTypeROM;
-    /* 0x10 0x20 */ void* apObject[SOT_COUNT];
-    /* 0x6C 0x74 */ s32 unk_6C;
-    /* 0x70 0x78 */ u64 nAddressBreak;
 #if IS_OOT
-    /* 0x78  N/A */ s32 unk_78[19];
+typedef struct System {
+    /* 0x00 */ bool bException;
+    /* 0x04 */ SystemMode eMode;
+    /* 0x08 */ SystemObjectType storageDevice;
+    /* 0x0C */ SystemRomType eTypeROM;
+    /* 0x10 */ void* apObject[SOT_COUNT];
+    /* 0x6C */ struct Store* unk_6C;
+    /* 0x70 */ u64 nAddressBreak;
+    /* 0x78 */ CpuBlock aBlock[4];
+    /* 0xC8 */ u8 anException[16];
+} System; // size = 0xD8
+#elif IS_MM
+typedef struct System {
+    /* 0x00 */ bool bException;
+    /* 0x04 */ SystemMode eMode;
+    /* 0x08 */ CpuBlock cpuBlock;
+    /* 0x18 */ SystemObjectType storageDevice;
+    /* 0x1C */ SystemRomType eTypeROM;
+    /* 0x20 */ void* apObject[SOT_COUNT];
+    /* 0x74 */ void* unk_6C;
+    /* 0x78 */ u64 nAddressBreak;
+    /* 0x80 */ s32 unk_80;
+    /* 0x84 */ u8 anException[16];
+    /* 0x94 */ s32 unk_94;
+} System; // size = 0x98
 #endif
-    /* 0xC4 0x80 */ void* pSound;
-    /* 0xC8 0x84 */ u8 anException[16];
-#if IS_MM
-    /*  N/A 0x94 */ s32 unk_94;
-#endif
-} System; // size = 0xD8 ; 0x98
 
 typedef struct SystemRomConfig {
     /*   OoT    MM   */

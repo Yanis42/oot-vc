@@ -23,26 +23,39 @@ typedef struct ControllerThread {
     /* 0x318 */ u8 unk_318[0xA];
 } ControllerThread; // size = 0x328
 
+#if IS_MM
+typedef struct ControllerUnknown {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ struct Store* pStore;
+} ControllerUnknown; // size = 0xC
+#endif
+
 typedef struct Controller {
-    /* 0x000 */ u32 unk_00[19];
-    /* 0x04C */ s32 unk_4C[PAD_MAX_CONTROLLERS];
-    /* 0x05C */ s32 analogTriggerLeft[PAD_MAX_CONTROLLERS];
-    /* 0x06C */ s32 analogTriggerRight[PAD_MAX_CONTROLLERS];
-    /* 0x07C */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x09C */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x0BC */ s32 unk_BC[PAD_MAX_CONTROLLERS];
-    /* 0x0CC */ s32 unk_CC[PAD_MAX_CONTROLLERS];
-    /* 0x0DC */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
-    /* 0x21C */ s32 unk_21C;
-    /* 0x220 */ s32 unk_220;
-    /* 0x224 */ s32 unk_224;
-    /* 0x228 */ u32 unk_228[PAD_MAX_CONTROLLERS];
-    /* 0x238 */ u32 unk_238[PAD_MAX_CONTROLLERS];
-    /* 0x248 */ s32 unk_248;
-    /* 0x24C */ s32 unk_24C;
-    /* 0x250 */ u8 unk_250[0x20];
-    /* 0x270 */ u32 unk_270[PAD_MAX_CONTROLLERS];
-    /* 0x280 */ u32 unk_280[PAD_MAX_CONTROLLERS];
+    /*  OoT   MM  */
+#if IS_MM
+    /*  N/A  0x000 */ u32 MM_unk_00;
+    /*  N/A  0x004 */ ControllerUnknown* MM_unk_04[4];
+#endif
+    /* 0x000 0x014 */ u32 unk_00[19];
+    /* 0x04C 0x060 */ s32 unk_4C[PAD_MAX_CONTROLLERS];
+    /* 0x05C 0x070 */ s32 analogTriggerLeft[PAD_MAX_CONTROLLERS];
+    /* 0x06C 0x080 */ s32 analogTriggerRight[PAD_MAX_CONTROLLERS];
+    /* 0x07C 0x090 */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x09C 0x0A0 */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x0BC 0x0C0 */ s32 unk_BC[PAD_MAX_CONTROLLERS];
+    /* 0x0CC 0x0D0 */ s32 unk_CC[PAD_MAX_CONTROLLERS];
+    /* 0x0DC 0x0E0 */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
+    /* 0x21C 0x000 */ s32 unk_21C;
+    /* 0x220 0x000 */ s32 unk_220;
+    /* 0x224 0x000 */ s32 unk_224;
+    /* 0x228 0x000 */ u32 unk_228[PAD_MAX_CONTROLLERS];
+    /* 0x238 0x000 */ u32 unk_238[PAD_MAX_CONTROLLERS];
+    /* 0x248 0x000 */ s32 unk_248;
+    /* 0x24C 0x000 */ s32 unk_24C;
+    /* 0x250 0x000 */ u8 unk_250[0x20];
+    /* 0x270 0x000 */ u32 unk_270[PAD_MAX_CONTROLLERS];
+    /* 0x280 0x000 */ u32 unk_280[PAD_MAX_CONTROLLERS];
 } Controller; // size = 0x290
 
 s32 fn_80062028(EDString* pSTString);
