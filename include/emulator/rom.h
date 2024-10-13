@@ -114,6 +114,7 @@ bool romGetPC(Rom* pROM, u64* pnPC);
 bool romGetCode(Rom* pROM, s32* acCode);
 #elif IS_MM
 bool romGetCode(Rom* pROM, char* acCode);
+bool fn_800518EC(void);
 #endif
 
 //! NOTE: The debug informations indicates that `nSize` is unsigned, but the

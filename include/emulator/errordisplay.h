@@ -124,7 +124,7 @@ typedef struct EDAnimation {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s16 nWidth;
     /* 0x0A */ s16 nHeight;
-    /* 0x0C */ s32* unk0C;
+    /* 0x0C */ u32* unk0C;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
@@ -155,6 +155,11 @@ void* OSAllocFromHeap(s32 handle, s32 size);
 void OSFreeToHeap(s32 handle, void* p);
 void errorDisplayInit(void);
 bool errorDisplayShow(ErrorIndex iString);
+
+#if IS_MM
+bool fn_8007F440(ErrorIndex iString);
+bool fn_8007F474(ErrorIndex iString);
+#endif
 
 extern ErrorDisplay sStringDraw[];
 extern struct_80174988 lbl_80174988[17];
