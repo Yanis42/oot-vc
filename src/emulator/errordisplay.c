@@ -51,8 +51,53 @@ static EDStringInfo sStringBase[] = {
     {SID_ERROR_SYS_MEM_CANT_ACCESS_2, 0, NULL, 0x00000000, 0x00000000},
 #endif
     {SID_ERROR_BLANK, 0, NULL, 0x00000000, 0x00000000},
+#if IS_OOT
     {SID_NONE, 0, NULL, 0x00000000, 0x00000000},
+#endif
 };
+
+#if IS_MM
+// unused strings?
+static char lbl_801538BC[] = {
+    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate 1 block of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen."
+};
+
+static char lbl_80153978[] = {
+    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate %ld blocks of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen."
+};
+
+static char lbl_80153A38[] = {
+    "Error #303,\nThere is not enough available\nspace in the Wii System Memory.\nEither move data to an SD Card\nor delete data on the\nData Management Screen."
+};
+
+static char lbl_80153AD0[] = {
+    "Error #308,\nThe Wii System Memory\nhas been corrupted.\nRefer to the Wii Operations Manual\nfor further instructions."
+};
+
+static char lbl_80153B44[] = {
+    "Error #307,\nThis data is corrupted and cannot be used."
+};
+
+static char lbl_80153B7C[] = {
+    "Error #305,\nThere is no more available space\nin the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information."
+};
+
+static char lbl_80153C00[] = {
+    "Error #306,\nUnable to save any more data\nto the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information."
+};
+
+static char lbl_80153C80[] = {
+    "The system file for this title\nis corrupted.\nAfter deleting the title from\nthe Data Management screen,\nredownload it from\nthe Wii Shop Channel.\nIf this message still appears\nvisit support.nintendo.com."
+};
+
+static char lbl_80153D4C[] = {
+    "Error #311,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual."
+};
+
+static char lbl_80153DBC[] = {
+    "Error #312,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual."
+};
+#endif
 
 ErrorDisplay sStringDraw[] = {
     {
@@ -72,7 +117,32 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
+#if IS_MM
+    {
+        {&sStringBase[ERROR_INS_SPACE_PLURAL], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                errorDisplayReturnToMenu,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+
+        {0},
+    },
+#endif
     {
         {&sStringBase[ERROR_INS_INNODE], FLAG_COLOR_WHITE, 0, 0},
         {
@@ -90,6 +160,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
@@ -100,6 +173,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_DATA_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
@@ -118,6 +194,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_MAX_BLOCKS], FLAG_COLOR_WHITE, 0, 0},
@@ -128,6 +207,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_MAX_FILES], FLAG_COLOR_WHITE, 0, 0},
@@ -138,6 +220,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_SYS_CORRUPT], FLAG_COLOR_WHITE, 0, 0},
@@ -148,12 +233,19 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_NO_CONTROLLER], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
+#if IS_OOT
                 &sStringBase[ERROR_NULL],
+#elif IS_MM
+                &sStringBase[ERROR_BLANK_2],
+#endif
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -166,6 +258,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_NO_CONTROLLER], FLAG_COLOR_WHITE, 0, 0},
@@ -184,6 +279,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_REMOTE_BATTERY], FLAG_COLOR_WHITE, 0, 0},
@@ -202,6 +300,9 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
     {
         {&sStringBase[ERROR_REMOTE_COMMUNICATION], FLAG_COLOR_WHITE, 0, 0},
@@ -220,12 +321,97 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {0},
+#endif
     },
+#if IS_MM
+    {
+        {&sStringBase[ERROR_NWC24_ERROR_BUFFER], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                fn_80063680,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+    {
+        {&sStringBase[ERROR_PHOTO_ALREADY_POSTED], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                fn_80063680,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+    {
+        {&sStringBase[ERROR_PHOTO_CANT_POST], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                fn_80063680,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+    {
+        {&sStringBase[ERROR_PHOTO_POSTED], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                fn_80063680,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+#endif
     {
         {&sStringBase[ERROR_BLANK_2], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
+#if IS_OOT
                 &sStringBase[ERROR_NULL],
+#elif IS_MM
+                &sStringBase[ERROR_BLANK_2],
+#endif
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -238,7 +424,69 @@ ErrorDisplay sStringDraw[] = {
         0,
         0,
         0,
+#if IS_MM
+        {"gameReloadingAnimation.tpl", 0x21, 320, 216},
+#endif
     },
+#if IS_MM
+    {
+        {&sStringBase[ERROR_SYS_CORRUPT_REDOWNLOAD], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                errorDisplayReturnToMenu,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+    {
+        {&sStringBase[ERROR_SYS_MEM_CANT_ACCESS], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                NULL,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+    {
+        {&sStringBase[ERROR_SYS_MEM_CANT_ACCESS_2], FLAG_COLOR_WHITE, 0, 0},
+        {
+            {
+                &sStringBase[ERROR_BLANK_2],
+                FLAG_COLOR_WHITE,
+                0,
+                0,
+                NULL,
+            },
+        },
+        1,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        {0},
+    },
+#endif
 };
 
 struct_80174988 lbl_80174988[] = {
@@ -537,7 +785,11 @@ static void errorDisplayPrint(EDString* pEDString) {
     }
 
     errorDisplayPrintMessage(&pErrorDisplay->message, nHeight, pErrorDisplay->unk38, WHITE);
+
+#if IS_MM
     fn_80080370(pErrorDisplay);
+#endif
+
     nHeight += pErrorDisplay->message.nShiftY;
 
     i = 0;
