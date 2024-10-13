@@ -51,9 +51,14 @@ void* fn_80061FB0(u32 nSize) {
 }
 
 bool fn_80061FF8(Controller* pController) {
-    MEMFreeToAllocator(&gControllerAllocator, pController->unk_00);
+    MEMFreeToAllocator(&gControllerAllocator, pController);
     return true;
 }
+
+#if IS_MM
+bool fn_80080A7C(Controller* pController) {
+}
+#endif
 
 static inline bool unk4C_UnknownInline(Controller* pController) {
     bool bRet = true;
@@ -71,10 +76,10 @@ s32 fn_80062028(EDString* pSTString) {
     OSGetTime();
     pController = SYSTEM_CONTROLLER(gpSystem);
 
-    switch (pController->unk_21C) {
-        case 7:
+    switch (pController->iString) {
+        case ERROR_NO_CONTROLLER:
             return 2;
-        case 8:
+        case ERROR_NEED_CLASSIC:
             if (unk4C_UnknownInline(pController)) {
                 return 2;
             }
@@ -86,12 +91,25 @@ s32 fn_80062028(EDString* pSTString) {
     return 0;
 }
 
+bool fn_80080C04(Controller* pController, ErrorIndex iString) {
+    pController->unk_248 = OSGetTime();
+    pController->iString = iString;
+    errorDisplayShow(iString);
+    pController->iString = ERROR_NONE;
+
+    if (!fn_800607C4(SYSTEM_HELP(gpSystem), 0)) {
+        return false;
+    }
+
+    return true;
+}
+
 bool fn_800620A8(Controller* pController) {
     void* sp8;
     s32 i;
 
     pController->unk_220 = 1;
-    pController->unk_21C = -1;
+    pController->iString = ERROR_NONE;
 
     for (i = 0; i < PAD_MAX_CONTROLLERS; i++) {
         pController->unk_228[i] = 0;
@@ -152,7 +170,7 @@ bool fn_800622B8(Controller* pController) {
         pController->unk_BC[i] = pController->unk_CC[i] = 0;
         pController->stickLeft[i][AXIS_X] = pController->stickLeft[i][AXIS_Y] = 0;
         pController->stickRight[i][AXIS_Y] = 0;
-        pController->unk_21C = -1; // why here
+        pController->iString = ERROR_NONE; // why here
         pController->stickRight[i][AXIS_X] = 0;
 
         if (!controllerValidateIndex(i)) {
@@ -169,7 +187,9 @@ bool simulatorDetectController(Controller* pController, s32 arg1) { return arg1 
 
 bool fn_80062C18(Controller* pController, s32 iController, s32* arg2, s32* arg3, s32* arg4, s32* arg5, s32* arg6,
                  s32* arg7) {
-    s32 temp_r3;
+#if IS_MM
+    pController->unk_220 = -1;
+#endif
 
     if (iController >= 0 && iController < PAD_MAX_CONTROLLERS) {
         if (arg2 != NULL) {
@@ -196,7 +216,9 @@ bool fn_80062C18(Controller* pController, s32 iController, s32* arg2, s32* arg3,
             *arg7 = pController->stickRight[iController][AXIS_Y];
         }
 
+#if IS_OOT
         pController->unk_220 = 1;
+#endif
         return !!pController->unk_4C[iController];
     }
 
@@ -231,7 +253,7 @@ bool simulatorSetControllerMap(Controller* pController, s32 channel, u32* mapDat
 //     return true;
 // }
 
-bool fn_80062E5C(Controller* pController, s32, s32*) { return true; }
+bool fn_80062E5C(Controller* pController, s32 arg1, s32* arg2) { return true; }
 
 static void* controllerThread(void* pArg) {
     Controller* pController = SYSTEM_CONTROLLER(gpSystem);
@@ -266,16 +288,8 @@ bool fn_800631B8(Controller* pController, s32 arg1) {
     return true;
 }
 
-static inline bool controllerEvent_Inline() {
-    if (!fn_800607C4(SYSTEM_HELP(gpSystem), 0)) {
-        return false;
-    }
-
-    return true;
-}
-
 bool controllerEvent(Controller* pController, s32 nEvent, void* pArgument) {
-    s32 var_r31;
+    s32 i;
 
     switch (nEvent) {
         case 0:
@@ -293,22 +307,21 @@ bool controllerEvent(Controller* pController, s32 nEvent, void* pArgument) {
             xlHeapFree(&sControllerHeap);
             break;
         case 2:
+            // for (i = 0; i < 4; i++) {
+            //     pController->MM_unk_00 = 1;
+            //     VIWaitForRetrace();
+            // }
         case 3:
             break;
         case 0x1003:
             if (!unk4C_UnknownInline(pController)) {
-                for (var_r31 = 0; var_r31 < 0x78; var_r31++) {
+                for (i = 0; i < 0x78; i++) {
                     VIWaitForRetrace();
                 }
             }
 
             if (!unk4C_UnknownInline(pController)) {
-                pController->unk_24C = pController->unk_248 = OSGetTime();
-                pController->unk_21C = 8;
-                errorDisplayShow(ERROR_NEED_CLASSIC);
-                pController->unk_21C = -1;
-
-                if (!controllerEvent_Inline()) {
+                if (!fn_80080C04(pController, ERROR_NEED_CLASSIC)) {
                     return false;
                 }
 

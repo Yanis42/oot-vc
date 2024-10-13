@@ -27,6 +27,9 @@ static s32 errorDisplayReturnToMenu(EDString* pEDString);
 
 static EDStringInfo sStringBase[] = {
     {SID_ERROR_INS_SPACE, 0, NULL, 0x00000000, 0x00000000},
+#if IS_MM
+    {SID_ERROR_INS_SPACE_PLURAL, 0, NULL, 0x00000000, 0x00000000},
+#endif
     {SID_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_INS_INNODE, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_SYS_CORRUPT, 0, NULL, 0x00000000, 0x00000000},
@@ -37,6 +40,16 @@ static EDStringInfo sStringBase[] = {
     {SID_ERROR_NEED_CLASSIC, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_REMOTE_BATTERY, 0, NULL, 0x00000000, 0x00000000},
     {SID_ERROR_REMOTE_COMMUNICATION, 0, NULL, 0x00000000, 0x00000000},
+#if IS_MM
+    {SID_ERROR_NWC24_ERROR_BUFFER, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_PHOTO_ALREADY_POSTED, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_PHOTO_CANT_POST, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_PHOTO_POSTED, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_BLANK, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_SYS_CORRUPT_REDOWNLOAD, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_SYS_MEM_CANT_ACCESS, 0, NULL, 0x00000000, 0x00000000},
+    {SID_ERROR_SYS_MEM_CANT_ACCESS_2, 0, NULL, 0x00000000, 0x00000000},
+#endif
     {SID_ERROR_BLANK, 0, NULL, 0x00000000, 0x00000000},
     {SID_NONE, 0, NULL, 0x00000000, 0x00000000},
 };
@@ -209,7 +222,7 @@ ErrorDisplay sStringDraw[] = {
         0,
     },
     {
-        {&sStringBase[ERROR_BLANK], FLAG_RESET_FADE_TIMER, 0, 0},
+        {&sStringBase[ERROR_BLANK_2], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
                 &sStringBase[ERROR_NULL],
@@ -249,7 +262,7 @@ struct_80174988 lbl_80174988[] = {
 };
 
 static DisplayFiles sSTFiles[] = {
-#if VERSION == OOT_J
+#if VERSION == OOT_J || VERSION == MM_J
     {SC_LANG_JP, "Errors_VC64ErrorStrings_jp.bin", "saveComments_saveComments_jp.bin"},
 #elif VERSION == OOT_U
     {SC_LANG_EN, "Errors_VC64ErrorStrings_en.bin", "saveComments_saveComments_en.bin"},
@@ -411,7 +424,13 @@ static void fn_80063764(EDStringInfo* pStringInfo) {
                     var_r3 = (char*)OSGetFontWidth(var_r3, &widthOut);
                     var_r30 = ((s32)(nSize * widthOut) / nCellWidth) + var_r30 + nSpace;
 
-                    if (((var_r30 + 15) / 16 > 0x230) && var_r31 != NULL) {
+#if IS_OOT
+#define COND_UNK 0x230
+#elif IS_MM
+#define COND_UNK 0x216
+#endif
+
+                    if (((var_r30 + 15) / 16 > COND_UNK) && var_r31 != NULL) {
                         *var_r31 = 0;
                         var_r3 = var_r31 + 1;
                         var_r30 = 0;
@@ -518,6 +537,7 @@ static void errorDisplayPrint(EDString* pEDString) {
     }
 
     errorDisplayPrintMessage(&pErrorDisplay->message, nHeight, pErrorDisplay->unk38, WHITE);
+    fn_80080370(pErrorDisplay);
     nHeight += pErrorDisplay->message.nShiftY;
 
     i = 0;
@@ -631,6 +651,13 @@ static inline void errorDisplaySetFadeInTimer(ErrorDisplay* pErrorDisplay) {
         }
     }
 }
+
+bool fn_8007F440(s32 arg0) {
+    // fn_800800EC(sStringDraw[arg0] + 0x5C);
+    return true;
+}
+
+// fn_8007F474
 
 /**
  * @brief Main error display function.

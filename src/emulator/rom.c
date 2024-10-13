@@ -592,7 +592,7 @@ static bool romLoadFullOrPart(Rom* pROM) {
                            ROM_THREAD_SIZE, OS_PRIORITY_MAX, 1)) {
 #if IS_OOT
             OSResumeThread(&ROM_THREAD);
-            errorDisplayShow(pROM->unk_C ? ERROR_NO_CONTROLLER : ERROR_BLANK);
+            errorDisplayShow(pROM->unk_C ? ERROR_NO_CONTROLLER : ERROR_BLANK_2);
 #elif IS_MM
             int var_r28 = pROM->unk_C ? 8 : 16;
 

@@ -110,15 +110,25 @@ emulator/store.c:
 
 emulator/errordisplay.c:
 	.text       start:0x8007E798 end:0x8007F90C
+	.data       start:0x80153718 end:0x801546D8
 
 emulator/banner.c:
 	.text       start:0x8007F90C end:0x80080A3C
 
 emulator/controller.c:
 	.text       start:0x80080A3C end:0x800821FC
+	.data       start:0x80154778 end:0x801547F0
+	.bss        start:0x8018B060 end:0x8018B388
+	.sbss       start:0x802007D8 end:0x802007E0
+
+emulator/code_800821FC.c:
+	.text       start:0x800821FC end:0x80083508
+
+emulator/code_80083508.c:
+	.text       start:0x80083508 end:0x800839E8
 
 emulator/helpRVL.c:
-	.text       start:0x800821FC end:0x80086B2C
+	.text       start:0x800839E8 end:0x80086B2C
 
 emulator/stringtable.c:
 	.text       start:0x80086B2C end:0x80086C10

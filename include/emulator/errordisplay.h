@@ -22,33 +22,60 @@ typedef enum ErrorIndex {
     ERROR_NONE = -1,
     // "There is not enough available space in the Wii system memory. Create %ld block(s) of free space by either moving
     // files to an SD Card or deleting files in the Data Management Screen."
-    ERROR_INS_SPACE = 0,
+    ERROR_INS_SPACE,
+#if IS_MM
+    ERROR_INS_SPACE_PLURAL,
+#endif
     // "Press the A Button to return to the Wii Menu."
-    ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU = 1,
+    ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU,
     // "There is not enough available space in the Wii system memory. Either move files to an SD Card or delete files on
     // the Data Management Screen."
-    ERROR_INS_INNODE = 2,
+    ERROR_INS_INNODE,
     // "The Wii system memory has been damaged. Refer to the Wii operations manual for further instructions."
-    ERROR_SYS_CORRUPT = 3,
+    ERROR_SYS_CORRUPT,
     // "This file cannot be used because the data is corrupted."
-    ERROR_DATA_CORRUPT = 4,
+    ERROR_DATA_CORRUPT,
     // "There is no more available space in Wii system memory. Refer to the Wii operations manual for further
     // information."
-    ERROR_MAX_BLOCKS = 5,
+    ERROR_MAX_BLOCKS,
     // "There is no more available space in Wii system memory."
-    ERROR_MAX_FILES = 6,
+    ERROR_MAX_FILES,
     // "You will need the Classic Controller."
-    ERROR_NO_CONTROLLER = 7,
+    ERROR_NO_CONTROLLER,
     // "Connect Classic Controller to the P1 Wii Remote or press the A Button to return to the Wii Menu."
-    ERROR_NEED_CLASSIC = 8,
+    ERROR_NEED_CLASSIC,
     // "The battery charge is running low."
-    ERROR_REMOTE_BATTERY = 9,
+    ERROR_REMOTE_BATTERY,
     // "Communications with the Wii Remote have been interrupted."
-    ERROR_REMOTE_COMMUNICATION = 10,
+    ERROR_REMOTE_COMMUNICATION,
+#if IS_MM
+    ERROR_NWC24_ERROR_BUFFER,
+    // "You have already posted a photo to the Wii Message Board today."
+    ERROR_PHOTO_ALREADY_POSTED,
+    // "Your photo could not be posted to the Wii Message Board."
+    ERROR_PHOTO_CANT_POST,
+    // "Your photo was posted to the Wii Message Board.""
+    ERROR_PHOTO_POSTED,
     // ""
-    ERROR_BLANK = 11,
+    ERROR_BLANK_1,
+    // "The system file for this title is corrupted. After deleting the title from the Data Management screen,
+    // redownload it from the Wii Shop Channel. If this message still appears, visit support.nintendo.com."
+    ERROR_SYS_CORRUPT_REDOWNLOAD,
+    // "Could not access the Wii system memory. Refer to the Wii Operations Manual for details."
+    ERROR_SYS_MEM_CANT_ACCESS,
+    // (same as above)
+    ERROR_SYS_MEM_CANT_ACCESS_2,
+#endif
+    // (same as `ERROR_BLANK_1`)
+    ERROR_BLANK_2,
     // (nothing)
-    ERROR_NULL = 12,
+    ERROR_NULL,
+#if IS_OOT
+    ERROR_MAX = 12
+#elif IS_MM
+    //! @bug? The length of `sStringBase` is 22, not 20
+    ERROR_MAX = 20
+#endif
 } ErrorIndex;
 
 typedef struct DisplayFiles {
@@ -58,7 +85,7 @@ typedef struct DisplayFiles {
 } DisplayFiles; // size = 0xC
 
 typedef struct EDString {
-    /* 0x00 */ struct ErrorDisplay* apStringDraw[ERROR_NULL];
+    /* 0x00 */ struct ErrorDisplay* apStringDraw[ERROR_MAX];
     /* 0x30 */ ErrorIndex iString;
     /* 0x34 */ s32 iAction;
 } EDString; // size = 0x38

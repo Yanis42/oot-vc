@@ -5,6 +5,7 @@
 #include "revolution/cnt.h"
 #include "revolution/dvd.h"
 #include "revolution/types.h"
+#include "macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,9 @@ typedef struct tXL_FILE {
     /* 0x1C */ char unk_1C[0x8];
     /* 0x24 */ s32 unk_24;
     /* 0x28 */ CNTFileInfoNAND info;
+#if IS_MM
+    u8 pad[0x34];
+#endif
 } tXL_FILE; // size = 0x38
 
 bool xlFileSetOpen(DVDOpenCallback pfOpen);

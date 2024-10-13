@@ -41,22 +41,24 @@ typedef struct Controller {
     /* 0x04C 0x060 */ s32 unk_4C[PAD_MAX_CONTROLLERS];
     /* 0x05C 0x070 */ s32 analogTriggerLeft[PAD_MAX_CONTROLLERS];
     /* 0x06C 0x080 */ s32 analogTriggerRight[PAD_MAX_CONTROLLERS];
-    /* 0x07C 0x090 */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x09C 0x0A0 */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x0BC 0x0C0 */ s32 unk_BC[PAD_MAX_CONTROLLERS];
-    /* 0x0CC 0x0D0 */ s32 unk_CC[PAD_MAX_CONTROLLERS];
-    /* 0x0DC 0x0E0 */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
-    /* 0x21C 0x000 */ s32 unk_21C;
-    /* 0x220 0x000 */ s32 unk_220;
-    /* 0x224 0x000 */ s32 unk_224;
-    /* 0x228 0x000 */ u32 unk_228[PAD_MAX_CONTROLLERS];
-    /* 0x238 0x000 */ u32 unk_238[PAD_MAX_CONTROLLERS];
-    /* 0x248 0x000 */ s32 unk_248;
-    /* 0x24C 0x000 */ s32 unk_24C;
-    /* 0x250 0x000 */ u8 unk_250[0x20];
-    /* 0x270 0x000 */ u32 unk_270[PAD_MAX_CONTROLLERS];
-    /* 0x280 0x000 */ u32 unk_280[PAD_MAX_CONTROLLERS];
-} Controller; // size = 0x290
+#if IS_MM
+    /*  N/A  0x090 */ u8 pad1[0x10];
+#endif
+    /* 0x07C 0x0A0 */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x09C 0x0B0 */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x0BC 0x0D0 */ s32 unk_BC[PAD_MAX_CONTROLLERS];
+    /* 0x0CC 0x0E0 */ s32 unk_CC[PAD_MAX_CONTROLLERS];
+    /* 0x0DC 0x0F0 */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
+    /* 0x21C 0x250 */ ErrorIndex iString;
+    /* 0x220 0x254 */ s32 unk_220;
+    /* 0x224 0x258 */ s32 unk_224;
+    /* 0x228 0x25C */ u32 unk_228[PAD_MAX_CONTROLLERS];
+    /* 0x238 0x26C */ u32 unk_238[PAD_MAX_CONTROLLERS];
+    /* 0x248 0x280 */ s64 unk_248;
+    /* 0x250 0x288 */ u8 unk_250[0x20];
+    /* 0x270 0x2A8 */ u32 unk_270[PAD_MAX_CONTROLLERS];
+    /* 0x280 0x2B8 */ u32 unk_280[PAD_MAX_CONTROLLERS];
+} Controller; // size = 0x290 ; 0x2C8
 
 s32 fn_80062028(EDString* pSTString);
 bool simulatorSetControllerMap(Controller* pController, s32 channel, u32* mapData);

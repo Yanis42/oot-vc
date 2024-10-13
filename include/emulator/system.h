@@ -62,7 +62,11 @@ typedef enum GcnButton {
     GCN_BTN_CSTICK_DOWN = 17,
     GCN_BTN_CSTICK_LEFT = 18,
     GCN_BTN_CSTICK_RIGHT = 19,
-    GCN_BTN_COUNT = 20,
+#if IS_MM
+    GCN_BTN_UNK20 = 20,
+    GCN_BTN_UNK21 = 21,
+#endif
+    GCN_BTN_COUNT,
 } GcnButton;
 
 typedef enum SystemMode {

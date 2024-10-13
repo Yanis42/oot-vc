@@ -1,4 +1,5 @@
 #include "emulator/xlFileRVL.h"
+#include "emulator/errordisplay.h"
 #include "emulator/xlCoreRVL.h"
 #include "emulator/xlHeap.h"
 #include "revolution/arc.h"
@@ -46,7 +47,12 @@ bool xlFileOpen(tXL_FILE** ppFile, XlFileType eType, char* szFileName) {
         return true;
     }
 
+#if IS_OOT
     xlObjectFree((void**)ppFile);
+#elif IS_MM
+    errorDisplayShow(ERROR_DATA_CORRUPT);
+#endif
+
     return false;
 }
 
@@ -63,6 +69,7 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
     s32 nOffsetExtra;
     s32 nSize;
     s32 nSizeUsed;
+    CNTResult result;
 
     if (pFile->nOffset + nSizeBytes > pFile->nSize) {
         nSizeBytes = pFile->nSize - pFile->nOffset;
@@ -101,7 +108,12 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pTarget, nSizeBytes, nOffset, NULL);
                 } else {
-                    contentReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
+                    result = contentReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
+#if IS_MM
+                    if (result < 0) {
+                        errorDisplayShow(ERROR_DATA_CORRUPT);
+                    }
+#endif
                 }
 
                 temp_r0 = pFile->nOffset + nSizeBytes;
@@ -120,7 +132,12 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pFile->pBuffer, nSize, nOffset, NULL);
                 } else {
-                    contentReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
+                    result = contentReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
+#if IS_MM
+                    if (result < 0) {
+                        errorDisplayShow(ERROR_DATA_CORRUPT);
+                    }
+#endif
                 }
             }
         }
