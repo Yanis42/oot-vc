@@ -78,6 +78,12 @@ typedef enum ErrorIndex {
 #endif
 } ErrorIndex;
 
+#if IS_OOT
+#define ERROR_EMPTY (ERROR_NULL)
+#elif IS_MM
+#define ERROR_EMPTY (ERROR_BLANK_2)
+#endif
+
 typedef struct DisplayFiles {
     /* 0x00 */ SCLanguage eLanguage;
     /* 0x04 */ char* szErrorsFilename;
@@ -118,7 +124,7 @@ typedef struct EDAnimation {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s16 nWidth;
     /* 0x0A */ s16 nHeight;
-    /* 0x0C */ s32 unk0C;
+    /* 0x0C */ s32* unk0C;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;

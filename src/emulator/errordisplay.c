@@ -58,44 +58,27 @@ static EDStringInfo sStringBase[] = {
 
 #if IS_MM
 // unused strings?
-static char lbl_801538BC[] = {
-    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate 1 block of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen."
-};
-
-static char lbl_80153978[] = {
-    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate %ld blocks of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen."
-};
-
-static char lbl_80153A38[] = {
-    "Error #303,\nThere is not enough available\nspace in the Wii System Memory.\nEither move data to an SD Card\nor delete data on the\nData Management Screen."
-};
-
-static char lbl_80153AD0[] = {
-    "Error #308,\nThe Wii System Memory\nhas been corrupted.\nRefer to the Wii Operations Manual\nfor further instructions."
-};
-
-static char lbl_80153B44[] = {
-    "Error #307,\nThis data is corrupted and cannot be used."
-};
-
-static char lbl_80153B7C[] = {
-    "Error #305,\nThere is no more available space\nin the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information."
-};
-
-static char lbl_80153C00[] = {
-    "Error #306,\nUnable to save any more data\nto the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information."
-};
-
-static char lbl_80153C80[] = {
-    "The system file for this title\nis corrupted.\nAfter deleting the title from\nthe Data Management screen,\nredownload it from\nthe Wii Shop Channel.\nIf this message still appears\nvisit support.nintendo.com."
-};
-
-static char lbl_80153D4C[] = {
-    "Error #311,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual."
-};
-
-static char lbl_80153DBC[] = {
-    "Error #312,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual."
+static char* lbl_80153DBC[] = {
+    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate 1 block of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen.",
+    "Error #302,\nThere is not enough available\nspace in the Wii System Memory.\nCreate %ld blocks of free space\nby either moving data to an\nSD Card or deleting data on\nthe Data Management Screen.",
+    "Error #303,\nThere is not enough available\nspace in the Wii System Memory.\nEither move data to an SD Card\nor delete data on the\nData Management Screen.",
+    "Error #308,\nThe Wii System Memory\nhas been corrupted.\nRefer to the Wii Operations Manual\nfor further instructions.",
+    "Error #307,\nThis data is corrupted and cannot be used.",
+    "Error #305,\nThere is no more available space\nin the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information.",
+    "Error #306,\nUnable to save any more data\nto the Wii System Memory.\nRefer to the Wii Operations Manual\nfor further information.",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "The system file for this title\nis corrupted.\nAfter deleting the title from\nthe Data Management screen,\nredownload it from\nthe Wii Shop Channel.\nIf this message still appears\nvisit support.nintendo.com.",
+    "Error #311,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual.",
+    "Error #312,\nCould not write to/read from\nWii System Memory.For details, please read the Wii\nOperations Manual.",
 };
 #endif
 
@@ -241,11 +224,7 @@ ErrorDisplay sStringDraw[] = {
         {&sStringBase[ERROR_NO_CONTROLLER], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
-#if IS_OOT
-                &sStringBase[ERROR_NULL],
-#elif IS_MM
-                &sStringBase[ERROR_BLANK_2],
-#endif
+                &sStringBase[ERROR_EMPTY],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -407,11 +386,7 @@ ErrorDisplay sStringDraw[] = {
         {&sStringBase[ERROR_BLANK_2], FLAG_RESET_FADE_TIMER, 0, 0},
         {
             {
-#if IS_OOT
-                &sStringBase[ERROR_NULL],
-#elif IS_MM
-                &sStringBase[ERROR_BLANK_2],
-#endif
+                &sStringBase[ERROR_EMPTY],
                 FLAG_COLOR_WHITE,
                 0,
                 0,
@@ -490,23 +465,23 @@ ErrorDisplay sStringDraw[] = {
 };
 
 struct_80174988 lbl_80174988[] = {
-    {NAND_RESULT_ACCESS, ERROR_NULL},
+    {NAND_RESULT_ACCESS, ERROR_EMPTY},
     {NAND_RESULT_ALLOC_FAILED, ERROR_INS_SPACE},
-    {NAND_RESULT_BUSY, ERROR_NULL},
+    {NAND_RESULT_BUSY, ERROR_EMPTY},
     {NAND_RESULT_CORRUPT, ERROR_INS_INNODE},
     {NAND_RESULT_ECC_CRIT, ERROR_SYS_CORRUPT},
-    {NAND_RESULT_EXISTS, ERROR_NULL},
+    {NAND_RESULT_EXISTS, ERROR_EMPTY},
     {NAND_RESULT_INVALID, ERROR_MAX_FILES},
     {NAND_RESULT_MAXBLOCKS, ERROR_DATA_CORRUPT},
     {NAND_RESULT_MAXFD, ERROR_MAX_BLOCKS},
     {NAND_RESULT_MAXFILES, ERROR_MAX_BLOCKS},
-    {NAND_RESULT_NOEXISTS, ERROR_NULL},
-    {NAND_RESULT_NOTEMPTY, ERROR_NULL},
-    {NAND_RESULT_OPENFD, ERROR_NULL},
+    {NAND_RESULT_NOEXISTS, ERROR_EMPTY},
+    {NAND_RESULT_NOTEMPTY, ERROR_EMPTY},
+    {NAND_RESULT_OPENFD, ERROR_EMPTY},
     {NAND_RESULT_AUTHENTICATION, ERROR_SYS_CORRUPT},
     {NAND_RESULT_UNKNOWN, ERROR_MAX_FILES},
     {NAND_RESULT_FATAL_ERROR, ERROR_MAX_FILES},
-    {NAND_RESULT_OK, ERROR_NULL},
+    {NAND_RESULT_OK, ERROR_EMPTY},
 };
 
 static DisplayFiles sSTFiles[] = {
@@ -723,6 +698,50 @@ static void fn_80063910(ErrorDisplay* pErrorDisplay) {
     }
 }
 
+#if IS_MM
+void fn_8007EF3C(s32 arg0, s32* arg1, s32* arg2, s32* arg3, s32* arg4) {
+    ErrorDisplay* pErrorDisplay;
+    s32 var_r31;
+    s32 i;
+    EDStringInfo* pStringInfo;
+    s32 nWidth;
+    s32 nHeight;
+    s32 nTextWidth;
+    char* var_r27;
+
+    pErrorDisplay = &sStringDraw[arg0];
+    pStringInfo = pErrorDisplay->message.pStringInfo;
+    var_r31 = 0;
+
+    nHeight = pErrorDisplay->nStartY;
+    if (nHeight == 0) {
+        nHeight = (rmode->efbHeight - pErrorDisplay->unk3C) / 2;
+    }
+
+    *arg3 = nHeight;
+    *arg3 -= DEMOGetRFTextHeight("") - 8;
+    *arg4 = *arg3 + pStringInfo->nLines * DEMOGetRFTextHeight("") - 8;
+    var_r27 = pStringInfo->szString;
+
+    for (i = 0; i < pStringInfo->nLines; i++) {
+        nTextWidth = DEMOGetRFTextWidth(var_r27);
+
+        if (nTextWidth > var_r31) {
+            var_r31 = nTextWidth;
+            nWidth = (rmode->fbWidth - nTextWidth) / 2;
+            *arg1 = nWidth;
+            *arg2 = nWidth + nTextWidth;
+        }
+
+        while (*var_r27 != '\0') {
+            var_r27++;
+        }
+
+        var_r27++;
+    }
+}
+#endif
+
 /**
  * @brief Prints a message.
  * @param pEDString Pointer to `EDString`.
@@ -904,12 +923,27 @@ static inline void errorDisplaySetFadeInTimer(ErrorDisplay* pErrorDisplay) {
     }
 }
 
-bool fn_8007F440(s32 arg0) {
-    // fn_800800EC(sStringDraw[arg0] + 0x5C);
+#if IS_MM
+bool fn_8007F440(s32 iString) {
+    fn_800800EC(&sStringDraw[iString]);
     return true;
 }
 
-// fn_8007F474
+s32 fn_8007F474(s32 iString) {
+    ErrorDisplay* pErrorDisplay;
+    s32 nSize;
+
+    pErrorDisplay = &sStringDraw[iString];
+
+    if (pErrorDisplay->anim.unk0C != 0 && xlFileGetSize(&nSize, pErrorDisplay->anim.szFileName)) {
+        fn_800854B8(SYSTEM_HELP(gpSystem), pErrorDisplay, nSize | 0x30000000);
+    }
+
+    return true;
+}
+#endif
+
+extern s32 lbl_802007B0;
 
 /**
  * @brief Main error display function.
@@ -924,6 +958,12 @@ bool errorDisplayShow(ErrorIndex iString) {
     s32 spC;
     s32 sp8;
     s32 nResult;
+
+    if (lbl_802007B0 == 0) {
+        GXColor bgColor = {255, 255, 255, 255};
+        GXColor textColor = {0, 0, 0, 255};
+        OSFatal(textColor, bgColor, lbl_80153DBC[iString]);
+    }
 
     string.iString = ERROR_NONE;
 

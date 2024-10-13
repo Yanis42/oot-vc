@@ -111,6 +111,9 @@ emulator/store.c:
 emulator/errordisplay.c:
 	.text       start:0x8007E798 end:0x8007F90C
 	.data       start:0x80153718 end:0x801546D8
+	.sdata      start:0x80200038 end:0x80200048
+	.sbss       start:0x802007B0 end:0x802007D8
+	.sdata2     start:0x80201630 end:0x8020164C
 
 emulator/banner.c:
 	.text       start:0x8007F90C end:0x80080A3C
