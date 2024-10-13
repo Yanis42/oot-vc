@@ -5,10 +5,21 @@
 extern "C" {
 #endif
 
-// The VERSION macro will be set to one of these version numbers.
+/**
+ * The VERSION macro will be set to one of these version numbers.
+ */
+// Ocarina of Time
 #define OOT_J 1
 #define OOT_U 2
 #define OOT_E 3
+// Mario Tennis
+#define MT_U 4
+
+#if VERSION == MT_U
+#define SAFE_FAILED(file, line) OSReport("SAFE Failed!, %s, %d\n", file, line)
+#else
+#define SAFE_FAILED(file, line) (void)0
+#endif
 
 #define ALIGN_PREV(X, N) ((X) & ~((N) - 1))
 #define ALIGN_NEXT(X, N) ALIGN_PREV(((X) + (N) - 1), N)
@@ -30,6 +41,19 @@ extern "C" {
 #define MEMCLR(x) __memclr((x), sizeof(*(x)))
 
 #define NO_INLINE __attribute__((never_inline))
+#define NO_INLINE2() \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0; \
+    (void)0
 
 #define __CONCAT(x, y) x##y
 #define CONCAT(x, y) __CONCAT(x, y)

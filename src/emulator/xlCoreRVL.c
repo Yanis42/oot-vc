@@ -122,6 +122,9 @@ bool xlCoreGetArgument(s32 iArgument, char** pszArgument) {
 bool xlCoreHiResolution(void) { return true; }
 
 bool fn_8007FC84(void) {
+#if VERSION == MT_U
+    return VIGetTvFormat() == VI_PAL;
+#else
     switch (VIGetTvFormat()) {
         case VI_PAL:
         case VI_MPAL:
@@ -130,11 +133,11 @@ bool fn_8007FC84(void) {
         default:
             break;
     }
-
     return false;
+#endif
 }
 
-void xlExit(void) { OSPanic("xlCoreRVL.c", 524, "xlExit"); }
+void xlExit(void) { OSPanic("xlCoreRVL.c", VERSION == MT_U ? 566 : 524, "xlExit"); }
 
 int main(int nCount, char** aszArgument) {
     s32 nSizeHeap;
@@ -175,18 +178,22 @@ int main(int nCount, char** aszArgument) {
 #endif // clang-format on
 
     if (!xlPostSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 624);
         return false;
     }
 
     if (!xlHeapSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 625);
         return false;
     }
 
     if (!xlListSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 626);
         return false;
     }
 
     if (!xlObjectSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 627);
         return false;
     }
 
@@ -198,36 +205,48 @@ int main(int nCount, char** aszArgument) {
         nSize = nSizeHeap;
     }
 
+#if VERSION < MT_U
     xlHeapTake(&DemoFrameBuffer1, nSize | 0x70000000);
     xlHeapTake(&DemoFrameBuffer2, nSize | 0x70000000);
+#endif
+
     xlHeapFill32(DemoFrameBuffer1, nSize, 0);
     xlHeapFill32(DemoFrameBuffer2, nSize, 0);
     DCStoreRange(DemoFrameBuffer1, nSize);
     DCStoreRange(DemoFrameBuffer2, nSize);
 
+#if VERSION == MT_U
+    xlHeapTake(&DefaultFifo, 0x80000 | 0x30000000);
+    DefaultFifoObj = GXInit(DefaultFifo, 0x80000);
+#else
     xlHeapTake(&DefaultFifo, 0x40000 | 0x30000000);
     DefaultFifoObj = GXInit(DefaultFifo, 0x40000);
+#endif
 
     __xlCoreInitGX();
     errorDisplayInit();
     xlMain();
 
     if (!xlObjectReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 641);
         return false;
     }
 
     if (!xlListReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 642);
         return false;
     }
 
     if (!xlHeapReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 643);
         return false;
     }
 
     if (!xlPostReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 644);
         return false;
     }
 
-    OSPanic("xlCoreRVL.c", 603, "CORE DONE!");
+    OSPanic("xlCoreRVL.c", VERSION == MT_U ? 646 : 603, "CORE DONE!");
     return false;
 }
