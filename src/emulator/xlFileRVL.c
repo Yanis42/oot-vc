@@ -2,6 +2,7 @@
 #include "emulator/errordisplay.h"
 #include "emulator/xlCoreRVL.h"
 #include "emulator/xlHeap.h"
+#include "emulator/code_80083508.h"
 #include "revolution/arc.h"
 #include "revolution/cnt.h"
 #include "revolution/mem.h"
@@ -30,7 +31,7 @@ static inline bool xlFileGetFile(tXL_FILE** ppFile, char* szFileName) {
     if (gpfOpen != NULL) {
         return gpfOpen(szFileName, (DVDFileInfo*)&(*ppFile)->info);
     } else {
-        return contentOpenNAND(&gCNTHandle.handleNAND, szFileName, &(*ppFile)->info) == 0;
+        return simulatorCNTOpenNAND(&gCNTHandle.handleNAND, szFileName, &(*ppFile)->info) == 0;
     }
 }
 
@@ -50,7 +51,7 @@ bool xlFileOpen(tXL_FILE** ppFile, XlFileType eType, char* szFileName) {
 #if IS_OOT
     xlObjectFree((void**)ppFile);
 #elif IS_MM
-    errorDisplayShow(ERROR_DATA_CORRUPT);
+    errorDisplayShow(ERROR_SYS_CORRUPT);
 #endif
 
     return false;
@@ -108,10 +109,10 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pTarget, nSizeBytes, nOffset, NULL);
                 } else {
-                    result = contentReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
+                    result = simulatorCNTReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
 #if IS_MM
                     if (result < 0) {
-                        errorDisplayShow(ERROR_DATA_CORRUPT);
+                        errorDisplayShow(ERROR_SYS_CORRUPT);
                     }
 #endif
                 }
@@ -132,10 +133,10 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                 if (gpfRead != NULL) {
                     gpfRead((DVDFileInfo*)pFile->pData, pFile->pBuffer, nSize, nOffset, NULL);
                 } else {
-                    result = contentReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
+                    result = simulatorCNTReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
 #if IS_MM
                     if (result < 0) {
-                        errorDisplayShow(ERROR_DATA_CORRUPT);
+                        errorDisplayShow(ERROR_SYS_CORRUPT);
                     }
 #endif
                 }
@@ -178,10 +179,10 @@ bool xlFileEvent(tXL_FILE* pFile, s32 nEvent, void* pArgument) {
             if (!xlFileEventInline()) {
                 return false;
             }
-            contentInitHandleNAND(5, &gCNTHandle.handleNAND, &gCNTAllocator);
+            simulatorCNTInitHandleNAND(5, &gCNTHandle.handleNAND, &gCNTAllocator);
             break;
         case 1:
-            contentReleaseHandleNAND(&gCNTHandle.handleNAND);
+            simulatorCNTReleaseHandleNAND(&gCNTHandle.handleNAND);
             break;
         case 2:
             pFile->nSize = 0;
@@ -197,7 +198,7 @@ bool xlFileEvent(tXL_FILE* pFile, s32 nEvent, void* pArgument) {
             if (pFile->iBuffer != NULL && !xlHeapFree(&pFile->iBuffer)) {
                 return false;
             }
-            contentCloseNAND(&pFile->info);
+            simulatorCNTCloseNAND(&pFile->info);
             if (!xlHeapFree(&pFile->pBuffer)) {
                 return false;
             }

@@ -1,5 +1,5 @@
-#ifndef _CODE_800633F8_H
-#define _CODE_800633F8_H
+#ifndef _ERRORDISPLAY_H
+#define _ERRORDISPLAY_H
 
 #include "emulator/banner.h"
 #include "emulator/stringtable.h"
