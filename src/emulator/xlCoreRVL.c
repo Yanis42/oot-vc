@@ -175,9 +175,8 @@ bool fn_8007FC84(void) {
         default:
             break;
     }
-
     return false;
-#elif IS_MM
+#elif IS_MM || IS_MT
     return VIGetTvFormat() == VI_PAL;
 #endif
 }
@@ -267,20 +266,24 @@ int main(int nCount, char** aszArgument) {
 #endif
 
     if (!xlPostSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 624);
         return false;
     }
 
 #if IS_OOT
     if (!xlHeapSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 625);
         return false;
     }
 #endif
 
     if (!xlListSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 626);
         return false;
     }
 
     if (!xlObjectSetup()) {
+        SAFE_FAILED("xlCoreRVL.c", 627);
         return false;
     }
 
@@ -293,15 +296,23 @@ int main(int nCount, char** aszArgument) {
         nSize = nSizeHeap;
     }
 
+#if VERSION < MT_U
     xlHeapTake(&DemoFrameBuffer1, nSize | 0x70000000);
     xlHeapTake(&DemoFrameBuffer2, nSize | 0x70000000);
+#endif
+
     xlHeapFill32(DemoFrameBuffer1, nSize, 0);
     xlHeapFill32(DemoFrameBuffer2, nSize, 0);
     DCStoreRange(DemoFrameBuffer1, nSize);
     DCStoreRange(DemoFrameBuffer2, nSize);
 
+#if VERSION == MT_U
+    xlHeapTake(&DefaultFifo, 0x80000 | 0x30000000);
+    DefaultFifoObj = GXInit(DefaultFifo, 0x80000);
+#else
     xlHeapTake(&DefaultFifo, 0x40000 | 0x30000000);
     DefaultFifoObj = GXInit(DefaultFifo, 0x40000);
+#endif
 
     __xlCoreInitGX();
     errorDisplayInit();
@@ -312,18 +323,22 @@ int main(int nCount, char** aszArgument) {
     xlMain();
 
     if (!xlObjectReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 641);
         return false;
     }
 
     if (!xlListReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 642);
         return false;
     }
 
     if (!xlHeapReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 643);
         return false;
     }
 
     if (!xlPostReset()) {
+        SAFE_FAILED("xlCoreRVL.c", 644);
         return false;
     }
 
@@ -331,6 +346,8 @@ int main(int nCount, char** aszArgument) {
     OSPanic("xlCoreRVL.c", 603, "CORE DONE!");
 #elif IS_MM
     OSPanic("xlCoreGCN.c", 653, "CORE DONE!");
+#elif IS_MT
+    OSPanic("xlCoreRVL.c", 646, "CORE DONE!");
 #endif
 
     return false;

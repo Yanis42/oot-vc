@@ -107,6 +107,7 @@ ALL_VERSIONS = [
     "oot-e",
     "mm-j",
     "mm-u",
+    "mt-u",
 ]
 config.versions = [
     version

@@ -5,19 +5,32 @@
 extern "C" {
 #endif
 
-// The VERSION macro will be set to one of these version numbers.
+/**
+ * The VERSION macro will be set to one of these version numbers.
+ */
+// Ocarina of Time
 #define OOT_J 1
 #define OOT_U 2
 #define OOT_E 3
+#define IS_OOT (VERSION == OOT_J || VERSION == OOT_U || VERSION == OOT_E)
+// Majora's Mask
 #define MM_J 4
 #define MM_U 5
 #define IS_MM (VERSION == MM_J || VERSION == MM_U)
-#define IS_OOT (!IS_MM)
+// Mario Tennis
+#define MT_U 6
+#define IS_MT (VERSION == MT_U)
 
 #if IS_OOT
 #define SYSTEM_PTR(...) (gpSystem)
 #elif IS_MM
 #define SYSTEM_PTR(pObject) ((System*)(pObject->pHost))
+#endif
+
+#if IS_MT
+#define SAFE_FAILED(file, line) OSReport("SAFE Failed!, %s, %d\n", file, line)
+#else
+#define SAFE_FAILED(file, line) (void)0
 #endif
 
 #define ALIGN_PREV(X, N) ((X) & ~((N) - 1))
