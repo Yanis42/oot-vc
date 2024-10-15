@@ -432,7 +432,7 @@ def main():
     ]
 
     parser = argparse.ArgumentParser(description="Find emulator's classes and guess the splits")
-    parser.add_argument("-r", "--report", action="store_true", default=True, help="write a report file for the found classes (default: false)")
+    parser.add_argument("-r", "--report", action="store_true", default=False, help="write a report file for the found classes (default: false)")
     parser.add_argument("-p", "--path", default=None, help="path to the workspace (default: the directory where this script is)")
 
     args = parser.parse_args()

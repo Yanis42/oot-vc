@@ -16,8 +16,86 @@ Sections:
 emulator/vc64_RVL.c:
 	.text       start:0x80006CE0 end:0x800074A0
 
+emulator/system.c:
+	.text       start:0x800074A0 end:0x8000E190
+
+emulator/ai.c:
+	.text       start:0x8000E190 end:0x8000E630
+
+emulator/vi.c:
+	.text       start:0x8000E630 end:0x8000EDF0
+
+emulator/si.c:
+	.text       start:0x8000EDF0 end:0x8000F1A0
+
+emulator/pi.c:
+	.text       start:0x8000F1A0 end:0x8000F8A0
+
+emulator/mi.c:
+	.text       start:0x8000F8A0 end:0x8000FF20
+
+emulator/disk.c:
+	.text       start:0x8000FF20 end:0x80010300
+
+emulator/cpu.c:
+	.text       start:0x80010300 end:0x80022290
+
+emulator/ram.c:
+	.text       start:0x80022290 end:0x80026250
+
+emulator/rom.c:
+	.text       start:0x80026250 end:0x800292D0
+
+emulator/rdb.c:
+	.text       start:0x800292D0 end:0x80029910
+
+emulator/pak.c:
+	.text       start:0x80029910 end:0x80029DB0
+
+emulator/sram.c:
+	.text       start:0x80029DB0 end:0x8002A460
+
+emulator/eeprom.c:
+	.text       start:0x8002A460 end:0x8002A740
+
+emulator/flash.c:
+	.text       start:0x8002A740 end:0x8002AF40
+
+emulator/frame.c:
+	.text       start:0x8002AF40 end:0x80044030
+
+emulator/library.c:
+	.text       start:0x80044030 end:0x8005ABB0
+
+emulator/codeRVL.c:
+	.text       start:0x8005ABB0 end:0x8005AC30
+
+emulator/soundRVL.c:
+	.text       start:0x8005AC30 end:0x8005BE90
+
+emulator/video.c:
+	.text       start:0x8005BE90 end:0x8005BF10
+
+emulator/store.c:
+	.text       start:0x8005BF10 end:0x8005CC90
+
+emulator/controller.c:
+	.text       start:0x8005CC90 end:0x8005ED70
+
+emulator/helpRVL.c:
+	.text       start:0x8005ED70 end:0x80065D20
+
+emulator/pif.c:
+	.text       start:0x80065D20 end:0x80067660
+
+emulator/rsp.c:
+	.text       start:0x80067660 end:0x8009DAD0
+
 emulator/xlCoreRVL.c:
 	.text       start:0x800A1530 end:0x800A1E50
+
+emulator/xlFileRVL.c:
+	.text       start:0x800A1E50 end:0x800A2590
 
 runtime/__init_cpp_exceptions.cpp:
 	.text       start:0x80151E00 end:0x80151E70
