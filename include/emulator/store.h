@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 typedef struct Store {
     /* 0x00 */ u32 nFileSize;
     /* 0x04 */ char szFileName[12];

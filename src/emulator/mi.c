@@ -1,6 +1,7 @@
 #include "emulator/mi.h"
 #include "emulator/system.h"
 #include "emulator/vc64_RVL.h"
+#include "macros.h"
 
 // Note: mips.c in oot-gc
 
@@ -228,7 +229,7 @@ bool miEvent(MI* pMI, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
-#if IS_OOT
+#if IS_OOT || IS_MT
         case 0x1004:
         case 0x1007:
 #endif
@@ -240,7 +241,7 @@ bool miEvent(MI* pMI, s32 nEvent, void* pArgument) {
     return true;
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 _XL_OBJECTTYPE gClassMI = {
     "MI",
     sizeof(MI),

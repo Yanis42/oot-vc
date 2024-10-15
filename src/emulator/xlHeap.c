@@ -304,6 +304,12 @@ bool xlHeapCompact(s32 iHeap) {
     return true;
 }
 
+#if IS_MT
+bool fn_800A3490(void) { return true; }
+
+bool fn_800A34A0(void) { return true; }
+#endif
+
 bool xlHeapTake(void** ppHeap, s32 nByteCount) {
     bool bValid;
     s32 iHeap;
@@ -420,6 +426,13 @@ bool xlHeapFree(void** ppHeap) {
     u32* pBlock;
     u32* pBlockNext;
 
+#if IS_MT
+    if (ppHeap == NULL) {
+        SAFE_FAILED("xlHeap.c", 801);
+        return false;
+    }
+#endif
+
     for (iHeap = 0; iHeap < 2; iHeap++) {
         if ((u32)gpHeapBlockFirst[iHeap] <= (u32)*ppHeap && (u32)gpHeapBlockLast[iHeap] >= (u32)*ppHeap) {
             break;
@@ -479,6 +492,24 @@ bool xlHeapCopy(void* pHeapTarget, void* pHeapSource, s32 nByteCount) {
 
     pSource32 = (u32*)pHeapSource;
     pTarget32 = (u32*)pHeapTarget;
+
+#if IS_MT
+    if (pTarget32 == NULL) {
+        SAFE_FAILED("xlHeap.c", 887);
+        return false;
+    }
+
+    if (pSource32 == NULL) {
+        SAFE_FAILED("xlHeap.c", 888);
+        return false;
+    }
+
+    if (nByteCount < 0) {
+        SAFE_FAILED("xlHeap.c", 890);
+        return false;
+    }
+#endif
+
     if ((u32)pSource32 % 4 == 0 && (u32)pTarget32 % 4 == 0) {
         for (; nByteCount >= 64; nByteCount -= 64) {
             *pTarget32++ = *pSource32++;
@@ -587,7 +618,23 @@ bool xlHeapFill8(void* pHeap, s32 nByteCount, u32 nData) {
 
 bool xlHeapFill32(void* pHeap, s32 nByteCount, u32 nData) {
     u32* pnTarget = pHeap;
-    s32 nWordCount = nByteCount >> 2;
+    s32 nWordCount;
+
+#if IS_MT
+    if (nByteCount & 3) {
+        SAFE_FAILED("xlHeap.c", 1085);
+        return false;
+    }
+#endif
+
+    nWordCount = nByteCount >> 2;
+
+#if IS_MT
+    if ((u32)pnTarget & 3) {
+        SAFE_FAILED("xlHeap.c", 1089);
+        return false;
+    }
+#endif
 
     for (; nWordCount > 16; nWordCount -= 16) {
         pnTarget[0] = nData;
@@ -624,6 +671,7 @@ static bool __xlHeapGetFree(s32 iHeap, s32* pnFreeBytes) {
     u32 nBlock;
 
     if (!xlHeapCompact(iHeap)) {
+        SAFE_FAILED("xlHeap.c", 1139);
         return false;
     }
 
@@ -644,46 +692,68 @@ static bool __xlHeapGetFree(s32 iHeap, s32* pnFreeBytes) {
         pBlock += nBlockSize + 1;
     }
 
+#if IS_MT
+    if (pBlock != gpHeapBlockLast[iHeap]) {
+        SAFE_FAILED("xlHeap.c", 1158);
+        return false;
+    }
+#endif
+
     *pnFreeBytes = nFree;
     return true;
 }
 
 bool xlHeapGetHeap1Free(s32* pnFreeBytes) { return __xlHeapGetFree(0, pnFreeBytes); }
 
-#if IS_MM
+#if IS_MM || IS_MT
 bool xlHeapGetHeap2Free(s32* pnFreeBytes) { return __xlHeapGetFree(1, pnFreeBytes); }
 #endif
 
 bool xlHeapSetup(void) {
-    s32 gpHeap_align[2];
-    s32 new_lo[2];
+    s32 arenaHi[2];
+    s32 arenaLo[2];
     u32 iHeap;
+    s32 nSize;
 
     gnHeapOS[0] = OSGetMEM1ArenaLo();
-    gpHeap_align[0] = ROUND_UP((u32)gnHeapOS[0], 4);
-    new_lo[0] = (u32)OSGetMEM1ArenaHi();
+    arenaHi[0] = ROUND_UP((u32)gnHeapOS[0], 4);
+    arenaLo[0] = (u32)OSGetMEM1ArenaHi();
 
-    if (new_lo[0] - gpHeap_align[0] > 0x4000000) {
-        new_lo[0] = gpHeap_align[0] + 0x4000000;
+    if (arenaLo[0] - arenaHi[0] > 0x4000000) {
+        arenaLo[0] = arenaHi[0] + 0x4000000;
     }
 
-    OSSetMEM1ArenaLo((void*)new_lo[0]);
+    OSSetMEM1ArenaLo((void*)arenaLo[0]);
 
     gnHeapOS[1] = OSGetMEM2ArenaLo();
-    gpHeap_align[1] = ROUND_UP((u32)gnHeapOS[1], 4);
-    new_lo[1] = (u32)OSGetMEM2ArenaHi();
+    arenaHi[1] = ROUND_UP((u32)gnHeapOS[1], 4);
+    arenaLo[1] = (u32)OSGetMEM2ArenaHi();
 
-    if (new_lo[1] - gpHeap_align[1] > 0x4000000) {
-        new_lo[1] = gpHeap_align[1] + 0x4000000;
+    if (arenaLo[1] - arenaHi[1] > 0x4000000) {
+        arenaLo[1] = arenaHi[1] + 0x4000000;
     }
 
-    OSSetMEM2ArenaLo((void*)new_lo[1]);
+    OSSetMEM2ArenaLo((void*)arenaLo[1]);
 
-    gpHeap[0] = (u32*)gpHeap_align[0];
-    gnSizeHeap[0] = new_lo[0] - gpHeap_align[0];
+#if IS_MT
+    OSReport("arenaLo_1, 0x%08x |||| arenaHi_1 0x%08x\n", arenaLo[1], arenaHi[1]);
+#endif
 
-    gpHeap[1] = (u32*)gpHeap_align[1];
-    gnSizeHeap[1] = new_lo[1] - gpHeap_align[1];
+    nSize = arenaLo[0] - arenaHi[0];
+#if IS_MT
+    OSReport("Setup: ---- HEAP0 (LO): %dK (%dMB) available ----\n", nSize / 1024, (nSize / 1024) / 1024);
+#endif
+    gpHeap[0] = (u32*)arenaHi[0];
+    gnSizeHeap[0] = nSize;
+
+
+    nSize = arenaLo[1] - arenaHi[1];
+#if IS_MT
+    OSReport("Setup: ---- HEAP1 (HI): %dK (%dMB) available ----\n", nSize / 1024, (nSize / 1024) / 1024);
+#endif
+    gpHeap[1] = (u32*)arenaHi[1];
+    gnSizeHeap[1] = nSize;
+
 
     for (iHeap = 0; iHeap < 2; iHeap++) {
         s32 nBlockSize = (gnSizeHeap[iHeap] >> 2) - 2;

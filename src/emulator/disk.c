@@ -5,7 +5,7 @@
 #include "macros.h"
 
 _XL_OBJECTTYPE gClassDD = {
-#if IS_OOT
+#if IS_OOT || IS_MT
     "DD",
 #elif IS_MM
     "DISK",
@@ -16,7 +16,7 @@ _XL_OBJECTTYPE gClassDD = {
 };
 
 bool diskPutROM8(Disk* pDisk, u32 nAddress, s8* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -24,7 +24,7 @@ bool diskPutROM8(Disk* pDisk, u32 nAddress, s8* pData) {
 }
 
 bool diskPutROM16(Disk* pDisk, u32 nAddress, s16* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -32,7 +32,7 @@ bool diskPutROM16(Disk* pDisk, u32 nAddress, s16* pData) {
 }
 
 bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -40,7 +40,7 @@ bool diskPutROM32(Disk* pDisk, u32 nAddress, s32* pData) {
 }
 
 bool diskPutROM64(Disk* pDisk, u32 nAddress, s64* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -68,7 +68,7 @@ bool diskGetROM64(Disk* pDisk, u32 nAddress, s64* pData) {
 }
 
 bool diskPutDrive8(Disk* pDisk, u32 nAddress, s8* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -76,7 +76,7 @@ bool diskPutDrive8(Disk* pDisk, u32 nAddress, s8* pData) {
 }
 
 bool diskPutDrive16(Disk* pDisk, u32 nAddress, s16* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;
@@ -98,7 +98,7 @@ bool diskPutDrive32(Disk* pDisk, u32 nAddress, s32* pData) {
 }
 
 bool diskPutDrive64(Disk* pDisk, u32 nAddress, s64* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     return true;

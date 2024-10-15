@@ -13,7 +13,7 @@ extern "C" {
 
 #define ROM_THREAD_SIZE 0x2000
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 #define ROM_THREAD (DefaultThread)
 #elif IS_MM
 #define ROM_THREAD (sRomThread)
@@ -73,7 +73,7 @@ typedef struct Rom {
     /* 0x00000 0x00004 */ void* pBuffer;
     /* 0x00004 0x00008 */ bool bFlip;
     /* 0x00008 0x0000C */ bool bLoad;
-#if IS_OOT
+#if IS_OOT || IS_MT
     /* 0x0000C   N/A   */ s32 unk_C;
 #endif
     /* 0x00010 0x00010 */ char acNameFile[513];
@@ -96,7 +96,7 @@ typedef struct Rom {
     /* 0x19A74 0x10E7C */ u8 acHeader[64];
     /* 0x19AB4 0x10EBC */ u32* anOffsetBlock;
     /* 0x19AB8 0x10EC0 */ s32 nCountOffsetBlocks;
-#if IS_OOT
+#if IS_OOT || IS_MT
     /* 0x19ABC 0x10EC4 */ u32 nChecksum;
 #endif
     /* 0x19AC0 0x10EC8 */ DVDFileInfo fileInfo;
@@ -110,7 +110,7 @@ typedef struct Rom {
 s32 fn_80042E30(EDString* pSTString);
 bool romGetPC(Rom* pROM, u64* pnPC);
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 bool romGetCode(Rom* pROM, s32* acCode);
 #elif IS_MM
 bool romGetCode(Rom* pROM, char* acCode);

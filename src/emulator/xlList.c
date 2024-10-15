@@ -1,10 +1,23 @@
 #include "emulator/xlList.h"
 #include "emulator/xlHeap.h"
+#include "revolution/os.h"
 #include "macros.h"
 
 static tXL_LIST gListList;
 
 bool xlListMake(tXL_LIST** ppList, s32 nItemSize) {
+#if IS_MT
+    if (ppList == NULL) {
+        SAFE_FAILED("xlList.c", 83);
+        return false;
+    }
+
+    if (nItemSize <= 0) {
+        SAFE_FAILED("xlList.c", 85);
+        return false;
+    }
+#endif
+
     nItemSize = (nItemSize + 3) & ~3;
 
     if (xlListMakeItem(&gListList, (void**)ppList)) {
@@ -23,10 +36,18 @@ static inline bool xlListWipe(tXL_LIST* pList) {
     void* pNode;
     void* pNodeNext;
 
+#if IS_MT
+    if (!xlListTest(pList)) {
+        SAFE_FAILED("xlList.c", 55);
+        return false;
+    }
+#endif
+
     pNode = pList->pNodeHead;
     while (pNode != NULL) {
         pNodeNext = NODE_NEXT(pNode);
         if (!xlHeapFree(&pNode)) {
+            SAFE_FAILED("xlList.c", 60);
             return false;
         }
         pNode = pNodeNext;
@@ -39,15 +60,42 @@ static inline bool xlListWipe(tXL_LIST* pList) {
 }
 
 bool xlListFree(tXL_LIST** ppList) {
+#if IS_MT
+    if (!xlListTest(*ppList)) {
+        SAFE_FAILED("xlList.c", 107);
+        return false;
+    }
+#endif
+
     if (!xlListWipe(*ppList)) {
+        SAFE_FAILED("xlList.c", 110);
         return false;
     }
 
     if (!xlListFreeItem(&gListList, (void**)ppList)) {
+        SAFE_FAILED("xlList.c", 112);
         return false;
     }
 
     return true;
+}
+
+static inline bool xlListTest(tXL_LIST* pList) {
+    void* pNode;
+
+    if (pList == &gListList) {
+        return true;
+    }
+
+    pNode = gListList.pNodeHead;
+    while (pNode != NULL) {
+        if (pList == (tXL_LIST*)NODE_DATA(pNode)) {
+            return true;
+        }
+        pNode = NODE_NEXT(pNode);
+    }
+
+    return false;
 }
 
 bool xlListMakeItem(tXL_LIST* pList, void** ppItem) {
@@ -55,9 +103,22 @@ bool xlListMakeItem(tXL_LIST* pList, void** ppItem) {
     void* pListNode;
     void* pNode;
     void* pNodeNext;
+    
+#if IS_MT
+    if (!xlListTest(pList)) {
+        SAFE_FAILED("xlList.c", 164);
+        return false;
+    }
+
+    if (ppItem == NULL) {
+        SAFE_FAILED("xlList.c", 165);
+        return false;
+    }
+#endif
 
     nSize = pList->nItemSize + 4;
     if (!xlHeapTake(&pListNode, nSize)) {
+        SAFE_FAILED("xlList.c", 169);
         return false;
     }
 
@@ -81,9 +142,23 @@ bool xlListFreeItem(tXL_LIST* pList, void** ppItem) {
     void* pNode;
     void* pNodeNext;
 
+#if IS_MT
+    if (!xlListTest(pList)) {
+        SAFE_FAILED("xlList.c", 204);
+        return false;
+    }
+#endif
+
     if (pList->pNodeHead == NULL) {
         return false;
     }
+
+#if IS_MT
+    if (ppItem == NULL || *ppItem == NULL) {
+        SAFE_FAILED("xlList.c", 210);
+        return false;
+    }
+#endif
 
     pNode = &pList->pNodeHead;
     while (pNode != NULL) {
@@ -92,30 +167,13 @@ bool xlListFreeItem(tXL_LIST* pList, void** ppItem) {
             NODE_NEXT(pNode) = NODE_NEXT(pNodeNext);
             *ppItem = NULL;
             if (!xlHeapFree(&pNodeNext)) {
+                SAFE_FAILED("xlList.c", 220);
                 return false;
             }
             pList->nItemCount--;
             return true;
         }
         pNode = pNodeNext;
-    }
-
-    return false;
-}
-
-static inline bool xlListTest(tXL_LIST* pList) {
-    void* pNode;
-
-    if (pList == &gListList) {
-        return true;
-    }
-
-    pNode = gListList.pNodeHead;
-    while (pNode != NULL) {
-        if (pList == (tXL_LIST*)NODE_DATA(pNode)) {
-            return true;
-        }
-        pNode = NODE_NEXT(pNode);
     }
 
     return false;

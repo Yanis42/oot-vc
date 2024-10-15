@@ -450,7 +450,7 @@ static bool fn_80042C98(Rom* pROM) {
     u32* pBuffer;
     u32 nBuffer;
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 #define FILE_PTR (pFile)
 #elif IS_MM
 #define FILE_PTR (spRomFile)

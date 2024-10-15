@@ -21,7 +21,7 @@ extern "C" {
 
 typedef struct CpuBlock CpuBlock;
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 typedef bool (*UnknownBlockCallback)(CpuBlock* pBlock, bool bUnknown);
 
 struct CpuBlock {

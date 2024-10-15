@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 typedef struct Flash {
     /* 0x00 */ u32 nFlashSize;
     /* 0x04 */ struct Store* pStore;

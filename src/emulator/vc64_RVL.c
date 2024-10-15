@@ -15,7 +15,7 @@
 #include "revolution/vi.h"
 #include "string.h"
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 static char* gaszArgument[12];
 
 System* gpSystem;
@@ -40,7 +40,7 @@ extern u32 lbl_801FF7DC;
 #endif
 
 void fn_80007020(void) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     SYSTEM_FRAME(gpSystem)->nMode = 0;
     SYSTEM_FRAME(gpSystem)->nModeVtx = -1;
     frameDrawReset(SYSTEM_FRAME(gpSystem), 0x5FFED);
@@ -76,7 +76,7 @@ bool simulatorDVDOpen(char* szNameFile, DVDFileInfo* pFileInfo) { return false; 
 #endif
 
 bool simulatorDVDRead(DVDFileInfo* pFileInfo, void* anData, s32 nSizeRead, s32 nOffset, DVDCallback callback) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     return false;
 #elif IS_MM
     fn_80083848();
@@ -152,7 +152,7 @@ static bool simulatorParseArguments(void) {
         gaszArgument[iArgument] = NULL;
     }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
     iArgument = 1;
 #elif IS_MM
     iArgument = 0;
@@ -170,7 +170,7 @@ static bool simulatorParseArguments(void) {
             }
 
             switch (szText[1]) {
-#if IS_OOT
+#if IS_OOT || IS_MT
                 case 'L':
                 case 'l':
                     gaszArgument[SAT_UNK9] = szValue;
@@ -270,14 +270,14 @@ static inline bool simulatorRun(SystemMode* peMode) {
 #if IS_MM
 #endif
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 #define FRAME_PTR (SYSTEM_FRAME(gpSystem))
 #elif IS_MM
 #define FRAME_PTR (gpFrame)
 #endif
 
 bool xlMain(void) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     SystemMode eMode;
     s32 nSize0;
     s32 nSize1;

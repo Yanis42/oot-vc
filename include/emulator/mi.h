@@ -21,7 +21,7 @@ typedef enum MIInterruptType {
     MIT_DP = 5,
 } MIInterruptType;
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 typedef struct MI {
     /* 0x0 */ s32 nInterrupt;
     /* 0x4 */ s32 nMask;

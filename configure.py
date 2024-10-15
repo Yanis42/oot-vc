@@ -182,18 +182,22 @@ if config.non_matching:
 
 ### Helper functions
 
-def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
-    emulator_compilers = {
-        "oot-j": "GC/3.0a5",
-        "oot-u": "GC/3.0a5",
-        "oot-e": "GC/3.0a5",
-        "mm-j": "GC/3.0a5.2",
-        "mm-u": "GC/3.0a5.2",
-    }
+compilers_gc = {
+    "oot-j": "GC/3.0a5",
+    "oot-u": "GC/3.0a5",
+    "oot-e": "GC/3.0a5",
+    "mm-j": "GC/3.0a5.2",
+    "mm-u": "GC/3.0a5.2",
+    "mt-u": "GC/3.0a5.2",
+}
 
+compilers_wii = compilers_gc
+compilers_wii["mt-u"] = "Wii/1.0"
+
+def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
-        "mw_versions": emulator_compilers,
+        "mw_versions": compilers_gc,
         "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-enc SJIS"],
         "host": False,
         "objects": objects,
@@ -266,8 +270,8 @@ config.libs = [
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/rdb.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/pak.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/sram.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/flash.c"),
             Object(NotLinked, "emulator/eeprom.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/flash.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/_frameGCNcc.c"),
             Object(NotLinked, "emulator/_buildtev.c"),
             Object(NotLinked, "emulator/frame.c"),
@@ -286,13 +290,13 @@ config.libs = [
             Object(NotLinked, "emulator/rsp.c"),
             Object(NotLinked, "emulator/rdp.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlCoreRVL.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/xlPostRVL.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mt-u"), "emulator/xlPostRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlFileRVL.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlText.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlList.c", extra_cflags=["-ipa file"]),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlHeap.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlFile.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlObject.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j", "mt-u"), "emulator/xlText.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j", "mt-u"), "emulator/xlList.c", extra_cflags=["-ipa file"]),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/xlHeap.c", mw_versions=compilers_wii),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j", "mt-u"), "emulator/xlFile.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j", "mt-u"), "emulator/xlObject.c", mw_versions=compilers_wii),
         ]
     ),
     RevolutionLib(
@@ -605,7 +609,7 @@ config.libs = [
             Object(NotLinked, "runtime/NMWException.cpp", extra_cflags=["-Cpp_exceptions on"]),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "runtime/ptmf.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "runtime/runtime.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "runtime/__init_cpp_exceptions.cpp"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e", "mt-u"), "runtime/__init_cpp_exceptions.cpp"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "runtime/Gecko_setjmp.c"),
             Object(NotLinked, "runtime/Gecko_ExceptionPPC.cpp", extra_cflags=["-Cpp_exceptions on"]),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "runtime/GCN_mem_alloc.c"),

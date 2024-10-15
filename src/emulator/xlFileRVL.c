@@ -1,8 +1,8 @@
 #include "emulator/xlFileRVL.h"
+#include "emulator/code_80083508.h"
 #include "emulator/errordisplay.h"
 #include "emulator/xlCoreRVL.h"
 #include "emulator/xlHeap.h"
-#include "emulator/code_80083508.h"
 #include "revolution/arc.h"
 #include "revolution/cnt.h"
 #include "revolution/mem.h"
@@ -50,15 +50,27 @@ bool xlFileOpen(tXL_FILE** ppFile, XlFileType eType, char* szFileName) {
 
 #if IS_OOT
     xlObjectFree((void**)ppFile);
-#elif IS_MM
+#elif IS_MM || IS_MT
     errorDisplayShow(ERROR_SYS_CORRUPT);
 #endif
 
     return false;
 }
 
+#if IS_MT
+bool fn_800A1F80(void) { return false; }
+#endif
+
 bool xlFileClose(tXL_FILE** ppFile) {
+#if IS_MT
+    if (!xlObjectTest(*ppFile, &gTypeFile)) {
+        SAFE_FAILED("xlFileRVL.c", 200);
+        return false;
+    }
+#endif
+
     if (!xlObjectFree((void**)ppFile)) {
+        SAFE_FAILED("xlFileRVL.c", 201);
         return false;
     }
 
@@ -110,7 +122,7 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                     gpfRead((DVDFileInfo*)pFile->pData, pTarget, nSizeBytes, nOffset, NULL);
                 } else {
                     result = simulatorCNTReadNAND((CNTFileInfoNAND*)pFile->pData, pTarget, nSizeBytes, nOffset);
-#if IS_MM
+#if IS_MM || IS_MT
                     if (result < 0) {
                         errorDisplayShow(ERROR_SYS_CORRUPT);
                     }
@@ -134,7 +146,7 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
                     gpfRead((DVDFileInfo*)pFile->pData, pFile->pBuffer, nSize, nOffset, NULL);
                 } else {
                     result = simulatorCNTReadNAND((CNTFileInfoNAND*)pFile->pData, pFile->pBuffer, nSize, nOffset);
-#if IS_MM
+#if IS_MM || IS_MT
                     if (result < 0) {
                         errorDisplayShow(ERROR_SYS_CORRUPT);
                     }
@@ -147,7 +159,26 @@ bool xlFileGet(tXL_FILE* pFile, void* pTarget, s32 nSizeBytes) {
     return true;
 }
 
+#if IS_MT
+bool fn_800A2260(tXL_FILE* pFile) {
+    if (!xlObjectTest(pFile, &gTypeFile)) {
+        SAFE_FAILED("xlFileRVL.c", 326);
+        return false;
+    }
+
+    //! @bug probably meant to return true?
+    return false;
+}
+#endif
+
 bool xlFileSetPosition(tXL_FILE* pFile, s32 nOffset) {
+#if IS_MT
+    if (!xlObjectTest(pFile, &gTypeFile)) {
+        SAFE_FAILED("xlFileRVL.c", 343);
+        return false;
+    }
+#endif
+
     if ((nOffset >= 0) && (nOffset < pFile->nSize)) {
         pFile->nOffset = nOffset;
         return true;

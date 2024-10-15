@@ -38,10 +38,10 @@ emulator/disk.c:
 	.text       start:0x8000FF20 end:0x80010300
 
 emulator/cpu.c:
-	.text       start:0x80010300 end:0x80022290
+	.text       start:0x80010300 end:0x800252F0
 
 emulator/ram.c:
-	.text       start:0x80022290 end:0x80026250
+	.text       start:0x800252F0 end:0x80026250
 
 emulator/rom.c:
 	.text       start:0x80026250 end:0x800292D0
@@ -62,10 +62,10 @@ emulator/flash.c:
 	.text       start:0x8002A740 end:0x8002AF40
 
 emulator/frame.c:
-	.text       start:0x8002AF40 end:0x80044030
+	.text       start:0x8002AF40 end:0x8004A9A0
 
 emulator/library.c:
-	.text       start:0x80044030 end:0x8005ABB0
+	.text       start:0x8004A9A0 end:0x8005ABB0
 
 emulator/codeRVL.c:
 	.text       start:0x8005ABB0 end:0x8005AC30
@@ -94,11 +94,38 @@ emulator/rsp.c:
 emulator/xlCoreRVL.c:
 	.text       start:0x800A1530 end:0x800A1E50
 
+emulator/xlPostRVL.c:
+	.text       start:0x800A1E50 end:0x800A1E70
+
 emulator/xlFileRVL.c:
-	.text       start:0x800A1E50 end:0x800A2590
+	.text       start:0x800A1E70 end:0x800A2590
+
+emulator/xlText.c:
+	.text       start:0x800A2590 end:0x800A2670
+
+emulator/xlList.c:
+	.text       start:0x800A2670 end:0x800A2D00
+	.data       start:0x80178298 end:0x801782C0
+	.bss        start:0x801B1270 end:0x801B1280
+
+emulator/xlHeap.c:
+	.text       start:0x800A2D00 end:0x800A4710
+	.data       start:0x801782D8 end:0x80178390
+	.bss        start:0x801B1280 end:0x801B1D80
+	.sbss       start:0x8021FA58 end:0x8021FA98
+
+emulator/xlFile.c:
+	.text       start:0x800A4710 end:0x800A4950
+	.data       start:0x80178390 end:0x801783B8
+
+emulator/xlObject.c:
+	.text       start:0x800A4950 end:0x800A4EB8
+	.data       start:0x801783B8 end:0x801783E0
+	.sbss       start:0x8021FA98 end:0x8021FAA0
 
 runtime/__init_cpp_exceptions.cpp:
 	.text       start:0x80151E00 end:0x80151E70
 	.ctors      start:0x80168580 end:0x80168584 rename:.ctors$10
 	.dtors      start:0x801685C0 end:0x801685C4 rename:.dtors$10
 	.dtors      start:0x801685C4 end:0x801685C8 rename:.dtors$15
+	.sdata      start:0x8021F790 end:0x8021F798

@@ -23,7 +23,7 @@ typedef enum ErrorIndex {
     // "There is not enough available space in the Wii system memory. Create %ld block(s) of free space by either moving
     // files to an SD Card or deleting files in the Data Management Screen."
     ERROR_INS_SPACE,
-#if IS_MM
+#if IS_MM || IS_MT
     ERROR_INS_SPACE_PLURAL,
 #endif
     // "Press the A Button to return to the Wii Menu."
@@ -48,7 +48,7 @@ typedef enum ErrorIndex {
     ERROR_REMOTE_BATTERY,
     // "Communications with the Wii Remote have been interrupted."
     ERROR_REMOTE_COMMUNICATION,
-#if IS_MM
+#if IS_MM || IS_MT
     ERROR_NWC24_ERROR_BUFFER,
     // "You have already posted a photo to the Wii Message Board today."
     ERROR_PHOTO_ALREADY_POSTED,
@@ -72,7 +72,7 @@ typedef enum ErrorIndex {
     ERROR_NULL,
 #if IS_OOT
     ERROR_MAX = 12
-#elif IS_MM
+#elif IS_MM || IS_MT
     //! @bug? The length of `sStringBase` is 22, not 20
     ERROR_MAX = 20
 #endif
@@ -118,7 +118,7 @@ typedef struct EDAction {
     /* 0x0C */ ErrorCallback callback;
 } EDAction; // size = 0x10
 
-#if IS_MM
+#if IS_MM || IS_MT
 typedef struct EDAnimation {
     /* 0x00 */ char* szFileName;
     /* 0x04 */ s32 unk_04;
@@ -140,7 +140,7 @@ typedef struct ErrorDisplay {
     /* 0x36 */ s16 unk36; // unused?
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-#if IS_MM
+#if IS_MM || IS_MT
     /* 0x40 */ EDAnimation anim;
 #endif
 } ErrorDisplay; // size = 0x40 ; 0x5C
@@ -156,7 +156,7 @@ void OSFreeToHeap(s32 handle, void* p);
 void errorDisplayInit(void);
 bool errorDisplayShow(ErrorIndex iString);
 
-#if IS_MM
+#if IS_MM || IS_MT
 bool fn_8007F440(ErrorIndex iString);
 bool fn_8007F474(ErrorIndex iString);
 #endif

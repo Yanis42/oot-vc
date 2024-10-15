@@ -212,7 +212,7 @@ typedef enum SystemObjectType {
     SOT_RDP,
     SOT_MI,
     SOT_DISK,
-#if IS_OOT
+#if IS_OOT || IS_MT
     SOT_AI = 8,
     SOT_VI = 9,
     SOT_SI = 10,
@@ -290,7 +290,7 @@ typedef struct SystemException {
     /* 0x10 0x18 */ SystemInterruptType eType;
 } SystemException; // size = 0x14 ; 0x1C
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 typedef struct System {
     /* 0x00 */ bool bException;
     /* 0x04 */ SystemMode eMode;

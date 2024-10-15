@@ -31,7 +31,7 @@
 #include "string.h"
 
 #undef SYSTEM_PTR
-#if IS_OOT
+#if IS_OOT || IS_MT
 #define SYSTEM_PTR (gpSystem)
 #elif IS_MM
 #define SYSTEM_PTR (pSystem)
@@ -166,7 +166,7 @@ static u32 contMap[][GCN_BTN_COUNT] = {
 };
 // clang-format on
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 static SystemDevice gaSystemDevice[] = {
     {
         SOT_HELP,
@@ -488,7 +488,7 @@ static bool systemSetupGameRAM(System* pSystem) {
     return true;
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 static inline void systemSetControllerConfiguration(SystemRomConfig* pRomConfig, s32 controllerConfig1,
                                                     s32 controllerConfig2, bool bSetControllerConfig,
                                                     bool bSetRumbleConfig)
@@ -527,7 +527,7 @@ static inline void systemSetupGameALL_Inline(void) {
     }
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 static bool systemSetupGameALL(System* pSystem) {
     char* szArgument;
     s32* pBuffer2;
@@ -1571,10 +1571,18 @@ static bool systemGetException(System* pSystem, SystemInterruptType eType, Syste
 }
 
 static bool systemGet8(System* pSystem, u32 nAddress, s8* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
+
     *pData = 0;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     *pData = 0;
@@ -1583,10 +1591,18 @@ static bool systemGet8(System* pSystem, u32 nAddress, s8* pData) {
 }
 
 static bool systemGet16(System* pSystem, u32 nAddress, s16* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
+
     *pData = 0;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     *pData = 0;
@@ -1595,10 +1611,18 @@ static bool systemGet16(System* pSystem, u32 nAddress, s16* pData) {
 }
 
 static bool systemGet32(System* pSystem, u32 nAddress, s32* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
+
     *pData = 0;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     *pData = 0;
@@ -1607,10 +1631,18 @@ static bool systemGet32(System* pSystem, u32 nAddress, s32* pData) {
 }
 
 static bool systemGet64(System* pSystem, u32 nAddress, s64* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
+
     *pData = 0;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     *pData = 0;
@@ -1619,9 +1651,16 @@ static bool systemGet64(System* pSystem, u32 nAddress, s64* pData) {
 }
 
 static bool systemPut8(System* pSystem, u32 nAddress, s8* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     return true;
@@ -1629,9 +1668,16 @@ static bool systemPut8(System* pSystem, u32 nAddress, s8* pData) {
 }
 
 static bool systemPut16(System* pSystem, u32 nAddress, s16* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     return true;
@@ -1639,9 +1685,16 @@ static bool systemPut16(System* pSystem, u32 nAddress, s16* pData) {
 }
 
 static bool systemPut32(System* pSystem, u32 nAddress, s32* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     return true;
@@ -1649,21 +1702,29 @@ static bool systemPut32(System* pSystem, u32 nAddress, s32* pData) {
 }
 
 static bool systemPut64(System* pSystem, u32 nAddress, s64* pData) {
-#if IS_OOT
+#if IS_OOT || IS_MT
     s64 pnPC;
-    cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL);
+
+    if (!cpuGetXPC(SYSTEM_CPU(gpSystem), &pnPC, NULL, NULL)) {
+#if IS_MT
+        SAFE_FAILED("system.c", 3260);
+        return false;
+#endif
+    }
+
     return false;
 #elif IS_MM
     return true;
 #endif
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 static bool systemGetBlock(System* pSystem, CpuBlock* pBlock) {
     void* pBuffer;
 
     if (pBlock->nAddress1 < 0x04000000) {
         if (!ramGetBuffer(SYSTEM_RAM(gpSystem), &pBuffer, pBlock->nAddress1, &pBlock->nSize)) {
+            SAFE_FAILED("system.c", 3260);
             return false;
         }
 
@@ -1671,6 +1732,7 @@ static bool systemGetBlock(System* pSystem, CpuBlock* pBlock) {
     }
 
     if (pBlock->pfUnknown != NULL && !pBlock->pfUnknown(pBlock, 1)) {
+        SAFE_FAILED("system.c", 3266);
         return false;
     }
 
@@ -1919,7 +1981,7 @@ static inline bool systemSetRamMode(System* pSystem) {
 bool systemReset(System* pSystem) {
     s64 nPC;
     s32 nOffsetRAM;
-#if IS_OOT
+#if IS_OOT || IS_MT
     int eObject;
 #elif IS_MM
     SystemObjectType eObject;
@@ -1929,7 +1991,7 @@ bool systemReset(System* pSystem) {
     pSystem->nAddressBreak = -1;
 
     if (romGetImage(SYSTEM_ROM(SYSTEM_PTR), NULL)) {
-#if IS_OOT
+#if IS_OOT || IS_MT
         if (!systemSetupGameRAM(pSystem)) {
             return false;
         }
@@ -1952,7 +2014,7 @@ bool systemReset(System* pSystem) {
             return false;
         }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
         block.nSize = 0x100000;
         block.pfUnknown = NULL;
         block.nAddress0 = 0x10001000;
@@ -1971,7 +2033,7 @@ bool systemReset(System* pSystem) {
             return false;
         }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
         if (!systemSetRamMode(pSystem)) {
             return false;
         }
@@ -2045,6 +2107,7 @@ bool systemCheckInterrupts(System* pSystem) {
 
             if (!bDone) {
                 if (!systemGetException(pSystem, iException, &exception)) {
+                    SAFE_FAILED("system.c", 3716);
                     return false;
                 }
 
@@ -2075,11 +2138,13 @@ bool systemCheckInterrupts(System* pSystem) {
 
     if (nMaskFinal != 0) {
         if (!cpuException(SYSTEM_CPU(SYSTEM_PTR), CEC_INTERRUPT, nMaskFinal)) {
+            SAFE_FAILED("system.c", 3752);
             return false;
         }
     } else {
         if ((eCodeFinal != CEC_NONE)) {
             if (!cpuException(SYSTEM_CPU(SYSTEM_PTR), eCodeFinal, 0)) {
+                SAFE_FAILED("system.c", 3754);
                 return false;
             }
         }
@@ -2117,6 +2182,7 @@ static inline bool systemFreeDevices(System* pSystem) {
 
     for (storageDevice = 0; storageDevice < SOT_COUNT; storageDevice++) {
         if (pSystem->apObject[storageDevice] != NULL && !xlObjectFree(&pSystem->apObject[storageDevice])) {
+            SAFE_FAILED("system.c", 873);
             return false;
         }
     }
@@ -2124,7 +2190,7 @@ static inline bool systemFreeDevices(System* pSystem) {
     return true;
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
     Cpu* pCPU;
     SystemException exception;
@@ -2139,16 +2205,19 @@ bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
             pSystem->nAddressBreak = -1;
             systemClearExceptions(pSystem);
             if (!systemCreateStorageDevice(pSystem, pArgument)) {
+                SAFE_FAILED("system.c", 3809);
                 return false;
             }
             break;
         case 3:
             if (!systemFreeDevices(pSystem)) {
+                SAFE_FAILED("system.c", 3813);
                 return false;
             }
             break;
         case 0x1001:
             if (!systemGetException(pSystem, (SystemInterruptType)(s32)pArgument, &exception)) {
+                SAFE_FAILED("system.c", 3831);
                 return false;
             }
             if (exception.eTypeMips != MIT_NONE) {
@@ -2164,14 +2233,17 @@ bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
             return false;
         case 0x1002:
             if (!cpuSetGetBlock(SYSTEM_CPU(gpSystem), pArgument, (GetBlockFunc)systemGetBlock)) {
+                SAFE_FAILED("system.c", 3855);
                 return false;
             }
             if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), pArgument, (Put8Func)systemPut8, (Put16Func)systemPut16,
                                  (Put32Func)systemPut32, (Put64Func)systemPut64)) {
+                SAFE_FAILED("system.c", 3856);
                 return false;
             }
             if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), pArgument, (Get8Func)systemGet8, (Get16Func)systemGet16,
                                  (Get32Func)systemGet32, (Get64Func)systemGet64)) {
+                SAFE_FAILED("system.c", 3857);
                 return false;
             }
             break;
@@ -2422,7 +2494,7 @@ bool systemEvent(System* pSystem, s32 nEvent, void* pArgument) {
 }
 #endif
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 _XL_OBJECTTYPE gClassSystem = {
     "SYSTEM",
     sizeof(System),

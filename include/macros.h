@@ -21,7 +21,7 @@ extern "C" {
 #define MT_U 6
 #define IS_MT (VERSION == MT_U)
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 #define SYSTEM_PTR(...) (gpSystem)
 #elif IS_MM
 #define SYSTEM_PTR(pObject) ((System*)(pObject->pHost))
@@ -31,6 +31,23 @@ extern "C" {
 #define SAFE_FAILED(file, line) OSReport("SAFE Failed!, %s, %d\n", file, line)
 #else
 #define SAFE_FAILED(file, line) (void)0
+#endif
+
+#if IS_MT
+#define ASSERT(cond, file, line)                            \
+    {                                                       \
+        if ((cond)) {                                       \
+            OSReport("SAFE Failed!, %s, %d\n", file, line); \
+            return false;                                   \
+        }                                                   \
+    }
+#else
+#define ASSERT(cond, file, line) \
+    {                            \
+        if ((cond)) {            \
+            return false;        \
+        }                        \
+    }
 #endif
 
 #define ALIGN_PREV(X, N) ((X) & ~((N) - 1))

@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 
 #define simulatorCNTInitHandleNAND contentInitHandleNAND
 #define simulatorCNTReleaseHandleNAND contentReleaseHandleNAND

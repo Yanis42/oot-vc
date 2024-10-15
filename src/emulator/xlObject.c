@@ -1,5 +1,6 @@
 #include "emulator/xlObject.h"
 #include "emulator/xlList.h"
+#include "revolution/os.h"
 
 static tXL_LIST* gpListData;
 
@@ -18,12 +19,14 @@ static inline bool xlObjectFindData(__anon_0x5062** ppData, _XL_OBJECTTYPE* pTyp
 
 static inline bool xlObjectMakeData(__anon_0x5062** ppData, _XL_OBJECTTYPE* pType) {
     if (!xlListMakeItem(gpListData, (void**)ppData)) {
+        SAFE_FAILED("xlObject.c", 60);
         return false;
     }
 
     (*ppData)->pType = pType;
 
     if (!xlListMake((tXL_LIST**)*ppData, pType->nSizeObject + 4)) {
+        SAFE_FAILED("xlObject.c", 62);
         return false;
     }
 
@@ -36,8 +39,21 @@ bool xlObjectMake(void** ppObject, void* pArgument, _XL_OBJECTTYPE* pType) {
     void* temp1;
     void* temp2;
 
+#if IS_MT
+    if (pType == NULL) {
+        SAFE_FAILED("xlObject.c", 82);
+        return false;
+    }
+
+    if (pType->pfEvent == NULL) {
+        SAFE_FAILED("xlObject.c", 83);
+        return false;
+    }
+#endif
+
     if (!xlObjectFindData(&pData, pType)) {
         if (!xlObjectMakeData(&pData, pType)) {
+            SAFE_FAILED("xlObject.c", 89);
             return false;
         }
         bFlag = true;
@@ -46,6 +62,7 @@ bool xlObjectMake(void** ppObject, void* pArgument, _XL_OBJECTTYPE* pType) {
     }
 
     if (!xlListMakeItem(pData->pList, ppObject)) {
+        SAFE_FAILED("xlObject.c", 96);
         return false;
     }
 
@@ -65,10 +82,18 @@ bool xlObjectFree(void** ppObject) {
     if (ppObject != NULL && *ppObject != NULL) {
         __anon_0x5062* pData = *(__anon_0x5062**)((u8*)*ppObject - 4);
 
+#if IS_MT
+        if (!xlListTestItem(gpListData, pData)) {
+            SAFE_FAILED("xlObject.c", 129);
+            return false;
+        }
+#endif
+
         pData->pType->pfEvent(*ppObject, 3, NULL);
         *ppObject = ((u8*)*ppObject - 4);
 
         if (xlListFreeItem(pData->pList, ppObject) == 0) {
+            SAFE_FAILED("xlObject.c", 135);
             return false;
         }
 
@@ -122,6 +147,7 @@ bool xlObjectEvent(void* pObject, s32 nEvent, void* pArgument) {
 
 bool xlObjectSetup(void) {
     if (!xlListMake(&gpListData, 8)) {
+        SAFE_FAILED("xlObject.c", 230);
         return false;
     }
 
@@ -135,12 +161,14 @@ bool xlObjectReset(void) {
 
     while (pListNode != NULL) {
         if (!xlListFree((void*)((u8*)pListNode + 4))) {
+            SAFE_FAILED("xlObject.c", 248);
             return false;
         }
         pListNode = NODE_NEXT(pListNode);
     }
 
     if (!xlListFree(&gpListData)) {
+        SAFE_FAILED("xlObject.c", 251);
         return false;
     }
 

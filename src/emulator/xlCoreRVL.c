@@ -136,7 +136,7 @@ bool xlCoreInitGX(void) {
     return true;
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 bool xlCoreBeforeRender(void) {
     if (rmode->field_rendering != 0) {
         GXSetViewportJitter(0.0f, 0.0f, rmode->fbWidth, rmode->efbHeight, 0.0f, 1.0f, VIGetNextField());
@@ -181,7 +181,7 @@ bool fn_8007FC84(void) {
 #endif
 }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
 void xlExit(void) { OSPanic("xlCoreRVL.c", 524, "xlExit"); }
 #endif
 
@@ -201,7 +201,7 @@ int main(int nCount, char** aszArgument) {
     gnCountArgument = nCount;
     gaszArgument = aszArgument;
 
-#if IS_OOT
+#if IS_OOT || IS_MT
     OSInit();
     DVDInit();
 
@@ -214,7 +214,7 @@ int main(int nCount, char** aszArgument) {
     xlCoreInitRenderMode(NULL);
     VIConfigure(rmode);
     OSInitFastCast();
-#elif MM_J
+#elif IS_MM
     __PADDisableRecalibration(true);
     OSInitFastCast();
     fn_8007DBDC(0, 0);
@@ -270,7 +270,7 @@ int main(int nCount, char** aszArgument) {
         return false;
     }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
     if (!xlHeapSetup()) {
         SAFE_FAILED("xlCoreRVL.c", 625);
         return false;
@@ -287,7 +287,7 @@ int main(int nCount, char** aszArgument) {
         return false;
     }
 
-#if IS_OOT
+#if IS_OOT || IS_MT
     aspectRatio = (f32)rmode->xfbHeight / (f32)rmode->efbHeight;
     nSizeHeap = fn_8007FC84() ? 0xBB800 : 0x87600;
     nSize = getFBTotalSize(aspectRatio) * 2;
@@ -296,7 +296,7 @@ int main(int nCount, char** aszArgument) {
         nSize = nSizeHeap;
     }
 
-#if VERSION < MT_U
+#if IS_OOT
     xlHeapTake(&DemoFrameBuffer1, nSize | 0x70000000);
     xlHeapTake(&DemoFrameBuffer2, nSize | 0x70000000);
 #endif
@@ -306,12 +306,12 @@ int main(int nCount, char** aszArgument) {
     DCStoreRange(DemoFrameBuffer1, nSize);
     DCStoreRange(DemoFrameBuffer2, nSize);
 
-#if VERSION == MT_U
-    xlHeapTake(&DefaultFifo, 0x80000 | 0x30000000);
-    DefaultFifoObj = GXInit(DefaultFifo, 0x80000);
-#else
+#if IS_OOT
     xlHeapTake(&DefaultFifo, 0x40000 | 0x30000000);
     DefaultFifoObj = GXInit(DefaultFifo, 0x40000);
+#else
+    xlHeapTake(&DefaultFifo, 0x80000 | 0x30000000);
+    DefaultFifoObj = GXInit(DefaultFifo, 0x80000);
 #endif
 
     __xlCoreInitGX();
