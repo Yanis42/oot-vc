@@ -1502,7 +1502,6 @@ static void cpuCompileNOP(s32* anCode, s32* iCode, s32 number) {
 
 #ifndef NON_MATCHING
 static bool fn_8000E734(Cpu* pCPU, s32 arg1, s32 arg2, s32 arg3);
-// #pragma GLOBAL_ASM("asm/non_matchings/cpu/fn_8000E734.s")
 #else
 static bool fn_8000E734(Cpu* pCPU, s32 arg1, s32 arg2, s32 arg3) {
     if (gpSystem->eTypeROM == CLBJ || gpSystem->eTypeROM == CLBE || gpSystem->eTypeROM == CLBP) {
@@ -1602,7 +1601,6 @@ s32 fn_8000E81C(Cpu* pCPU, s32 arg1, s32 arg2, s32 arg3, s32 arg5, s32* arg6, s3
  * @return bool true on success, false otherwise.
  */
 static bool cpuGetPPC(Cpu* pCPU, s32* pnAddress, CpuFunction* pFunction, s32* anCode, s32* piCode, bool bSlot);
-// #pragma GLOBAL_ASM("asm/non_matchings/cpu/cpuGetPPC.s")
 
 //! TODO: remove NO_INLINE once this is matched
 static bool fn_80031D4C(Cpu* pCPU, CpuFunction* pFunction, s32 unknown) NO_INLINE { return false; }
@@ -5837,35 +5835,26 @@ bool cpuReset(Cpu* pCPU) {
     }
 
     pCPU->nCompileFlag = 1;
-    pCPU->unk_12228 = 0;
 
-    //! TODO: make this struct match
-    // pCPU->alarmRetrace.handler = NULL;
-    // pCPU->alarmRetrace.tag = 0;
-    // pCPU->alarmRetrace.end = 0;
-    // pCPU->alarmRetrace.prev = NULL;
-    // pCPU->alarmRetrace.next = NULL;
-    // pCPU->alarmRetrace.period = 0;
-    // pCPU->alarmRetrace.start = 0;
-    // pCPU->alarmRetrace.userData = NULL;
-    pCPU->alarmRetrace[0] = 0;
-    pCPU->alarmRetrace[1] = 0;
-    pCPU->alarmRetrace[2] = 0;
-    pCPU->alarmRetrace[3] = 0;
-    pCPU->alarmRetrace[4] = 0;
-    pCPU->alarmRetrace[5] = 0;
-    pCPU->alarmRetrace[6] = 0;
-    pCPU->alarmRetrace[7] = 0;
-    pCPU->alarmRetrace[8] = 0;
-    pCPU->alarmRetrace[9] = 0;
-    pCPU->alarmRetrace[10] = 0;
-    pCPU->alarmRetrace[11] = 0;
+    pCPU->unk_12228[0] = 0;
+    pCPU->unk_12228[1] = 0;
+    pCPU->unk_12228[2] = 0;
+    pCPU->unk_12228[3] = 0;
+    pCPU->unk_12228[4] = 0;
+    pCPU->unk_12228[5] = 0;
+    pCPU->unk_12228[6] = 0;
+    pCPU->unk_12228[7] = 0;
+    pCPU->unk_12228[8] = 0;
+    pCPU->unk_12228[9] = 0;
+    pCPU->unk_12228[10] = 0;
+    pCPU->unk_12228[11] = 0;
+    pCPU->unk_12228[12] = 0;
+    pCPU->unk_12228[13] = 0;
+    pCPU->unk_12228[14] = 0;
+    pCPU->unk_12228[15] = 0;
+    pCPU->unk_12228[16] = 0;
+    pCPU->unk_12228[17] = 0;
 
-    pCPU->unk_1225C = 0;
-    pCPU->unk_12260 = 0;
-    pCPU->unk_12264 = 0;
-    pCPU->unk_12268 = 0;
-    pCPU->unk_1226C = 0;
     return true;
 }
 
