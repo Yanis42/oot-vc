@@ -623,6 +623,7 @@ static void errorDisplayDrawSetup(ErrorIndex iString, bool bFullscreen)
 
 static s32 fn_80063680(EDString* pEDString) { return 2; }
 
+#if IS_MM || IS_MT
 static inline bool fn_80063688_Inline(ErrorDisplay* pErrorDisplay) {
     bool ret = true;
 
@@ -640,6 +641,7 @@ static inline bool fn_80063688_Inline(ErrorDisplay* pErrorDisplay) {
 
     return ret;
 }
+#endif
 
 static inline s32 fn_80063688_Inline2(ErrorDisplay* pErrorDisplay, EDString* pEDString) {
     s32 var_r3 = pErrorDisplay->callback(pEDString);

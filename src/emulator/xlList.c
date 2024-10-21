@@ -118,7 +118,10 @@ bool xlListMakeItem(tXL_LIST* pList, void** ppItem) {
 
     nSize = pList->nItemSize + 4;
     if (!xlHeapTake(&pListNode, nSize)) {
+        // this is necessary to get this function inlined in xlListMake...
+#if IS_MT
         SAFE_FAILED("xlList.c", 169);
+#endif
         return false;
     }
 
